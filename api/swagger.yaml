@@ -14,7 +14,7 @@ paths:
     get:
       tags:
       - "MobileyearTemplate"
-      description: "Gets `MobileYearTemplate` objects.\n"
+      description: "Get `MobileYearTemplate` objects.\n"
       operationId: "mobileyeartemplatesGET"
       parameters: []
       responses:
@@ -25,11 +25,95 @@ paths:
             items:
               $ref: "#/definitions/inline_response_200"
       x-swagger-router-controller: "MobileyearTemplate"
+  /projects:
+    get:
+      tags:
+      - "Project"
+      description: "Get `Projects` objects.\n"
+      operationId: "projectsGET"
+      parameters: []
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/project"
+      x-swagger-router-controller: "Project"
+    post:
+      tags:
+      - "Project"
+      description: "Add `Project`.\n"
+      operationId: "projectsPOST"
+      parameters:
+      - in: "body"
+        name: "project"
+        description: "project to add"
+        required: true
+        schema:
+          $ref: "#/definitions/newProject"
+      responses:
+        200:
+          description: "add project response"
+          schema:
+            $ref: "#/definitions/project"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Project"
+  /projects/{projectId}/{mobileYearId}:
+    get:
+      tags:
+      - "Project"
+      description: "Get `Project`.\n"
+      operationId: "projectsProjectIdMobileYearIdGET"
+      parameters:
+      - name: "projectId"
+        in: "path"
+        description: "ID of project template"
+        required: true
+        type: "string"
+      - name: "mobileYearId"
+        in: "path"
+        description: "ID of mobile year template"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: "#/definitions/project"
+      x-swagger-router-controller: "Project"
+    delete:
+      tags:
+      - "Project"
+      description: "Delete Projects"
+      operationId: "projectsProjectIdMobileYearIdDELETE"
+      parameters:
+      - name: "projectId"
+        in: "path"
+        description: "ID of project template"
+        required: true
+        type: "string"
+      - name: "mobileYearId"
+        in: "path"
+        description: "ID of mobile year template"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "project deleted"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Project"
   /projecttemplates:
     get:
       tags:
       - "ProjectTemplate"
-      description: "Gets `ProjectTemplate` objects.\n"
+      description: "Get `ProjectTemplate` objects.\n"
       operationId: "projecttemplatesGET"
       parameters: []
       responses:
@@ -41,6 +125,44 @@ paths:
               $ref: "#/definitions/inline_response_200"
       x-swagger-router-controller: "ProjectTemplate"
 definitions:
+  project:
+    type: "object"
+    required:
+    - "createTime"
+    - "creatorId"
+    - "mobileYearId"
+    - "projectId"
+    properties:
+      projectId:
+        type: "string"
+      mobileYearId:
+        type: "string"
+      createTime:
+        type: "number"
+        format: "double"
+      creatorId:
+        type: "string"
+  newProject:
+    type: "object"
+    required:
+    - "mobileYearId"
+    - "projectId"
+    properties:
+      projectId:
+        type: "string"
+      mobileYearId:
+        type: "string"
+  errorModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
   inline_response_200:
     properties:
       id:
