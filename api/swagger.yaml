@@ -1,0 +1,34 @@
+---
+swagger: "2.0"
+info:
+  version: "0.0.0"
+  title: "DRE API"
+host: "localhost:8080"
+basePath: "/v1"
+schemes:
+- "http"
+produces:
+- "application/json"
+paths:
+  /projecttemplates:
+    get:
+      tags:
+      - "ProjectTemplate"
+      description: "Gets `ProjectTemplate` objects.\n"
+      operationId: "projecttemplatesGET"
+      parameters: []
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/inline_response_200"
+      x-swagger-router-controller: "ProjectTemplate"
+definitions:
+  inline_response_200:
+    properties:
+      id:
+        type: "string"
+      label:
+        type: "string"
