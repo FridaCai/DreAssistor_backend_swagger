@@ -1,47 +1,91 @@
 'use strict';
 
+var dbpool = require('../db.js');
 exports.projectsGET = function(args, res, next) {
-  /**
-   * parameters expected in the args:
-  **/
-    var examples = {};
-  examples['application/json'] = [ {
-  "createTime" : 1.3579000000000001069366817318950779736042022705078125,
-  "mobileYearId" : "aeiou",
-  "creatorId" : "aeiou",
-  "projectId" : "aeiou"
-} ];
-  if(Object.keys(examples).length > 0) {
+  var projects = [];
+  var sql = 'select * from projects';
+  dbpool.execute(sql, function(err, rows){
+    if(err){
+      console.log(err);
+      res.end();
+    }
+
+    rows.map(function(row){
+      projects.push({
+        projectId: row.projectId,
+        createTime: row.createTime,
+        mobileYearId: row.mobileYearId,
+        creatorId: row.creatorId,
+      });
+    })
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  }
-  else {
-    res.end();
-  }
-  
+    res.end(JSON.stringify(projects || [], null, 2));
+  });
 }
+
+
+
+
+var convertDateToUnixTime = function(d) {
+  var unixTime = Date.parse(d);
+  unixTime = unixTime || undefined;
+  return unixTime;
+}
+
+var convertUnixTimeToDate = function(unix_timestamp) {
+      var d = new Date(unix_timestamp);
+      return d.toLocaleDateString() + " " + d.toLocaleTimeString();
+}
+
+
+
+
+
 
 exports.projectsPOST = function(args, res, next) {
   /**
    * parameters expected in the args:
   * project (NewProject)
   **/
-    var examples = {};
-  examples['application/json'] = {
-  "createTime" : 1.3579000000000001069366817318950779736042022705078125,
-  "mobileYearId" : "aeiou",
-  "creatorId" : "aeiou",
-  "projectId" : "aeiou"
-};
-  if(Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  }
-  else {
-    res.end();
-  }
+  var param = args.project.value;
+
+  var projectId = param.projectId;
+  var mobileYearId = param.mobileYearId;
+  var createTime = convertDateToUnixTime(new Date());
+  var creatorId = '0'; //todo: creatorId should be login userid.
+
+
   
+  var sql = `insert into projects(projectId, createTime, mobileYearId, creatorId) 
+    values ("${projectId}", "${createTime}", "${mobileYearId}", "${creatorId}")`;
+
+
+  var project = {};
+  dbpool.execute(sql, function(err, rows){
+    if(err){
+      debugger;
+      console.log(err);
+      res.end();
+    }
+
+    debugger;
+    console.log(rows);
+
+    project = {
+      projectId: projectId,
+      mobileYearId: mobileYearId,
+      createTime: createTime,
+      creatorId: creatorId,
+    }
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(project || {}, null, 2));
+  });
 }
+
+
+
+
 
 exports.projectsProjectIdMobileYearIdDELETE = function(args, res, next) {
   /**
@@ -54,25 +98,6 @@ exports.projectsProjectIdMobileYearIdDELETE = function(args, res, next) {
 }
 
 exports.projectsProjectIdMobileYearIdGET = function(args, res, next) {
-  /**
-   * parameters expected in the args:
-  * projectId (String)
-  * mobileYearId (String)
-  **/
-    var examples = {};
-  examples['application/json'] = {
-  "createTime" : 1.3579000000000001069366817318950779736042022705078125,
-  "mobileYearId" : "aeiou",
-  "creatorId" : "aeiou",
-  "projectId" : "aeiou"
-};
-  if(Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  }
-  else {
-    res.end();
-  }
-  
+  res.end();
 }
 
