@@ -9,7 +9,67 @@ schemes:
 - "http"
 produces:
 - "application/json"
+
+
+
 paths:
+  /user:
+    get:
+      tags:
+      - "User"
+      description: "Login. get token and user meta by password and email\n"
+      operationId: "userGET"
+      parameters:
+      - name: "email"
+        in: "query"
+        description: "user email"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "query"
+        description: "password"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: "#/definitions/user"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "User"
+    
+    post:
+      tags:
+      - "User"
+      description: "Register \n"
+      operationId: "userPOST"
+      parameters:
+      - name: "user"
+        in: "body"
+        description: "user email and password"
+        required: true
+        schema:
+          $ref: "#/definitions/newUser"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: "#/definitions/user"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "User"
+
+
+
+
+
+
+
   /mobileyeartemplates:
     get:
       tags:
@@ -25,6 +85,9 @@ paths:
             items:
               $ref: "#/definitions/inline_response_200"
       x-swagger-router-controller: "MobileyearTemplate"
+      
+      
+      
   /projects:
     get:
       tags:
@@ -125,6 +188,38 @@ paths:
               $ref: "#/definitions/inline_response_200"
       x-swagger-router-controller: "ProjectTemplate"
 definitions:
+  user: 
+    type: "object"
+    required:
+    - "id"
+    - "name"
+    - "email"
+    - "token"
+    properties:
+      id:
+        type: "string"
+      name:
+        type: "string"
+      email:
+        type: "string"
+      token: 
+        type: "string"
+  
+  newUser:
+    type: "object"
+    required:
+    - "name"
+    - "password"
+    - "email"
+    properties:
+      name:
+        type: "string"
+      password:
+        type: "string"
+      email: 
+        type: "string"
+    
+  
   project:
     type: "object"
     required:
