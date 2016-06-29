@@ -3,6 +3,7 @@ var logger = require('../../logger.js').logger('normal');
 //var UserModel = require('../models/user'); //this is cool! we need to redesign backend code.
 
 var jwt = require('jwt-simple');
+var jwtTokenSecret = require('../../constant.js').jwtTokenSecret;
 
 exports.authTestGet = function(args, res, next) {
   try{
@@ -20,7 +21,7 @@ exports.authTestGet = function(args, res, next) {
     var token = param.value;
 
     try {
-      var decoded = jwt.decode(token, 'jwtTokenSecret'); //bad. app.get('jwtTokenSecret');
+      var decoded = jwt.decode(token, jwtTokenSecret); 
       if (decoded.exp <= Date.now()) {
         var errstr = JSON.stringify({
           errCode: 7, 

@@ -3,7 +3,9 @@
 var dbpool = require('../../db.js');
 var moment = require('moment');
 var jwt = require('jwt-simple');
+var jwtTokenSecret = require('../../constant.js').jwtTokenSecret;
 var logger = require('../../logger.js').logger('normal');
+
 
 exports.userGET = function(args, res, next) {
   var email = args.email.value;
@@ -64,7 +66,7 @@ exports.userGET = function(args, res, next) {
     var token = jwt.encode({
       iss: userId,
       exp: expires
-    }, 'jwtTokenSecret'); //jwtTokenSecret should be in a better place.
+    }, jwtTokenSecret);
 
 
 
@@ -116,7 +118,7 @@ exports.userPOST = function(args, res, next) {
     var token = jwt.encode({
       iss: userId,
       exp: expires
-    }, 'jwtTokenSecret'); //jwtTokenSecret should be in a better place.
+    }, jwtTokenSecret); 
 
 
 
