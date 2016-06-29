@@ -57,11 +57,3 @@ exports.authTestGet = function(args, res, next) {
     return;
   }
 } 
-
-
-/*var resStr = {
-      errorCode: -1,
-      errorMessage: 'hello',
-    }
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(resStr || [], null, 2));*/

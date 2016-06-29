@@ -13,7 +13,7 @@ exports.userGET = function(args, res, next) {
     password: password,
   };
 
-  //may be should be User.findOne({username : unsername}); 
+  //User.findOne({username : unsername}); 
   //sql clause should be all together. eg: each clause should add status == 0 condition
   //sql execute should be capsulate.
   var sql = `select * from user where email = "${email}" and status = 0`;
@@ -82,22 +82,18 @@ exports.userGET = function(args, res, next) {
 
 
 exports.userPOST = function(args, res, next) {
-//  logger.info("hi log 4 js, i am post user.");
   var param = args.user.value;
   var name = param.name;
   var email = param.email;
   var password = param.password;
-  
 
   var sql = `insert into user(name, password, email) 
     values ("${name}", "${password}", "${email}")`;
 
   dbpool.execute(sql, function(err, rows){
     if(err){
-      if(err.errno === 1062){ //duplicate name/email
+      if(err.errno === 1062){
         var msg = err.message;
-
-        
         var errMsg;
         var errCode;
         if(msg.indexOf('name')!=-1){
@@ -116,7 +112,6 @@ exports.userPOST = function(args, res, next) {
     }
 
     var userId = rows.insertId;
-
     var expires = moment().add( 8, 'hours').valueOf();
     var token = jwt.encode({
       iss: userId,

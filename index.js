@@ -15,7 +15,7 @@ var options = {
 };
 
 // The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
-var spec = fs.readFileSync('./api/swagger.yaml', 'utf8');
+var spec = fs.readFileSync('./res/swagger.yaml', 'utf8');
 var swaggerDoc = jsyaml.safeLoad(spec);
 
 // Initialize the Swagger middleware
@@ -30,12 +30,12 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   app.use(middleware.swaggerRouter(options));
 
   // Serve the Swagger documents and Swagger UI
-  app.use(middleware.swaggerUi());
+  //app.use(middleware.swaggerUi());
 
   // Start the server
   http.createServer(app).listen(serverPort, function () {
     console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
-    console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
+    //console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
   });
 });
 
@@ -65,6 +65,5 @@ app.use(log4js.connectLogger(logger, {level:log4js.levels.INFO, format:':method 
 
 exports.logger=function(name){
   var logger = log4js.getLogger(name);
-  //logger.setLevel('INFO');
   return logger;
 }

@@ -90,26 +90,6 @@ paths:
 
 
 
-
-
-
-  /mobileyeartemplates:
-    get:
-      tags:
-      - "MobileyearTemplate"
-      description: "Get `MobileYearTemplate` objects.\n"
-      operationId: "mobileyeartemplatesGET"
-      parameters: []
-      responses:
-        200:
-          description: "Successful response"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/inline_response_200"
-      x-swagger-router-controller: "MobileyearTemplate"
-      
-      
       
   /projects:
     get:
