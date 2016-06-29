@@ -13,6 +13,29 @@ produces:
 
 
 paths:
+  /authTest:
+    get:
+      tags:
+      - "Test"
+      description: "test user auth when taking some actions\n"
+      operationId: "authTestGet"
+      parameters: 
+      - name: "x-access-token"
+        in: "header"
+        description: "token saved in client localstorage"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: "#/definitions/errorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "AuthTest"
+
   /user:
     get:
       tags:

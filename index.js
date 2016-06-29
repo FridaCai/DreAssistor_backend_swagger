@@ -52,7 +52,7 @@ log4js.configure({
     { type: 'console' },{
       type: 'file', 
       filename: 'logs/access.log', 
-      maxLogSize: 1024,
+      maxLogSize: 4096000, //3m
       backups:4,
       category: 'normal' 
     }

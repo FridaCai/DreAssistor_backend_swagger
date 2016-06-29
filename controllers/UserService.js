@@ -6,43 +6,94 @@ var jwt = require('jwt-simple');
 var logger = require('../index').logger('normal'); //not good to require app here.
 
 exports.userGET = function(args, res, next) {
-  /*var projecttemplates = [];
-  var sql = 'select * from template_projects';
+  var email = args.email.value;
+  var password = args.password.value;
+  var param = {
+    email: email,
+    password: password,
+  };
+
+  //may be should be User.findOne({username : unsername}); 
+  //sql clause should be all together. eg: each clause should add status == 0 condition
+  //sql execute should be capsulate.
+  var sql = `select * from user where email = "${email}" and status = 0`;
   dbpool.execute(sql, function(err, rows){
     if(err){
-      console.log(err);
-      res.end();
+      var errstr = JSON.stringify({
+        errCode: 2, //unknown db error 
+        errMsg: err.message,
+      });
+      res.end(errstr);
+      logger.error(`${errstr}`);
+      return;
     }
 
-    rows.map(function(row){
-      projecttemplates.push({
-        id: row.id,
-        label: row.label,
+    if(rows.length === 0){
+      var errstr = JSON.stringify({
+        errCode: 3, //user not found
+        errMsg: `user not found. param: ${JSON.stringify(param)}`,
       });
-    })
+      res.end(errstr);
+      logger.info(`${errstr}`); 
+      return; 
+    }
+
+    if(rows.length > 1){
+      var errstr = JSON.stringify({
+        errCode: 4, //find duplicate user email which should not happen. 
+        errMsg: `duplicate user email found. param: ${JSON.stringify(param)}`,
+      });
+      logger.error(`${errstr}`);
+    }
+
+    var row = rows[0];
+    var userId = row.id;
+    var userPassword = row.password;
+
+    if(userPassword != password){//better coding style: user.validPassword(pw)
+        var errstr = JSON.stringify({
+          errCode: 5, //user input wrong password.
+          errMsg: `wrong password input. param: ${JSON.stringify(param)}`,
+        });
+      logger.info(`${errstr}`);
+    } 
+
+
+
+    var expires = moment().add( 8, 'hours').valueOf();
+    var token = jwt.encode({
+      iss: userId,
+      exp: expires
+    }, 'jwtTokenSecret'); //jwtTokenSecret should be in a better place.
+
+
+
+    var user = {
+      id: userId,
+      token: token,
+      expires: expires,
+    }
+
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(projecttemplates || [], null, 2));
-  });*/
+    res.end(JSON.stringify(user || {}, null, 2));
+
+  })
 }
 
 
 exports.userPOST = function(args, res, next) {
-  debugger;
-  logger.info("hi log 4 js, i am post user.");
+//  logger.info("hi log 4 js, i am post user.");
   var param = args.user.value;
-
   var name = param.name;
-  var password = param.password;
   var email = param.email;
+  var password = param.password;
+  
 
   var sql = `insert into user(name, password, email) 
     values ("${name}", "${password}", "${email}")`;
 
-
   dbpool.execute(sql, function(err, rows){
     if(err){
-
-
       if(err.errno === 1062){ //duplicate name/email
         var msg = err.message;
 
@@ -57,9 +108,6 @@ exports.userPOST = function(args, res, next) {
           errMsg = `email already exist in user database`;
         }
       } 
-
-
-      
       res.end(JSON.stringify({
         errCode: errCode, 
         errMsg: errMsg,
@@ -78,7 +126,7 @@ exports.userPOST = function(args, res, next) {
 
 
     var user = {
-      id: userId,  
+      id: userId,  //return user.toJSON()
       token: token,
       expires: expires,
     }
