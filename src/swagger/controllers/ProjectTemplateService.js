@@ -1,6 +1,6 @@
 'use strict';
 
-var dbpool = require('../db.js');
+var dbpool = require('../../db.js');
 
 exports.projecttemplatesGET = function(args, res, next) {
   var projecttemplates = [];

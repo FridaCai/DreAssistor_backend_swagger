@@ -1,11 +1,10 @@
 'use strict';
-var logger = require('../index').logger('normal');
+var logger = require('../../logger.js').logger('normal');
 //var UserModel = require('../models/user'); //this is cool! we need to redesign backend code.
 
 var jwt = require('jwt-simple');
 
 exports.authTestGet = function(args, res, next) {
-  debugger; //what is next???
   try{
     var param = args['x-access-token']
     if(!param){

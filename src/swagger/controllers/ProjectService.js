@@ -1,6 +1,6 @@
 'use strict';
 
-var dbpool = require('../db.js');
+var dbpool = require('../../db.js');
 exports.projectsGET = function(args, res, next) {
   var projects = [];
   var sql = 'select * from projects';
@@ -63,12 +63,10 @@ exports.projectsPOST = function(args, res, next) {
   var project = {};
   dbpool.execute(sql, function(err, rows){
     if(err){
-      debugger;
       console.log(err);
       res.end();
     }
 
-    debugger;
     console.log(rows);
 
     project = {

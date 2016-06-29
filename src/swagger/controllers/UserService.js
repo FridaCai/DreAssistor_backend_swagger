@@ -1,9 +1,9 @@
 'use strict';
 
-var dbpool = require('../db.js');
+var dbpool = require('../../db.js');
 var moment = require('moment');
 var jwt = require('jwt-simple');
-var logger = require('../index').logger('normal'); //not good to require app here.
+var logger = require('../../logger.js').logger('normal');
 
 exports.userGET = function(args, res, next) {
   var email = args.email.value;
@@ -98,7 +98,7 @@ exports.userPOST = function(args, res, next) {
         var errCode;
         if(msg.indexOf('name')!=-1){
           errCode = 0;
-          errMsg = `name already exist in user database`;
+          errMsg = `name already exist in user database`; //already registered user?
         }else if(msg.indexOf('email')!=-1){
           errCode = 1;
           errMsg = `email already exist in user database`;
