@@ -109,7 +109,10 @@ var action = function(res, err){
 	//common error. not CError
 	var tmpErr = err;
 	if(err instanceof Error){
-		tmpErr = new CError(3, err.message);
+		tmpErr = new CError(3, JSON.stringify({
+			msg: err.message,
+			stack: err.stack
+		}));
 	}
 
 	var e = ENUM[tmpErr.key](tmpErr.addParam);

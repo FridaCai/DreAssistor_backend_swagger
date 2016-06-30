@@ -27,14 +27,24 @@ module.exports = class Persistence{
 	static findUserByEmail(email){
 		var sql = `select * from user where email = "${email}" and status = 0`;
 		return new Promise(function(resolve, reject){
-			dbpool.execute(sql, resolve);	
+			dbpool.execute(sql, function(err, rows){
+				resolve({
+					err: err,
+					rows: rows
+				});
+			});
 		})
 	}
 
 	static findUserById(id){
 		var sql = `select * from user where id = "${id}" and status = 0`;
 		return new Promise(function(resolve, reject){
-			dbpool.execute(sql, resolve);	
+			dbpool.execute(sql, function(err, rows){
+				resolve({
+					err: err,
+					rows: rows
+				});
+			});
 		}) 
 	}
 }

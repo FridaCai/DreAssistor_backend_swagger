@@ -45,8 +45,8 @@ exports.userGET = function(args, res, next) {
       exp: expires
     }, jwtTokenSecret);
 
-    var user = {
-      user: user.dump(),
+    var res = {
+      user: user,
       token: token,
       expires: expires,
     }
@@ -54,7 +54,7 @@ exports.userGET = function(args, res, next) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({
       errCode: -1,
-      user: user
+      res: res
     }));
   }).catch(function(e){
     EAction(res, e);
@@ -93,17 +93,17 @@ exports.userPOST = function(args, res, next) {
       exp: expires
     }, jwtTokenSecret); 
 
-    var user = {
-      id: userId,  //return user.toJSON()
+    var res = {
+      userId: userId,  
       token: token,
       expires: expires,
     }
 
     res.setHeader('Content-Type', 'application/json');
-    res.end({
+    res.end(JSON.stringify({
       errCode: -1,
-      user: JSON.stringify(user || {}, null, 2),
-    });
+      res: res,
+    }));
   }).catch(function(e){
     EAction(res, e);
   });
