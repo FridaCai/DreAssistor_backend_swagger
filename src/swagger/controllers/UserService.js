@@ -1,11 +1,11 @@
 'use strict';
-
 var moment = require('moment');
 var jwt = require('jwt-simple');
 var jwtTokenSecret = require('../../constant.js').jwtTokenSecret;
-var logger = require('../../logger.js').logger('normal');
 var User = require('../../model/user.js');
 
+var EAction = require('../../exception.js').action;
+var CError = require('../../exception.js').CError;
 
 exports.userGET = function(args, res, next) {
   var email = args.email.value;
@@ -93,25 +93,16 @@ exports.userPOST = function(args, res, next) {
   User.save(param).then(function(result){
     var err = result.err;
     var rows = result.rows;
-
     if(err){
       if(err.errno === 1062){
         var msg = err.message;
-        var errMsg;
-        var errCode;
         if(msg.indexOf('name')!=-1){
-          errCode = 0;
-          errMsg = `name already exist in user database`; //already registered user?
+          throw new CError(0);
         }else if(msg.indexOf('email')!=-1){
-          errCode = 1;
-          errMsg = `email already exist in user database`;
+          throw new CError(1);
         }
       } 
-      res.end(JSON.stringify({
-        errCode: errCode, 
-        errMsg: errMsg,
-      }));
-      return;
+	  throw new CError(2, JSON.stringify(err));
     }
 
     var userId = rows.insertId;
@@ -130,7 +121,11 @@ exports.userPOST = function(args, res, next) {
     }
 
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(user || {}, null, 2));
+    res.end({
+      errCode: -1,
+      user: JSON.stringify(user || {}, null, 2),
+    });
+  }).catch(function(e){
+    EAction(res, e);
   });
-
 }
