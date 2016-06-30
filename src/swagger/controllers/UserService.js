@@ -15,11 +15,9 @@ exports.userGET = function(args, res, next) {
     password: password,
   };
 
-  //User.findOne({username : unsername}); 
-  //sql clause should be all together. eg: each clause should add status == 0 condition
-  //sql execute should be capsulate.
-  var sql = `select * from user where email = "${email}" and status = 0`;
-  dbpool.execute(sql, function(err, rows){
+  User.findByEmail(email).then(function(result){
+    var err = result.err;
+    var rows = result.rows;
     if(err){
       var errstr = JSON.stringify({
         errCode: 2, //unknown db error 
@@ -42,45 +40,47 @@ exports.userGET = function(args, res, next) {
 
     if(rows.length > 1){
       var errstr = JSON.stringify({
-        errCode: 4, //find duplicate user email which should not happen. 
+        errCode: 4, //find duplicate user email which should not happen. sth wrong with db constrain
         errMsg: `duplicate user email found. param: ${JSON.stringify(param)}`,
       });
       logger.error(`${errstr}`);
     }
 
-    var row = rows[0];
-    var userId = row.id;
-    var userPassword = row.password;
 
-    if(userPassword != password){//better coding style: user.validPassword(pw)
-        var errstr = JSON.stringify({
+    var user = new User();
+    user.init(rows[0]);
+
+    if(!user.isPasswordValid(password)){//better coding style: user.validPassword(pw)
+      var errstr = JSON.stringify({
           errCode: 5, //user input wrong password.
           errMsg: `wrong password input. param: ${JSON.stringify(param)}`,
         });
       logger.info(`${errstr}`);
+      return;
     } 
 
 
 
     var expires = moment().add( 8, 'hours').valueOf();
     var token = jwt.encode({
-      iss: userId,
+      iss: user.id,
       exp: expires
     }, jwtTokenSecret);
 
 
 
     var user = {
-      id: userId,
+      user: user.dump(),
       token: token,
       expires: expires,
     }
 
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(user || {}, null, 2));
-
-  })
+  });
 }
+
+
 
 
 exports.userPOST = function(args, res, next) {
@@ -90,7 +90,10 @@ exports.userPOST = function(args, res, next) {
   var password = param.password;
 
 
-  User.save(param).then(function(err, rows){
+  User.save(param).then(function(result){
+    var err = result.err;
+    var rows = result.rows;
+
     if(err){
       if(err.errno === 1062){
         var msg = err.message;

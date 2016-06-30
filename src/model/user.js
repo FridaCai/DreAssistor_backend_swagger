@@ -6,7 +6,20 @@ module.exports = class User {
 	}
 
 	static save(param) {
-  		return Persistence.insertUser(param);
+  		return Persistence.insertUser(param).then(function(result){
+  			return result;
+  		});
+	}
+
+	static findByEmail(email){
+  		return Persistence.findUserByEmail(email).then(function(result){
+  			return result;
+  		});
+	}
+	static findById(id){
+		return Persistence.findUserById(id).then(function(result){
+			return result;
+		});
 	}
 
 	init(param){
@@ -15,19 +28,9 @@ module.exports = class User {
 		this.email = param.email;
 		this.password = param.password;
 	}
-	
-	update(param){
-		//might have problem for array copy. 
-		//$.extend(true, [], templateList);
-		Object.assign(this, param); 
-	}
 
-	save(){
-
-	}
-
-	find(){
-
+	isPasswordValid(pw){
+		return this.password == pw;
 	}
 	
 	dump(){

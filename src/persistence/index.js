@@ -15,10 +15,26 @@ module.exports = class Persistence{
 
 
 		return new Promise(function(resolve, reject){
-			dbpool.execute(sql, function(){
-				resolve(arguments[0], arguments[1]);
-			});	
+			dbpool.execute(sql, function(err, rows){
+				resolve({
+					err: err,
+					rows: rows
+				});
+			});
 		})
-		
+	}
+
+	static findUserByEmail(email){
+		var sql = `select * from user where email = "${email}" and status = 0`;
+		return new Promise(function(resolve, reject){
+			dbpool.execute(sql, resolve);	
+		})
+	}
+
+	static findUserById(id){
+		var sql = `select * from user where id = "${id}" and status = 0`;
+		return new Promise(function(resolve, reject){
+			dbpool.execute(sql, resolve);	
+		}) 
 	}
 }

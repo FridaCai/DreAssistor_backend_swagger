@@ -1,14 +1,15 @@
 'use strict';
 var logger = require('../../logger.js').logger('normal');
-//var UserModel = require('../models/user'); //this is cool! we need to redesign backend code.
-
 var jwt = require('jwt-simple');
 var jwtTokenSecret = require('../../constant.js').jwtTokenSecret;
+var User = require('../../model/user.js');
 
 exports.authTestGet = function(args, res, next) {
   try{
-    var param = args['x-access-token']
-    if(!param){
+    var token = args['x-access-token'].value;
+
+
+    if(!token){
       var errstr = JSON.stringify({
           errCode: -1, 
           errMsg: `no token found. no user login`,
@@ -18,7 +19,6 @@ exports.authTestGet = function(args, res, next) {
     }
 
 
-    var token = param.value;
 
     try {
       var decoded = jwt.decode(token, jwtTokenSecret); 
@@ -31,13 +31,27 @@ exports.authTestGet = function(args, res, next) {
         return;
       }
 
-      /*User.findOne({ _id: decoded.iss }, function(err, user) {
-        req.user = user;
-      });*/
-      //auth check model. 
-      res.end(`success. decoded token:${JSON.stringify(decoded)}`);
-
-
+      User.findById(decoded.iss).then(function(result) {
+        var err = result.err;
+        var rows = result.rows;
+        
+        if(rows.length === 0) {
+          var errstr = JSON.stringify({
+            errCode: 9, //bad errorcode. string and simbol will be better.
+            errMsg: `no user found`,
+          });
+          res.end(errstr); 
+          return;
+        }
+        if(rows.length === 1){
+          var errstr = JSON.stringify({
+            errCode: -1,
+            errMsg: `valid user`,
+          });
+          res.end(errstr); 
+          return;
+        }
+      });
     } catch (err) {
       var errstr = JSON.stringify({
         errCode: 6, //bad errorcode. string and simbol will be better.
