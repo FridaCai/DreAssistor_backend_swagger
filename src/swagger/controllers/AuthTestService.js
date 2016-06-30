@@ -15,14 +15,18 @@ exports.authTestGet = function(args, res, next) {
   }
 
   var decoded = jwt.decode(token, jwtTokenSecret); 
-  (decoded.exp <= Date.now()) && (throw new CError(8));
+  if(decoded.exp <= Date.now()){
+    throw new CError(8)
+  }
 
   User.findById(decoded.iss).then(function(result) {
     var err = result.err;
     var rows = result.rows;
     
-    if(!rows.length) && (throw new CError(9));
-
+    if(!rows.length){
+      throw new CError(9); 
+    }
+    
     if(rows.length === 1){
       var user = rows[0]; //another choise is to new a user instance and init it with param. but too complex and no need.
       var errstr = JSON.stringify({
