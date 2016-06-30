@@ -1,10 +1,10 @@
 'use strict';
 
-var dbpool = require('../../db.js');
 var moment = require('moment');
 var jwt = require('jwt-simple');
 var jwtTokenSecret = require('../../constant.js').jwtTokenSecret;
 var logger = require('../../logger.js').logger('normal');
+var User = require('../../model/user.js');
 
 
 exports.userGET = function(args, res, next) {
@@ -89,10 +89,8 @@ exports.userPOST = function(args, res, next) {
   var email = param.email;
   var password = param.password;
 
-  var sql = `insert into user(name, password, email) 
-    values ("${name}", "${password}", "${email}")`;
 
-  dbpool.execute(sql, function(err, rows){
+  User.save(param).then(function(err, rows){
     if(err){
       if(err.errno === 1062){
         var msg = err.message;
@@ -131,4 +129,5 @@ exports.userPOST = function(args, res, next) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(user || {}, null, 2));
   });
+
 }
