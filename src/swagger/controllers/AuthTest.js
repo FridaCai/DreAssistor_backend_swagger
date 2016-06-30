@@ -3,7 +3,12 @@
 var url = require('url');
 
 var AuthTest = require('./AuthTestService');
+var EAction = require('../../exception.js').action;
 
 module.exports.authTestGet = function authTestGet (req, res, next) {
-  AuthTest.authTestGet(req.swagger.params, res, next);
+	try{
+		AuthTest.authTestGet(req.swagger.params, res, next);
+	}catch(e){
+		EAction(res, e);
+	}
 };

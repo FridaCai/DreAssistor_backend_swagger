@@ -18,56 +18,32 @@ exports.userGET = function(args, res, next) {
   User.findByEmail(email).then(function(result){
     var err = result.err;
     var rows = result.rows;
+
     if(err){
-      var errstr = JSON.stringify({
-        errCode: 2, //unknown db error 
-        errMsg: err.message,
-      });
-      res.end(errstr);
-      logger.error(`${errstr}`);
-      return;
-    }
+      throw new CError(2, JSON.stringify(err));
+    } 
 
     if(rows.length === 0){
-      var errstr = JSON.stringify({
-        errCode: 3, //user not found
-        errMsg: `user not found. param: ${JSON.stringify(param)}`,
-      });
-      res.end(errstr);
-      logger.info(`${errstr}`); 
-      return; 
+      throw new CError(4, JSON.stringify(param));
     }
 
     if(rows.length > 1){
-      var errstr = JSON.stringify({
-        errCode: 4, //find duplicate user email which should not happen. sth wrong with db constrain
-        errMsg: `duplicate user email found. param: ${JSON.stringify(param)}`,
-      });
-      logger.error(`${errstr}`);
+      var e = new CError(5, JSON.stringify(param));
+      EAction(res, e);
     }
-
 
     var user = new User();
     user.init(rows[0]);
 
-    if(!user.isPasswordValid(password)){//better coding style: user.validPassword(pw)
-      var errstr = JSON.stringify({
-          errCode: 5, //user input wrong password.
-          errMsg: `wrong password input. param: ${JSON.stringify(param)}`,
-        });
-      logger.info(`${errstr}`);
-      return;
+    if(!user.isPasswordValid(password)){
+      throw new CError(6);
     } 
-
-
 
     var expires = moment().add( 8, 'hours').valueOf();
     var token = jwt.encode({
       iss: user.id,
       exp: expires
     }, jwtTokenSecret);
-
-
 
     var user = {
       user: user.dump(),
@@ -76,7 +52,12 @@ exports.userGET = function(args, res, next) {
     }
 
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(user || {}, null, 2));
+    res.end(JSON.stringify({
+      errCode: -1,
+      user: user
+    }));
+  }).catch(function(e){
+    EAction(res, e);
   });
 }
 
@@ -102,7 +83,7 @@ exports.userPOST = function(args, res, next) {
           throw new CError(1);
         }
       } 
-	  throw new CError(2, JSON.stringify(err));
+      throw new CError(2, JSON.stringify(err));
     }
 
     var userId = rows.insertId;
@@ -111,8 +92,6 @@ exports.userPOST = function(args, res, next) {
       iss: userId,
       exp: expires
     }, jwtTokenSecret); 
-
-
 
     var user = {
       id: userId,  //return user.toJSON()
