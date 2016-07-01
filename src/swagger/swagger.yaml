@@ -92,8 +92,18 @@ paths:
       x-swagger-router-controller: "User"
 
 
+    options:
+      tags:
+      - "User"
+      description: "preflight for cors \n"
+      operationId: "userOptions"
+      
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "User"
 
-
+      
 
 definitions:
   authTestResponse:

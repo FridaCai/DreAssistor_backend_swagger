@@ -7,6 +7,11 @@ var User = require('../../model/user.js');
 var EAction = require('../../exception.js').action;
 var CError = require('../../exception.js').CError;
 
+
+exports.userOptions = function(args, res, next) {
+  res.end();
+}
+
 exports.userGET = function(args, res, next) {
   var email = args.email.value;
   var password = args.password.value;
