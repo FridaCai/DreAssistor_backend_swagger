@@ -156,6 +156,5 @@ var action = function(res, err){
 
 module.exports = {
 	CError: CError,
-	enum: ENUM,
 	action: action,
 }

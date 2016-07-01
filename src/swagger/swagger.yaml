@@ -40,6 +40,20 @@ paths:
             $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "AuthTest"
 
+
+
+
+    options:
+      tags:
+      - "Test"
+      description: "preflight for cors \n"
+      operationId: "authTestOptions"
+      
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "AuthTest"
+
   /user:
     get:
       tags:
@@ -103,7 +117,7 @@ paths:
           description: "Successful response"
       x-swagger-router-controller: "User"
 
-      
+
 
 definitions:
   authTestResponse:

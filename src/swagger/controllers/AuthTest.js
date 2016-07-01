@@ -12,3 +12,10 @@ module.exports.authTestGet = function authTestGet (req, res, next) {
 		EAction(res, e);
 	}
 };
+module.exports.authTestOptions = function authTestOptions (req, res, next) {
+	AuthTest.authTestOptions(req.swagger.params, res, next);
+};
+
+
+
+

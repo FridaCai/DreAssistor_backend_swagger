@@ -39,3 +39,6 @@ exports.authTestGet = function(args, res, next) {
     }
   });
 } 
+exports.authTestOptions = function(args, res, next) {
+  res.end();
+}
