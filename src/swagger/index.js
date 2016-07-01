@@ -7,7 +7,8 @@ module.exports = {
   execute: function(app){
     var options = {
       controllers: './src/swagger/controllers',
-      useStubs: process.env.NODE_ENV === 'development' ? true : false // Conditionally turn on stubs (mock mode)
+      useStubs: process.env.NODE_ENV === 'development' ? true : false, // Conditionally turn on stubs (mock mode)
+      swaggerUi: '/swagger.json',
     };
 
     var spec = fs.readFileSync('./src/swagger/swagger.yaml', 'utf8');
@@ -18,6 +19,8 @@ module.exports = {
         app.use(middleware.swaggerMetadata());
         app.use(middleware.swaggerValidator());
         app.use(middleware.swaggerRouter(options));
+          // Serve the Swagger documents and Swagger UI
+        app.use(middleware.swaggerUi());
         resolve();
       });
     })

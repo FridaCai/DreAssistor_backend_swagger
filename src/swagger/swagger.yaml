@@ -12,6 +12,10 @@ produces:
 
 
 
+
+
+
+
 paths:
   /authTest:
     get:
@@ -29,7 +33,7 @@ paths:
         200:
           description: "Successful response"
           schema:
-            $ref: "#/definitions/errorModel"
+            $ref: "#/definitions/authTestResponse"
         default:
           description: "unexpected error"
           schema:
@@ -57,7 +61,7 @@ paths:
         200:
           description: "Successful response"
           schema:
-            $ref: "#/definitions/user"
+            $ref: "#/definitions/getUserResponse"
         default:
           description: "unexpected error"
           schema:
@@ -75,12 +79,12 @@ paths:
         description: "user email and password"
         required: true
         schema:
-          $ref: "#/definitions/newUser"
+          $ref: "#/definitions/postUserRequest"
       responses:
         200:
           description: "Successful response"
           schema:
-            $ref: "#/definitions/user"
+            $ref: "#/definitions/postUserResponse"
         default:
           description: "unexpected error"
           schema:
@@ -90,114 +94,75 @@ paths:
 
 
 
-      
-  /projects:
-    get:
-      tags:
-      - "Project"
-      description: "Get `Projects` objects.\n"
-      operationId: "projectsGET"
-      parameters: []
-      responses:
-        200:
-          description: "Successful response"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/project"
-      x-swagger-router-controller: "Project"
-    post:
-      tags:
-      - "Project"
-      description: "Add `Project`.\n"
-      operationId: "projectsPOST"
-      parameters:
-      - in: "body"
-        name: "project"
-        description: "project to add"
-        required: true
-        schema:
-          $ref: "#/definitions/newProject"
-      responses:
-        200:
-          description: "add project response"
-          schema:
-            $ref: "#/definitions/project"
-        default:
-          description: "unexpected error"
-          schema:
-            $ref: "#/definitions/errorModel"
-      x-swagger-router-controller: "Project"
-  /projects/{projectId}/{mobileYearId}:
-    get:
-      tags:
-      - "Project"
-      description: "Get `Project`.\n"
-      operationId: "projectsProjectIdMobileYearIdGET"
-      parameters:
-      - name: "projectId"
-        in: "path"
-        description: "ID of project template"
-        required: true
-        type: "string"
-      - name: "mobileYearId"
-        in: "path"
-        description: "ID of mobile year template"
-        required: true
-        type: "string"
-      responses:
-        200:
-          description: "Successful response"
-          schema:
-            $ref: "#/definitions/project"
-      x-swagger-router-controller: "Project"
-    delete:
-      tags:
-      - "Project"
-      description: "Delete Projects"
-      operationId: "projectsProjectIdMobileYearIdDELETE"
-      parameters:
-      - name: "projectId"
-        in: "path"
-        description: "ID of project template"
-        required: true
-        type: "string"
-      - name: "mobileYearId"
-        in: "path"
-        description: "ID of mobile year template"
-        required: true
-        type: "string"
-      responses:
-        204:
-          description: "project deleted"
-        default:
-          description: "unexpected error"
-          schema:
-            $ref: "#/definitions/errorModel"
-      x-swagger-router-controller: "Project"
-  /projecttemplates:
-    get:
-      tags:
-      - "ProjectTemplate"
-      description: "Get `ProjectTemplate` objects.\n"
-      operationId: "projecttemplatesGET"
-      parameters: []
-      responses:
-        200:
-          description: "Successful response"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/inline_response_200"
-      x-swagger-router-controller: "ProjectTemplate"
+
 definitions:
+  authTestResponse:
+    type: "object"
+    required: 
+    - errCode
+    - user
+    properties:
+      errCode:
+        type: integer
+        format: int32
+      user: 
+        $ref: "#/definitions/user"
+  getUserResponse:
+    type: "object"
+    required: 
+    - errCode
+    - user
+    - token
+    - expires
+    properties:
+      errCode:
+        type: integer
+        format: int32
+      user: 
+        $ref: "#/definitions/user"
+      token:
+        type: string
+      expires: 
+        type: integer
+        format: int64
+  postUserRequest:
+    type: "object"
+    required: 
+    - email
+    - name
+    - password
+    properties:
+      email:
+        type: "string"
+      name:
+        type: "string"
+      password:
+        type: "string"
+        
+  postUserResponse:
+    type: "object"
+    required: 
+    - errCode
+    - userId
+    - token
+    - expires
+    properties:
+      errCode:
+        type: integer
+        format: int32
+      userId: 
+        type: string
+      token:
+        type: string
+      expires: 
+        type: integer
+        format: int64
   user: 
     type: "object"
     required:
     - "id"
     - "name"
     - "email"
-    - "token"
     properties:
       id:
         type: "string"
@@ -205,65 +170,14 @@ definitions:
         type: "string"
       email:
         type: "string"
-      token: 
-        type: "string"
-  
-  newUser:
-    type: "object"
-    required:
-    - "name"
-    - "password"
-    - "email"
-    properties:
-      name:
-        type: "string"
-      password:
-        type: "string"
-      email: 
-        type: "string"
-    
-  
-  project:
-    type: "object"
-    required:
-    - "createTime"
-    - "creatorId"
-    - "mobileYearId"
-    - "projectId"
-    properties:
-      projectId:
-        type: "string"
-      mobileYearId:
-        type: "string"
-      createTime:
-        type: "number"
-        format: "double"
-      creatorId:
-        type: "string"
-  newProject:
-    type: "object"
-    required:
-    - "mobileYearId"
-    - "projectId"
-    properties:
-      projectId:
-        type: "string"
-      mobileYearId:
-        type: "string"
   errorModel:
     type: "object"
     required:
-    - "code"
-    - "message"
+    - "errCode"
+    - "errMsg"
     properties:
-      code:
+      errCode:
         type: "integer"
         format: "int32"
-      message:
-        type: "string"
-  inline_response_200:
-    properties:
-      id:
-        type: "string"
-      label:
+      errMsg:
         type: "string"

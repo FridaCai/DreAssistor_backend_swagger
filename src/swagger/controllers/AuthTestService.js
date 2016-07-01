@@ -26,13 +26,14 @@ exports.authTestGet = function(args, res, next) {
     if(!rows.length){
       throw new CError(9); 
     }
-    
+
     if(rows.length === 1){
       var user = rows[0]; //another choise is to new a user instance and init it with param. but too complex and no need.
       var errstr = JSON.stringify({
         errCode: -1,
         user: user
       });
+      res.setHeader('Content-Type', 'application/json');
       res.end(errstr); 
       return;
     }
