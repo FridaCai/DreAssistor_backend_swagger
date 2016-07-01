@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "site": "node index.js",
-    "debug-site": "node-debug index.js"
+    "build": "cnpm install",
+    "deploy": "node index.js",
+    "deploy-debug": "node-debug index.js"
   },
   "keywords": [
     "swagger"
