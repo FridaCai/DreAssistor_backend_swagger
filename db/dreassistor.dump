@@ -36,8 +36,8 @@ CREATE TABLE `attachment` (
   `url` varchar(500) DEFAULT NULL,
   `taskId` int(10) unsigned DEFAULT NULL,
   `propertyId` int(10) unsigned DEFAULT NULL,
-  `create_time` int(11) DEFAULT NULL,
-  `update_time` int(11) DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `flag` tinyint(3) unsigned DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -45,7 +45,7 @@ CREATE TABLE `attachment` (
   KEY `property_attachment_idx` (`propertyId`),
   CONSTRAINT `property_attachment` FOREIGN KEY (`propertyId`) REFERENCES `property` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `task_attachment` FOREIGN KEY (`taskId`) REFERENCES `task` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -54,6 +54,7 @@ CREATE TABLE `attachment` (
 
 LOCK TABLES `attachment` WRITE;
 /*!40000 ALTER TABLE `attachment` DISABLE KEYS */;
+INSERT INTO `attachment` VALUES (1,'t1',NULL,NULL,NULL,'2016-08-26 05:59:43',NULL,0),(2,'t2',NULL,NULL,NULL,'2016-08-26 06:07:57',NULL,0);
 /*!40000 ALTER TABLE `attachment` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -70,8 +71,8 @@ CREATE TABLE `curve` (
   `data` json DEFAULT NULL,
   `series` json DEFAULT NULL,
   `propertyId` int(10) unsigned NOT NULL,
-  `create_time` int(11) DEFAULT NULL,
-  `update_time` int(11) DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `flag` tinyint(3) unsigned DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -99,8 +100,8 @@ DROP TABLE IF EXISTS `engine`;
 CREATE TABLE `engine` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `projectId` int(10) unsigned DEFAULT NULL,
-  `create_time` int(11) DEFAULT NULL,
-  `update_time` int(11) DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `flag` tinyint(3) unsigned DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -130,8 +131,8 @@ CREATE TABLE `image` (
   `label` varchar(45) DEFAULT NULL,
   `url` varchar(500) DEFAULT NULL,
   `propertyId` int(10) unsigned DEFAULT NULL,
-  `create_time` int(11) DEFAULT NULL,
-  `update_time` int(11) DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `flag` tinyint(3) unsigned DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -159,8 +160,8 @@ DROP TABLE IF EXISTS `project`;
 CREATE TABLE `project` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `creatorId` int(10) NOT NULL COMMENT 'foreign key with user table;',
-  `create_time` int(11) DEFAULT NULL,
-  `update_time` int(11) DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `flag` tinyint(3) unsigned DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -196,8 +197,8 @@ CREATE TABLE `property` (
   `engineId` int(10) unsigned DEFAULT NULL,
   `projectId` int(10) unsigned DEFAULT NULL,
   `taskId` int(10) unsigned DEFAULT NULL,
-  `create_time` int(11) DEFAULT NULL,
-  `update_time` int(11) DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `flag` tinyint(3) unsigned DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -231,8 +232,8 @@ CREATE TABLE `subtask` (
   `label` varchar(45) DEFAULT NULL,
   `status` bit(1) DEFAULT b'0' COMMENT 'has finished or not.',
   `taskId` int(10) unsigned DEFAULT NULL,
-  `create_time` int(11) DEFAULT NULL,
-  `update_time` int(11) DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `flag` tinyint(3) unsigned DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -263,8 +264,8 @@ CREATE TABLE `tag` (
   `time` int(11) DEFAULT NULL,
   `week` varchar(45) DEFAULT NULL,
   `projectId` int(10) unsigned DEFAULT NULL,
-  `create_time` int(11) DEFAULT NULL,
-  `update_time` int(11) DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `flag` tinyint(3) unsigned DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -302,8 +303,8 @@ CREATE TABLE `task` (
   `end_week` int(11) DEFAULT NULL,
   `template_type` tinyint(4) DEFAULT NULL,
   `projectId` int(10) unsigned DEFAULT NULL,
-  `create_time` int(11) DEFAULT NULL,
-  `update_time` int(11) DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `flag` tinyint(3) unsigned DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -333,8 +334,8 @@ CREATE TABLE `user` (
   `name` varchar(100) DEFAULT NULL,
   `password` varchar(100) DEFAULT NULL,
   `email` varchar(300) NOT NULL,
-  `create_time` int(11) DEFAULT NULL,
-  `update_time` int(11) DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `flag` tinyint(3) unsigned DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -362,4 +363,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-08-26 12:06:37
+-- Dump completed on 2016-08-26 14:12:02
