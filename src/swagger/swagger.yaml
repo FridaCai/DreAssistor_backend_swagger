@@ -117,6 +117,40 @@ paths:
           description: "Successful response"
       x-swagger-router-controller: "User"
 
+      
+  /project:
+    post:
+      tags:
+      - "Project"
+      description: ""
+      operationId: "projectPOST"
+      parameters:
+      - name: "project"
+        in: "body"
+        description: "add project"
+        required: true
+        schema:
+          $ref: "#/definitions/postProjectRequest"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: "#/definitions/postProjectResponse"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Project"
+      
+    options:
+      tags:
+      - "Project"
+      description: "preflight for cors \n"
+      operationId: "projectOptions"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Project"
 
 
 definitions:
@@ -162,7 +196,7 @@ definitions:
         type: "string"
       password:
         type: "string"
-        
+
   postUserResponse:
     type: "object"
     required: 
@@ -181,6 +215,32 @@ definitions:
       expires: 
         type: integer
         format: int64
+
+
+
+  postProjectRequest:
+    type: "object"
+    required: 
+    - creatorId
+    properties:
+      creatorId:
+        type: integer
+
+  postProjectResponse:
+    type: "object"
+    required: 
+    - errCode
+    - id
+    properties:
+      errCode:
+        type: integer
+        format: int32
+      id: 
+        type: integer
+        format: int32
+
+
+
   user: 
     type: "object"
     required:
