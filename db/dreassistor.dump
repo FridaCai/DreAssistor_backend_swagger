@@ -24,28 +24,262 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `dreassistor` /*!40100 DEFAULT CHARACTE
 USE `dreassistor`;
 
 --
--- Table structure for table `subproject`
+-- Table structure for table `attachment`
 --
 
-DROP TABLE IF EXISTS `subproject`;
+DROP TABLE IF EXISTS `attachment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `subproject` (
-  `id` int(11) NOT NULL,
-  `name` varchar(45) NOT NULL,
-  `creatorId` varchar(45) NOT NULL,
-  `createTime` varchar(45) NOT NULL,
-  PRIMARY KEY (`id`)
+CREATE TABLE `attachment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `label` varchar(45) DEFAULT NULL,
+  `url` varchar(500) DEFAULT NULL,
+  `taskId` int(10) unsigned DEFAULT NULL,
+  `propertyId` int(10) unsigned DEFAULT NULL,
+  `create_time` int(11) DEFAULT NULL,
+  `update_time` int(11) DEFAULT NULL,
+  `flag` tinyint(3) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `task_attachment_idx` (`taskId`),
+  KEY `property_attachment_idx` (`propertyId`),
+  CONSTRAINT `property_attachment` FOREIGN KEY (`propertyId`) REFERENCES `property` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `task_attachment` FOREIGN KEY (`taskId`) REFERENCES `task` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `subproject`
+-- Dumping data for table `attachment`
 --
 
-LOCK TABLES `subproject` WRITE;
-/*!40000 ALTER TABLE `subproject` DISABLE KEYS */;
-/*!40000 ALTER TABLE `subproject` ENABLE KEYS */;
+LOCK TABLES `attachment` WRITE;
+/*!40000 ALTER TABLE `attachment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `attachment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `curve`
+--
+
+DROP TABLE IF EXISTS `curve`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `curve` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `caption` varchar(100) DEFAULT NULL,
+  `data` json DEFAULT NULL,
+  `series` json DEFAULT NULL,
+  `propertyId` int(10) unsigned NOT NULL,
+  `create_time` int(11) DEFAULT NULL,
+  `update_time` int(11) DEFAULT NULL,
+  `flag` tinyint(3) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `property_curve_idx` (`propertyId`),
+  CONSTRAINT `property_curve` FOREIGN KEY (`propertyId`) REFERENCES `property` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `curve`
+--
+
+LOCK TABLES `curve` WRITE;
+/*!40000 ALTER TABLE `curve` DISABLE KEYS */;
+/*!40000 ALTER TABLE `curve` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `engine`
+--
+
+DROP TABLE IF EXISTS `engine`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `engine` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `projectId` int(10) unsigned DEFAULT NULL,
+  `create_time` int(11) DEFAULT NULL,
+  `update_time` int(11) DEFAULT NULL,
+  `flag` tinyint(3) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `project_engine_idx` (`projectId`),
+  CONSTRAINT `project_engine` FOREIGN KEY (`projectId`) REFERENCES `project` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `engine`
+--
+
+LOCK TABLES `engine` WRITE;
+/*!40000 ALTER TABLE `engine` DISABLE KEYS */;
+/*!40000 ALTER TABLE `engine` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `image`
+--
+
+DROP TABLE IF EXISTS `image`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `image` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `label` varchar(45) DEFAULT NULL,
+  `url` varchar(500) DEFAULT NULL,
+  `propertyId` int(10) unsigned DEFAULT NULL,
+  `create_time` int(11) DEFAULT NULL,
+  `update_time` int(11) DEFAULT NULL,
+  `flag` tinyint(3) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `property_image_idx` (`propertyId`),
+  CONSTRAINT `property_image` FOREIGN KEY (`propertyId`) REFERENCES `property` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `image`
+--
+
+LOCK TABLES `image` WRITE;
+/*!40000 ALTER TABLE `image` DISABLE KEYS */;
+/*!40000 ALTER TABLE `image` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `project`
+--
+
+DROP TABLE IF EXISTS `project`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `project` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `creatorId` int(10) NOT NULL COMMENT 'foreign key with user table;',
+  `create_time` int(11) DEFAULT NULL,
+  `update_time` int(11) DEFAULT NULL,
+  `flag` tinyint(3) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `user_project_idx` (`creatorId`),
+  CONSTRAINT `user_project` FOREIGN KEY (`creatorId`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project`
+--
+
+LOCK TABLES `project` WRITE;
+/*!40000 ALTER TABLE `project` DISABLE KEYS */;
+/*!40000 ALTER TABLE `project` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `property`
+--
+
+DROP TABLE IF EXISTS `property`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `property` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `dropdown_id` int(11) DEFAULT NULL,
+  `text` varchar(500) DEFAULT NULL,
+  `value` float DEFAULT NULL,
+  `ref_key` varchar(100) DEFAULT NULL,
+  `status` bit(1) DEFAULT NULL,
+  `label` varchar(100) DEFAULT NULL,
+  `engineId` int(10) unsigned DEFAULT NULL,
+  `projectId` int(10) unsigned DEFAULT NULL,
+  `taskId` int(10) unsigned DEFAULT NULL,
+  `create_time` int(11) DEFAULT NULL,
+  `update_time` int(11) DEFAULT NULL,
+  `flag` tinyint(3) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `project_property_idx` (`projectId`),
+  KEY `task_property_idx` (`taskId`),
+  KEY `engine_property_idx` (`engineId`),
+  CONSTRAINT `engine_property` FOREIGN KEY (`engineId`) REFERENCES `engine` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `project_property` FOREIGN KEY (`projectId`) REFERENCES `project` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `task_property` FOREIGN KEY (`taskId`) REFERENCES `task` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `property`
+--
+
+LOCK TABLES `property` WRITE;
+/*!40000 ALTER TABLE `property` DISABLE KEYS */;
+/*!40000 ALTER TABLE `property` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `subtask`
+--
+
+DROP TABLE IF EXISTS `subtask`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `subtask` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `label` varchar(45) DEFAULT NULL,
+  `status` bit(1) DEFAULT b'0' COMMENT 'has finished or not.',
+  `taskId` int(10) unsigned DEFAULT NULL,
+  `create_time` int(11) DEFAULT NULL,
+  `update_time` int(11) DEFAULT NULL,
+  `flag` tinyint(3) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `task_subtask_idx` (`taskId`),
+  CONSTRAINT `task_subtask` FOREIGN KEY (`taskId`) REFERENCES `task` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `subtask`
+--
+
+LOCK TABLES `subtask` WRITE;
+/*!40000 ALTER TABLE `subtask` DISABLE KEYS */;
+/*!40000 ALTER TABLE `subtask` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tag`
+--
+
+DROP TABLE IF EXISTS `tag`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tag` (
+  `label` varchar(50) NOT NULL DEFAULT '""',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `time` int(11) DEFAULT NULL,
+  `week` varchar(45) DEFAULT NULL,
+  `projectId` int(10) unsigned DEFAULT NULL,
+  `create_time` int(11) DEFAULT NULL,
+  `update_time` int(11) DEFAULT NULL,
+  `flag` tinyint(3) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `project_tag_idx` (`projectId`),
+  CONSTRAINT `project_tag` FOREIGN KEY (`projectId`) REFERENCES `project` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tag`
+--
+
+LOCK TABLES `tag` WRITE;
+/*!40000 ALTER TABLE `tag` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tag` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -56,18 +290,25 @@ DROP TABLE IF EXISTS `task`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `task` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) DEFAULT NULL,
-  `createTime` datetime DEFAULT NULL,
-  `startTime` datetime DEFAULT NULL,
-  `endTime` datetime DEFAULT NULL,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `label` varchar(100) DEFAULT NULL,
+  `start_time` int(11) DEFAULT NULL,
+  `end_time` int(11) DEFAULT NULL,
   `desc` varchar(500) DEFAULT NULL,
-  `markColor` int(11) DEFAULT NULL,
-  `files` varchar(500) DEFAULT NULL,
-  `creatorId` int(11) DEFAULT NULL,
+  `creatorId` int(10) unsigned DEFAULT NULL,
   `priority` tinyint(1) DEFAULT NULL,
+  `exp` varchar(500) DEFAULT NULL,
+  `start_week` int(11) DEFAULT NULL,
+  `end_week` int(11) DEFAULT NULL,
+  `template_type` tinyint(4) DEFAULT NULL,
+  `projectId` int(10) unsigned DEFAULT NULL,
+  `create_time` int(11) DEFAULT NULL,
+  `update_time` int(11) DEFAULT NULL,
+  `flag` tinyint(3) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `projectId_idx` (`projectId`),
+  CONSTRAINT `project_task` FOREIGN KEY (`projectId`) REFERENCES `project` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -90,15 +331,16 @@ DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `password` varchar(100) DEFAULT NULL,
   `email` varchar(300) NOT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0:normal; -1:deleted;',
+  `create_time` int(11) DEFAULT NULL,
+  `update_time` int(11) DEFAULT NULL,
+  `flag` tinyint(3) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=110 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=113 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -107,7 +349,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (2,'a','2016-06-28 19:54:51','a','a@a.com',0),(3,'b','2016-06-28 20:04:57','b','b@b.com',0),(4,'c','2016-06-28 20:06:46','c','c@c.com',0),(16,'d','2016-06-28 21:52:37','d','d@d.com',0),(18,'e','2016-06-28 21:56:01','e','e@e.com',0),(21,'f','2016-06-29 22:54:01','f','f@f.com',0),(23,'g','2016-06-29 22:54:48','g','g@g.com',0),(24,'h','2016-06-29 23:05:23','h','h@h.com',0),(25,'i','2016-06-30 11:29:57','i','i@i.com',0),(29,'j','2016-06-30 12:42:51','j','j@j.com',0),(34,'k','2016-06-30 13:11:36','k','k@k.com',0),(35,'l','2016-06-30 13:12:03','l','l@l.com',0),(36,'m','2016-06-30 13:12:44','m','m@m.com',0),(37,'n','2016-06-30 13:13:45','n','n@n.com',0),(38,'o','2016-06-30 13:15:25','o','o@o.com',0),(39,'p','2016-06-30 13:17:59','p','p@p.com',0),(40,'q','2016-06-30 13:23:54','q','q@q.com',0),(41,'r','2016-06-30 13:26:12','r','r@r.com',0),(42,'s','2016-06-30 13:39:23','s','s@s.com',0),(46,'t','2016-06-30 13:45:19','t','t@t.com',0),(47,'u','2016-06-30 13:47:50','u','u@u.com',0),(49,'v','2016-06-30 13:53:01','v','v@v.com',0),(70,'w','2016-06-30 21:38:00','w','w@w.com',0),(71,'x','2016-06-30 21:49:06','x','x@x.com',0),(72,'y','2016-06-30 21:53:31','y','y@y.com',0),(73,'z','2016-06-30 21:55:45','z','z@z.com',0),(75,'aa','2016-06-30 22:01:17','aa','aa@aa.com',0),(78,'bb','2016-07-01 09:36:31','bb','bb@bb.com',0),(81,'cc','2016-07-01 12:08:35','cc','cc@cc.com',0),(83,'dd','2016-07-01 12:12:17','dd','dd@dd.com',0),(88,'ee','2016-07-01 13:55:55','ee','ee@ee.com',0),(98,'ff','2016-07-01 14:27:38','ff','ff@ff.com',0),(100,'gg','2016-07-01 14:28:33','gg','gg@gg.com',0),(101,'hh','2016-07-01 15:33:47','hh','hh@hh.com',0),(105,'ii','2016-07-01 16:12:08','ii','ii@ii.com',0),(108,'jj','2016-07-01 16:12:58','jj','jj@jj.com',0),(109,'kk','2016-07-01 20:39:22','kk','kk@kk.com',0);
+INSERT INTO `user` VALUES (2,'a','a','a@a.com',NULL,NULL,NULL),(3,'b','b','b@b.com',NULL,NULL,NULL),(4,'c','c','c@c.com',NULL,NULL,NULL),(16,'d','d','d@d.com',NULL,NULL,NULL),(18,'e','e','e@e.com',NULL,NULL,NULL),(21,'f','f','f@f.com',NULL,NULL,NULL),(23,'g','g','g@g.com',NULL,NULL,NULL),(24,'h','h','h@h.com',NULL,NULL,NULL),(25,'i','i','i@i.com',NULL,NULL,NULL),(29,'j','j','j@j.com',NULL,NULL,NULL),(34,'k','k','k@k.com',NULL,NULL,NULL),(35,'l','l','l@l.com',NULL,NULL,NULL),(36,'m','m','m@m.com',NULL,NULL,NULL),(37,'n','n','n@n.com',NULL,NULL,NULL),(38,'o','o','o@o.com',NULL,NULL,NULL),(39,'p','p','p@p.com',NULL,NULL,NULL),(40,'q','q','q@q.com',NULL,NULL,NULL),(41,'r','r','r@r.com',NULL,NULL,NULL),(42,'s','s','s@s.com',NULL,NULL,NULL),(46,'t','t','t@t.com',NULL,NULL,NULL),(47,'u','u','u@u.com',NULL,NULL,NULL),(49,'v','v','v@v.com',NULL,NULL,NULL),(70,'w','w','w@w.com',NULL,NULL,NULL),(71,'x','x','x@x.com',NULL,NULL,NULL),(72,'y','y','y@y.com',NULL,NULL,NULL),(73,'z','z','z@z.com',NULL,NULL,NULL),(75,'aa','aa','aa@aa.com',NULL,NULL,NULL),(78,'bb','bb','bb@bb.com',NULL,NULL,NULL),(81,'cc','cc','cc@cc.com',NULL,NULL,NULL),(83,'dd','dd','dd@dd.com',NULL,NULL,NULL),(88,'ee','ee','ee@ee.com',NULL,NULL,NULL),(98,'ff','ff','ff@ff.com',NULL,NULL,NULL),(100,'gg','gg','gg@gg.com',NULL,NULL,NULL),(101,'hh','hh','hh@hh.com',NULL,NULL,NULL),(105,'ii','ii','ii@ii.com',NULL,NULL,NULL),(108,'jj','jj','jj@jj.com',NULL,NULL,NULL),(109,'kk','kk','kk@kk.com',NULL,NULL,NULL),(110,'pai','pai','pai@patac.com',NULL,NULL,NULL),(112,'frida','frida','frida@frida.com',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -120,4 +362,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-07-03 11:06:33
+-- Dump completed on 2016-08-26 10:36:04
