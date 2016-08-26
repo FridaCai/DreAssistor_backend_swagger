@@ -25,7 +25,7 @@ module.exports = class Persistence{
 	}
 
 	static findUserByEmail(email){
-		var sql = `select * from user where email = "${email}" and status = 0`;
+		var sql = `select * from user where email = "${email}" and flag = 0`;
 		return new Promise(function(resolve, reject){
 			dbpool.execute(sql, function(err, rows){
 				resolve({
