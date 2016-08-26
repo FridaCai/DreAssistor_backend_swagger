@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "cnpm install",
-    "deploy": "node index.js",
+    "deploy": "node index.js & mysqld",
     "deploy-debug": "node-debug index.js"
   },
   "keywords": [
