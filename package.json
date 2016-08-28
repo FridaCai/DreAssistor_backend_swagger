@@ -7,7 +7,8 @@
     "build": "cnpm install",
     "deploy": "node index.js & mysqld",
     "deploy-debug": "node-debug index.js",
-    "dbdump": "mysqldump  -u root -p --databases dreassistor >~/WorkStation/DRE/DreAssistor_backend_swagger/db/dreassistor.dump"
+    "exportdb": "mysqldump  -u root -p --databases dreassistor >~/WorkStation/DRE/DreAssistor_backend_swagger/db/dreassistor.dump",
+    "importdb": "mysql -u root -p dreassistor < ~/WorkStation/DRE/DreAssistor_backend_swagger/db/dreassistor.dump"
   },
   "keywords": [
     "swagger"
