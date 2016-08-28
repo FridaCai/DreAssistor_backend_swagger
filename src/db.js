@@ -52,14 +52,6 @@ exports.batch = function(param, callback){
                 projectId
             ) values ${taskClause}`;
 
-            //create error .
-            sql = `insert into task(
-                label, start_time, end_time, 
-                desc, exp, priority, 
-                start_week, end_week, template_type, 
-                projectId
-            ) values ${taskClause}`;
-            
             conn.query(sql, function(err, result) {
                 if (err) {
                     reject(new Error(err.stack));
@@ -83,7 +75,8 @@ exports.batch = function(param, callback){
             
             conn.query(sql, function(err, result) {
                 if (err) {
-                  throw err;
+                    reject(new Error(err.stack));
+                    return;
                 }
                 resolve();
             });
@@ -123,10 +116,8 @@ exports.batch = function(param, callback){
                         }
                         callback();
                     });
-
                 }, function(err){
                     throw err;
-                    debugger;
                 }).catch(function(err){
                     debugger;
                     conn.rollback(function(err){
@@ -140,7 +131,6 @@ exports.batch = function(param, callback){
         });
         conn.release();
     });
-
 }
 
   
