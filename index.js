@@ -6,8 +6,8 @@ var logger = require('./src/logger.js');
 var serverPort = 8080;
 
 var preBootActions = [
-	swagger.execute(app),
-	logger.init(app)
+	logger.init(app),
+	swagger.execute(app)
 ]
 
 app.all('*', function (req, res, next) {
@@ -20,7 +20,6 @@ app.all('*', function (req, res, next) {
 
 Promise.all(preBootActions).then(function(){
 	http.createServer(app).listen(serverPort, function () {
-
-    	console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
+		logger.logger('normal').info('Start server. Listening on port %d (http://localhost:%d)', serverPort, serverPort);
   });
 });

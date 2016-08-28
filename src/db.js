@@ -1,5 +1,5 @@
 var mysql = require('mysql');
-
+var logger = require('./logger.js').logger('normal');
 var pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
@@ -51,10 +51,19 @@ exports.batch = function(param, callback){
                 start_week, end_week, template_type, 
                 projectId
             ) values ${taskClause}`;
+
+            //create error .
+            sql = `insert into task(
+                label, start_time, end_time, 
+                desc, exp, priority, 
+                start_week, end_week, template_type, 
+                projectId
+            ) values ${taskClause}`;
             
             conn.query(sql, function(err, result) {
                 if (err) {
-                  throw err;
+                    reject(new Error(err.stack));
+                    return;
                 }
                 resolve();
             });
@@ -96,7 +105,9 @@ exports.batch = function(param, callback){
             var sql = `insert into project(creatorId) values ("${param.creatorId}")`;
             conn.query(sql, function(err, result) {       
                 if (err) {
-                  conn.rollback(function(err){logger.error(err)});
+                  conn.rollback(function(err){
+                    err && logger.error(err);
+                  });
                   callback(err);
                   return;
                 }
@@ -113,9 +124,13 @@ exports.batch = function(param, callback){
                         callback();
                     });
 
+                }, function(err){
+                    throw err;
+                    debugger;
                 }).catch(function(err){
+                    debugger;
                     conn.rollback(function(err){
-                        logger.error(err);
+                        err && logger.error(err);
                     });
                     callback(err);
                     return;

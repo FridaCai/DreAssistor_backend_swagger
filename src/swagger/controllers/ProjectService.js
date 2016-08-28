@@ -4,6 +4,7 @@ var Project = require('../../model/project.js');
 
 var EAction = require('../../exception.js').action;
 var CError = require('../../exception.js').CError;
+var logger = require('../../logger').logger('normal');
 
 exports.projectOptions = function(args, res, next) {
   res.end();
@@ -66,13 +67,9 @@ exports.projectPOST = function(args, res, next) {
     var err = result.err;
     
     if(err){
-      if(err.errno === 1062){
-        var msg = err.message;
-      } 
+      logger.error(err.message);
+      throw new CError(3, ''); //currently, there is only db error. not set msg to client.
     }
-
-    //var projectId = rows.insertId;
-    
 
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({
