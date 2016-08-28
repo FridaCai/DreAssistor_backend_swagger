@@ -37,7 +37,7 @@ module.exports = class Persistence{
 	}
 
 	static findUserById(id){
-		var sql = `select * from user where id = "${id}" and status = 0`;
+		var sql = `select * from user where id = "${id}" and flag = 0`;
 		return new Promise(function(resolve, reject){
 			dbpool.execute(sql, function(err, rows){
 				resolve({
@@ -46,5 +46,15 @@ module.exports = class Persistence{
 				});
 			});
 		}) 
+	}
+
+	static insertProject(param){
+		return new Promise(function(resolve, reject){
+			dbpool.batch(param, function(err, rows){
+				resolve({
+					err: err,
+				});
+			});
+		})
 	}
 }

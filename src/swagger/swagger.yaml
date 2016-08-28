@@ -222,20 +222,77 @@ definitions:
     type: "object"
     required: 
     - creatorId
+    - tags
+    #- tasks
     properties:
       creatorId:
         type: integer
+      tags:
+        type: array
+        items:
+          $ref: "#/definitions/tag"
+      tasks: 
+        type: array
+        items:
+          $ref: "#/definitions/task"
+        
+  
+  tag:
+    type: object
+    required:
+    - label
+    - time
+    - week
+    properties:
+      label:
+        type: string
+      time:
+        type: integer
+      week:
+        type: integer
+  
+  task:
+    type: object
+    required:
+    - label
+    - startTime
+    - endTime
+    - desc
+    - priority
+    - exp
+    - startWeek
+    - endWeek
+    
+    #- template
+    properties:
+      label:
+        type: string
+      startTime:
+        type: integer
+      endTime:
+        type: integer
+      startWeek:
+        type: integer
+      endWeek:
+        type: integer
+      desc: 
+        type: string
+      exp:
+        type: string
+      priority:
+        type: integer
+
 
   postProjectResponse:
     type: "object"
     required: 
     - errCode
-    - id
+    - projectId
     properties:
       errCode:
         type: integer
         format: int32
-      id: 
+      projectId: 
         type: integer
         format: int32
 

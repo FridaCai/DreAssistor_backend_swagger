@@ -5,13 +5,11 @@ var logger = require('./src/logger.js');
 
 var serverPort = 8080;
 
-
 var preBootActions = [
 	swagger.execute(app),
 	logger.init(app)
 ]
 
-//todo: remove duplicate header set in api controller.
 app.all('*', function (req, res, next) {
 	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "X-Requested-With, accept, origin, content-type, x-access-token");
@@ -20,10 +18,9 @@ app.all('*', function (req, res, next) {
 	next();
 });
 
-
-
 Promise.all(preBootActions).then(function(){
 	http.createServer(app).listen(serverPort, function () {
+
     	console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
   });
 });

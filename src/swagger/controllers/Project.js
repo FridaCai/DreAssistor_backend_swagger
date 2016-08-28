@@ -1,23 +1,29 @@
 'use strict';
-
 var url = require('url');
-
-
 var Project = require('./ProjectService');
+var EAction = require('../../exception.js').action;
 
-
-module.exports.projectsGET = function projectsGET (req, res, next) {
-  Project.projectsGET(req.swagger.params, res, next);
+module.exports.projectGET = function projectGET (req, res, next) {
+	try{
+		Project.projectGET(req.swagger.params, res, next);		
+	}catch(e){
+		EAction(res, e);
+	}
 };
 
-module.exports.projectsPOST = function projectsPOST (req, res, next) {
-  Project.projectsPOST(req.swagger.params, res, next);
+module.exports.projectPOST = function projectPOST (req, res, next) {
+  	try{
+		Project.projectPOST(req.swagger.params, res, next);	
+	}catch(e){
+		EAction(res, e);
+	}
 };
 
-module.exports.projectsProjectIdMobileYearIdDELETE = function projectsProjectIdMobileYearIdDELETE (req, res, next) {
-  Project.projectsProjectIdMobileYearIdDELETE(req.swagger.params, res, next);
+module.exports.projectOptions = function projectOptions (req, res, next) {
+	Project.projectOptions(req.swagger.params, res, next);
 };
 
-module.exports.projectsProjectIdMobileYearIdGET = function projectsProjectIdMobileYearIdGET (req, res, next) {
-  Project.projectsProjectIdMobileYearIdGET(req.swagger.params, res, next);
-};
+
+
+
+

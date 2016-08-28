@@ -1,101 +1,85 @@
 'use strict';
+var moment = require('moment');
+var Project = require('../../model/project.js');
 
-var dbpool = require('../../db.js');
-exports.projectsGET = function(args, res, next) {
-  var projects = [];
-  var sql = 'select * from projects';
-  dbpool.execute(sql, function(err, rows){
+var EAction = require('../../exception.js').action;
+var CError = require('../../exception.js').CError;
+
+exports.projectOptions = function(args, res, next) {
+  res.end();
+}
+
+/*exports.projectGET = function(args, res, next) {
+  var email = args.email.value;
+  var password = args.password.value;
+  var param = {
+    email: email,
+    password: password,
+  };
+
+  Project.findByEmail(email).then(function(result){
+    var err = result.err;
+    var rows = result.rows;
+
     if(err){
-      console.log(err);
-      res.end();
+      throw new CError(2, JSON.stringify(err));
+    } 
+
+    if(rows.length === 0){
+      throw new CError(4, JSON.stringify(param));
     }
 
-    rows.map(function(row){
-      projects.push({
-        projectId: row.projectId,
-        createTime: row.createTime,
-        mobileYearId: row.mobileYearId,
-        creatorId: row.creatorId,
-      });
-    })
+    if(rows.length > 1){
+      var e = new CError(5, JSON.stringify(param));
+      EAction(res, e);
+    }
+
+    var project = new Project();
+    project.init(rows[0]);
+
+    if(!project.isPasswordValid(password)){
+      throw new CError(6);
+    } 
+
+    var expires = moment().add( 8, 'hours').valueOf();
+    var token = jwt.encode({
+      iss: project.id,
+      exp: expires
+    }, jwtTokenSecret);
+
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(projects || [], null, 2));
+    res.end(JSON.stringify({
+      errCode: -1,
+      project: project,
+      token: token,
+      expires: expires,
+    }));
+  }).catch(function(e){
+    EAction(res, e);
   });
-}
+}*/
 
-
-
-
-var convertDateToUnixTime = function(d) {
-  var unixTime = Date.parse(d);
-  unixTime = unixTime || undefined;
-  return unixTime;
-}
-
-var convertUnixTimeToDate = function(unix_timestamp) {
-      var d = new Date(unix_timestamp);
-      return d.toLocaleDateString() + " " + d.toLocaleTimeString();
-}
-
-
-
-
-
-
-exports.projectsPOST = function(args, res, next) {
-  /**
-   * parameters expected in the args:
-  * project (NewProject)
-  **/
+exports.projectPOST = function(args, res, next) {
   var param = args.project.value;
-
-  var projectId = param.projectId;
-  var mobileYearId = param.mobileYearId;
-  var createTime = convertDateToUnixTime(new Date());
-  var creatorId = '0'; //todo: creatorId should be login userid.
-
-
   
-  var sql = `insert into projects(projectId, createTime, mobileYearId, creatorId) 
-    values ("${projectId}", "${createTime}", "${mobileYearId}", "${creatorId}")`;
-
-
-  var project = {};
-  dbpool.execute(sql, function(err, rows){
+  Project.save(param).then(function(result){
+    var err = result.err;
+    
     if(err){
-      console.log(err);
-      res.end();
+      if(err.errno === 1062){
+        var msg = err.message;
+      } 
     }
 
-    console.log(rows);
-
-    project = {
-      projectId: projectId,
-      mobileYearId: mobileYearId,
-      createTime: createTime,
-      creatorId: creatorId,
-    }
+    //var projectId = rows.insertId;
+    
 
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(project || {}, null, 2));
+    res.end(JSON.stringify({
+      errCode: -1,
+      //projectId: projectId,  //return project json.
+    }));
+  }).catch(function(e){
+    EAction(res, e);
   });
 }
-
-
-
-
-
-exports.projectsProjectIdMobileYearIdDELETE = function(args, res, next) {
-  /**
-   * parameters expected in the args:
-  * projectId (String)
-  * mobileYearId (String)
-  **/
-  // no response value expected for this operation
-  res.end();
-}
-
-exports.projectsProjectIdMobileYearIdGET = function(args, res, next) {
-  res.end();
-}
-
