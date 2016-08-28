@@ -223,7 +223,8 @@ definitions:
     required: 
     - creatorId
     - tags
-    #- tasks
+    - tasks
+    - properties
     properties:
       creatorId:
         type: integer
@@ -235,8 +236,14 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/task"
+      properties:
+        type: array
+        items:
+          $ref: "#/definitions/property"
         
-  
+  property:
+    type: object
+    
   tag:
     type: object
     required:
@@ -262,7 +269,7 @@ definitions:
     - exp
     - startWeek
     - endWeek
-    
+
     #- template
     properties:
       label:

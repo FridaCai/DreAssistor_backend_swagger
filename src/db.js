@@ -24,7 +24,40 @@ exports.execute = function(sql, callback){
 
 //todo: refactor.
 exports.batch = function(param, callback){
-    
+    var insertProperties = function(conn, properties, projectId){
+        return new Promise(function(resolve, reject){
+            var propertyClause = properties.map(function(property){
+                //undefined; null; 0; ''
+                var dropdownId = (property.dropdownId == undefined) ? 'NULL': property.dropdownId; 
+                var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
+                var value = (property.value == undefined) ? 'NULL': `"${property.value}"`;
+                var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
+                var status = (property.status == undefined) ? 'NULL': `${property.status}`;
+                var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
+
+                return `(
+                    ${dropdownId}, ${text}, ${value}, 
+                    ${refKey}, ${status}, ${label}, 
+                    ${projectId}
+                )`;
+
+            }).join(',');
+            
+            var sql = `insert into property(
+                dropdown_id, text, value, 
+                ref_key, status, label, 
+                projectId
+            ) values ${propertyClause}`;
+
+            conn.query(sql, function(err, result) {
+                if (err) {
+                    reject(new Error(err.stack));
+                    return;
+                }
+                resolve();
+            });
+        })
+    }
 
     var insertTasks = function(conn, tasks, projectId){
         return new Promise(function(resolve, reject){
@@ -108,7 +141,8 @@ exports.batch = function(param, callback){
                 var projectId = result.insertId;
                 Promise.all([
                     insertTags(conn, param.tags, projectId), 
-                    insertTasks(conn, param.tasks, projectId)
+                    insertTasks(conn, param.tasks, projectId),
+                    insertProperties(conn, param.properties, projectId)
                 ]).then(function(){
                     conn.commit(function(err) {
                         if (err) {
