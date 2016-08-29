@@ -24,6 +24,69 @@ exports.execute = function(sql, callback){
 
 //todo: refactor.
 exports.batch = function(param, callback){
+    var insertEngines = function(conn, engines, projectId){
+        //insert engine, set engine.projectId.
+        //get engineId.
+        //insert propery table, set property.engineId
+        return new Promise(function(resolve, reject){
+            var engineClause = engines.map(function(engine){
+                return `(
+                    ${projectId}
+                )`; 
+            }).join(',');
+
+            var sql = `insert into engine(projectId) values ${engineClause}`;
+            conn.query(sql, function(err, result) {
+                if (err) {
+                    reject(new Error(err.stack));
+                    return;
+                }
+
+                var affectedRows = result.affectedRows;
+                var insertId = result.insertId;
+
+                var propertyClauseArr = [];
+                for(var i=0; i<affectedRows; i++){
+                    var engineId = insertId + i;
+                    var property = engines[i];
+
+                    var dropdownId = (property.dropdownId == undefined) ? 'NULL': property.dropdownId; 
+                    var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
+                    var value = (property.value == undefined) ? 'NULL': `"${property.value}"`;
+                    var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
+                    var status = (property.status == undefined) ? 'NULL': `${property.status}`;
+                    var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
+
+
+                    propertyClauseArr.push(
+                        `(
+                            ${dropdownId}, ${text}, ${value}, 
+                            ${refKey}, ${status}, ${label}, 
+                            ${engineId}
+                        )`
+                    )
+                }
+
+                var propertyClause = propertyClauseArr.join(",");
+                var sql = `insert into property(
+                    dropdown_id, text, value, 
+                    ref_key, status, label, 
+                    engineId
+                ) values ${propertyClause}`;
+
+
+                conn.query(sql, function(err, result) {
+                    if (err) {
+                        reject(new Error(err.stack));
+                        return;
+                    }
+                    resolve();
+                });
+            });
+        })
+    }
+
+
     var insertProperties = function(conn, properties, projectId){
         return new Promise(function(resolve, reject){
             var propertyClause = properties.map(function(property){
@@ -142,7 +205,8 @@ exports.batch = function(param, callback){
                 Promise.all([
                     insertTags(conn, param.tags, projectId), 
                     insertTasks(conn, param.tasks, projectId),
-                    insertProperties(conn, param.properties, projectId)
+                    insertProperties(conn, param.properties, projectId),
+                    insertEngines(conn, param.engines, projectId)
                 ]).then(function(){
                     conn.commit(function(err) {
                         if (err) {
