@@ -123,7 +123,7 @@ paths:
       tags:
       - "Project"
       description: ""
-      operationId: "projectPOST"
+      operationId: "addProject"
       parameters:
       - name: "project"
         in: "body"
@@ -150,6 +150,57 @@ paths:
       responses:
         200:
           description: "Successful response"
+      x-swagger-router-controller: "Project"
+    
+    get:
+      tags:
+      - "Project"
+      description: ""
+      operationId: "findProjects"
+      parameters:
+      - name: "userId"
+        in: "query"
+        description: "project ownerId"
+        required: false
+        type: "integer"
+      
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/project'
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Project"
+
+  /project/{id}:
+    get:
+      tags:
+      - "Project"
+      description: ""
+      operationId: "findProjectById"
+      parameters:
+      - name: id
+        in: path
+        description: "project id"
+        required: true
+        type: "integer"
+      
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/project'
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "Project"
 
 
@@ -217,6 +268,8 @@ definitions:
         format: int64
 
 
+  project:
+    type: "object"
 
   postProjectRequest:
     type: "object"
@@ -243,7 +296,7 @@ definitions:
         
   property:
     type: object
-    
+
   tag:
     type: object
     required:

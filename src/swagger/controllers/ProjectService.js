@@ -6,61 +6,45 @@ var EAction = require('../../exception.js').action;
 var CError = require('../../exception.js').CError;
 var logger = require('../../logger').logger('normal');
 
+var Persistence = require('../../persistence/index.js');
+
 exports.projectOptions = function(args, res, next) {
   res.end();
 }
 
-/*exports.projectGET = function(args, res, next) {
-  var email = args.email.value;
-  var password = args.password.value;
+exports.findProjects = function(args, res, next) {
+  //how to get user?
+  var userId = args.userId.value;
   var param = {
-    email: email,
-    password: password,
-  };
+    userId: userId
+  }
 
-  Project.findByEmail(email).then(function(result){
+  Persistence.findProjects(param).then(function(result){
+
     var err = result.err;
-    var rows = result.rows;
+    var projects = result.projects;
 
     if(err){
-      throw new CError(2, JSON.stringify(err));
+      throw new CError(3, '');
     } 
-
-    if(rows.length === 0){
-      throw new CError(4, JSON.stringify(param));
-    }
-
-    if(rows.length > 1){
-      var e = new CError(5, JSON.stringify(param));
-      EAction(res, e);
-    }
-
-    var project = new Project();
-    project.init(rows[0]);
-
-    if(!project.isPasswordValid(password)){
-      throw new CError(6);
-    } 
-
-    var expires = moment().add( 8, 'hours').valueOf();
-    var token = jwt.encode({
-      iss: project.id,
-      exp: expires
-    }, jwtTokenSecret);
 
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({
       errCode: -1,
-      project: project,
-      token: token,
-      expires: expires,
+      project: projects.map(function(project){
+        return project.dump();
+      })
     }));
   }).catch(function(e){
     EAction(res, e);
   });
-}*/
+}
 
-exports.projectPOST = function(args, res, next) {
+exports.findProjectById = function(args, res, next) {
+
+}
+
+exports.addProject = function(args, res, next) {
   var param = args.project.value;
   
   Project.save(param).then(function(result){
