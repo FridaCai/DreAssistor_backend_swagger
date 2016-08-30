@@ -476,7 +476,8 @@ definitions:
             type: array
             items: 
               type: array
-              items: integer
+              items: 
+                type: integer
           series:
             type: array
             items: 

@@ -338,7 +338,7 @@ exports.batch = function(param, callback){
                 return;
             }
 
-            var sql = `insert into project(creatorId) values ("${param.creatorId}")`;
+            var sql = `insert into project(creatorId, sorp) values ("${param.creatorId}", FROM_UNIXTIME(${param.sorp})`;
             conn.query(sql, function(err, result) {       
                 if (err) {
                   conn.rollback(function(err){

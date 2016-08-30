@@ -31,7 +31,7 @@ exports.findProjects = function(args, res, next) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({
       errCode: -1,
-      project: projects.map(function(project){
+      projects: projects.map(function(project){
         return project.dump();
       })
     }));

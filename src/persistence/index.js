@@ -59,7 +59,7 @@ module.exports = class Persistence{
 	}
 
 	static findProjects(param){
-		var sqls = [`select creatorId, id, label from project where flag=0`];
+		var sqls = [`select creatorId, id, label, UNIX_TIMESTAMP(sorp) as sorp from project where flag=0`];
 
 		if(param.userId != undefined)
 			sqls.push(`and creatorId = ${param.userId}`);
@@ -109,15 +109,14 @@ module.exports = class Persistence{
 						return Project.create({
 							id: row.id,
 							creatorId: row.creatorId,
-							label: row.label
+							label: row.label,
+							sorp: row.sorp
 						})
 					})
 					resolve(projects);
 				})
 			})
 		}
-
-
 
 		var getTasksAndTags = function(project){
 			return Promise.all([

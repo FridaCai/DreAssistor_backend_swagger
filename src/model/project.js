@@ -12,6 +12,7 @@ module.exports = class Project {
 		this.id = param.id;
 		this.creatorId = param.creatorId;
 		this.label = param.label;
+		this.sorp = param.sorp;
 
 		this.tasks = new Tasks();
 		this.tags = new Tags();
@@ -32,6 +33,7 @@ module.exports = class Project {
 			id: this.id,
 			creatorId: this.creatorId,
 			label: this.label,
+			sorp: this.sorp,
 
 
 			tasks: this.tasks.dump(),
