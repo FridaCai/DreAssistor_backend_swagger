@@ -295,6 +295,8 @@ definitions:
         format: int32
       user: 
         $ref: "#/definitions/user"
+
+
   getUserResponse:
     type: "object"
     required: 
@@ -313,6 +315,8 @@ definitions:
       expires: 
         type: integer
         format: int64
+
+
   postUserRequest:
     type: "object"
     required: 
@@ -326,6 +330,8 @@ definitions:
         type: "string"
       password:
         type: "string"
+
+
 
   postUserResponse:
     type: "object"
@@ -453,9 +459,51 @@ definitions:
         type: boolean
       label:
         type: string
-      
+      images:
+        type: array
+        items:
+          $ref: '#/definitions/image'
+      attachments:
+        type: array
+        items:
+          $ref: '#/definitions/attachment'
+      curve:
+        type: object
+        properties:
+          caption: 
+            type: string
+          data: 
+            type: array
+            items: 
+              type: array
+              items: integer
+          series:
+            type: array
+            items: 
+              type: object
+              properties:
+                label:
+                  type: string
+                isShowCurve:
+                  type: boolean
+                data:
+                  type: integer
 
+  attachment:
+    type: object
+    properties:
+      label:
+        type: string
+      url:
+        type: string
 
+  image:
+    type: object
+    properties:
+      label:
+        type: string
+      url:
+        type: string
 
 
   template:
