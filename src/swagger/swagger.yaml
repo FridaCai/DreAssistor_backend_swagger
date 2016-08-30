@@ -204,6 +204,85 @@ paths:
       x-swagger-router-controller: "Project"
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /task:
+    post:
+      tags:
+      - "Task"
+      description: ""
+      operationId: "addTask"
+      parameters:
+      - name: "task"
+        in: "body"
+        description: "add task"
+        required: true
+        schema:
+          $ref: "#/definitions/postTaskRequest"
+
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: "#/definitions/postTaskResponse"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Task"
+      
+    options:
+      tags:
+      - "Task"
+      description: "preflight for cors \n"
+      operationId: "taskOptions"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Task"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 definitions:
   authTestResponse:
     type: "object"
@@ -293,9 +372,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/property"
-        
-  property:
-    type: object
+  
 
   tag:
     type: object
@@ -311,37 +388,7 @@ definitions:
       week:
         type: integer
   
-  task:
-    type: object
-    required:
-    - label
-    - startTime
-    - endTime
-    - desc
-    - priority
-    - exp
-    - startWeek
-    - endWeek
-
-    #- template
-    properties:
-      label:
-        type: string
-      startTime:
-        type: integer
-      endTime:
-        type: integer
-      startWeek:
-        type: integer
-      endWeek:
-        type: integer
-      desc: 
-        type: string
-      exp:
-        type: string
-      priority:
-        type: integer
-
+  
 
   postProjectResponse:
     type: "object"
@@ -371,6 +418,8 @@ definitions:
         type: "string"
       email:
         type: "string"
+        
+        
   errorModel:
     type: "object"
     required:
@@ -382,3 +431,101 @@ definitions:
         format: "int32"
       errMsg:
         type: "string"
+
+
+
+
+
+
+
+  property:
+    type: object
+    properties:
+      dropdownId:
+        type: integer
+      text:
+        type: string
+      value: 
+        type: integer
+      refKey:
+        type: string
+      status:
+        type: boolean
+      label:
+        type: string
+      
+
+
+
+
+  template:
+    type: object
+    required:
+      - type
+      - sheetNames
+      - sheets
+    properties:
+      type:
+        type: integer
+      sheetNames:
+        type: array
+        items:
+          type: string
+      sheets:
+        type: array
+        items:
+          type: array
+          items:
+            $ref: '#/definitions/property'
+
+  task:
+    type: object
+    required:
+    - label
+    - startTime
+    - endTime
+    - desc
+    - exp
+    - priority
+    - privacy
+    - startWeek
+    - endWeek
+    - template
+    properties:
+      label:
+        type: string
+      startTime:
+        type: integer
+      endTime:
+        type: integer
+      desc:
+        type: string
+      exp: 
+        type: string
+      priority:
+        type: integer
+      privacy:
+        type: integer
+      startWeek:
+        type: integer
+      endWeek:
+        type: integer
+      template:
+        $ref: "#/definitions/template"
+
+
+
+  postTaskRequest:
+    type: object
+    required:
+    - projectId
+    - task
+    properties:
+      projectId:
+        type: integer
+      task:
+        $ref: "#/definitions/task"
+      
+
+  postTaskResponse:
+    type: "object"

@@ -22,6 +22,158 @@ exports.execute = function(sql, callback){
     })
 }
 
+exports.batch2 = function(param, callback){
+    return new Promise(function(resolve, reject){
+        var projectId = param.projectId;
+        var task = param.task;
+
+        var label = task.label;
+        var startTime = task.startTime;
+        var endTime = task.endTime;
+        var desc = task.desc;
+        var priority = task.priority;
+        var exp = task.exp;
+        var startWeek = task.startWeek;
+        var endWeek = task.endWeek;
+        var templateType = task.template.type;
+
+        var sql = `insert into task(label, start_time, end_time, 
+            \`desc\`, priority, exp, 
+            start_week, end_week, template_type, 
+            projectId) 
+            values (
+                "${label}", FROM_UNIXTIME(${startTime}), FROM_UNIXTIME(${endTime}),
+                "${desc}", ${priority}, "${exp}",
+                ${startWeek}, ${endWeek}, ${templateType},
+                ${projectId}
+            )`;
+        var insertPropertyWrapParam = function(conn, sheetNames, taskId){
+            return new Promise(function(resolve, reject){
+                var clause = sheetNames.map(function(sheetName){
+                    return `("${sheetName}", ${taskId})`
+                }).join(',');
+
+                var sql = `insert into property_wrap(label, taskId) values ${clause}`;
+                conn.query(sql, function(err, result) {
+                    if (err) {
+                        reject(new Error(err.stack));
+                        return;
+                    }
+                    var insertId = result.insertId;
+                    var affectedRows = result.affectedRows;
+
+                    resolve({
+                        insertId: insertId,
+                        affectedRows: affectedRows,
+                    });
+                });    
+            })
+        }
+
+        var insertProperties = function(conn, sheets, propertyWrapParam){
+            debugger;
+            return new Promise(function(resolve, reject){
+                var firstWrapParamId = propertyWrapParam.insertId;
+
+
+                var propertyClause = sheets.map(function(sheet, index){
+                    var propertyWrapId = firstWrapParamId + index;
+
+                    return sheet.map(function(property){
+                        //undefined; null; 0; ''
+                        var dropdownId = (property.dropdownId == undefined) ? 'NULL': property.dropdownId; 
+                        var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
+                        var value = (property.value == undefined) ? 'NULL': `"${property.value}"`;
+                        var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
+                        var status = (property.status == undefined) ? 'NULL': `${property.status}`;
+                        var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
+                        return `(
+                            ${dropdownId}, ${text}, ${value}, 
+                            ${refKey}, ${status}, ${label}, 
+                            ${propertyWrapId}
+                        )`;
+                    }).join(',')
+                    
+                }).join(',');
+                
+
+
+
+
+                var sql = `insert into property(
+                    dropdown_id, text, value, 
+                    ref_key, status, label, 
+                    property_wrap_id
+                ) values ${propertyClause}`;
+                
+                conn.query(sql, function(err, result) {
+                    if (err) {
+                        reject(new Error(err.stack));
+                        return;
+                    }
+                    resolve();
+                });
+                  
+
+                    
+
+
+                
+            })
+        }
+
+        pool.getConnection(function(err, conn) {
+            if(err) {
+                callback(err);
+                return;
+            }
+
+            conn.beginTransaction(function(err) {
+                if(err) {
+                    callback(err);
+                    return;
+                }
+                conn.query(sql, function(err, result) {       
+                    if (err) {
+                      conn.rollback(function(err){
+                        err && logger.error(err);
+                      });
+                      callback(err);
+                      return;
+                    }
+
+                    var taskId = result.insertId;
+                    var sheetNames = task.template.sheetNames;
+                    var sheets = task.template.sheets;
+
+                    insertPropertyWrapParam(conn, sheetNames, taskId).then(function(propertyWrapParam){
+                        insertProperties(conn, sheets, propertyWrapParam).then(function(){
+                            conn.commit(function(err) {
+                                if (err) {
+                                  throw err;
+                                }
+                                callback();
+                            });
+                        }, function(err){
+                            throw err;
+                        })
+                    }, function(err){
+                        throw err;
+                    }).catch(function(err){
+                        conn.rollback(function(err){
+                            err && logger.error(err);
+                        });
+                        callback(err);
+                        return;
+                    });
+
+                });
+            });
+            conn.release();
+        });
+    })
+
+}
 //todo: refactor.
 exports.batch = function(param, callback){
     var insertEngines = function(conn, engines, projectId){
@@ -85,8 +237,6 @@ exports.batch = function(param, callback){
             });
         })
     }
-
-
     var insertProperties = function(conn, properties, projectId){
         return new Promise(function(resolve, reject){
             var propertyClause = properties.map(function(property){
@@ -121,7 +271,6 @@ exports.batch = function(param, callback){
             });
         })
     }
-
     var insertTasks = function(conn, tasks, projectId){
         return new Promise(function(resolve, reject){
             var taskClause = tasks.map(function(task){
@@ -157,7 +306,6 @@ exports.batch = function(param, callback){
             });
         })
     }
-
     var insertTags = function(conn, tags, projectId){
         return new Promise(function(resolve, reject){
             var tagClause = tags.map(function(tag){
@@ -178,7 +326,6 @@ exports.batch = function(param, callback){
             });
         })
     }
-
     pool.getConnection(function(err, conn) {
         if(err) {
             callback(err);

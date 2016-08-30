@@ -48,7 +48,6 @@ module.exports = class Persistence{
 			});
 		}) 
 	}
-
 	static insertProject(param){
 		return new Promise(function(resolve, reject){
 			dbpool.batch(param, function(err, rows){
@@ -185,5 +184,15 @@ module.exports = class Persistence{
 
 	static findProjectById(id){
 
+	}
+
+	static addTask(param){
+		return new Promise(function(resolve, reject){
+			dbpool.batch2(param, function(err, rows){
+				resolve({
+					err: err,
+				});
+			});
+		})
 	}
 }
