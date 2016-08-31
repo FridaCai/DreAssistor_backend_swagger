@@ -12,7 +12,7 @@ module.exports = class Engine{
 	}
 	init(param){
 		this.id = param.id;
-		this.properties = Properties.create(param);
+		this.properties = Properties.create(param.properties);
 	}
 	dump(){
 		return {

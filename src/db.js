@@ -91,10 +91,11 @@ exports.batch2 = function(param, callback){
                         var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
                         var status = (property.status == undefined) ? 'NULL': `${property.status}`;
                         var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
+                        var key = `"${property.key}"`;
                         return `(
                             ${dropdownId}, ${text}, ${value}, 
                             ${refKey}, ${status}, ${label}, 
-                            ${propertyWrapId}
+                            ${key}, ${propertyWrapId}
                         )`;
                     }).join(',')
                     
@@ -106,8 +107,8 @@ exports.batch2 = function(param, callback){
 
                 var sql = `insert into property(
                     dropdown_id, text, value, 
-                    ref_key, status, label, 
-                    property_wrap_id
+                    ref_key, status, label,
+                    \`key\`, property_wrap_id
                 ) values ${propertyClause}`;
                 
                 conn.query(sql, function(err, result) {
@@ -204,7 +205,7 @@ exports.batch = function(param, callback){
                 var propertyClauseArr = [];
                 for(var i=0; i<affectedRows; i++){
                     var engineId = insertId + i;
-                    var properties = engines[i];
+                    var properties = engines[i].properties;
 
                     properties.map(function(property){
                         var dropdownId = (property.dropdownId == undefined) ? 'NULL': property.dropdownId; 
@@ -213,13 +214,14 @@ exports.batch = function(param, callback){
                         var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
                         var status = (property.status == undefined) ? 'NULL': `${property.status}`;
                         var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
+                        var key = `"${property.key}"`;
 
 
                         propertyClauseArr.push(
                             `(
                                 ${dropdownId}, ${text}, ${value}, 
                                 ${refKey}, ${status}, ${label}, 
-                                ${engineId}
+                                ${key}, ${engineId}
                             )`
                         )
                     })
@@ -230,7 +232,7 @@ exports.batch = function(param, callback){
                 var sql = `insert into property(
                     dropdown_id, text, value, 
                     ref_key, status, label, 
-                    engineId
+                    \`key\`, engineId
                 ) values ${propertyClause}`;
 
 
@@ -254,11 +256,12 @@ exports.batch = function(param, callback){
                 var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
                 var status = (property.status == undefined) ? 'NULL': `${property.status}`;
                 var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
+                var key = `"${property.key}"`;
 
                 return `(
                     ${dropdownId}, ${text}, ${value}, 
                     ${refKey}, ${status}, ${label}, 
-                    ${projectId}
+                    ${key}, ${projectId}
                 )`;
 
             }).join(',');
@@ -266,8 +269,9 @@ exports.batch = function(param, callback){
             var sql = `insert into property(
                 dropdown_id, text, value, 
                 ref_key, status, label, 
-                projectId
+                \`key\`, projectId
             ) values ${propertyClause}`;
+            console.log(sql);
 
             conn.query(sql, function(err, result) {
                 if (err) {

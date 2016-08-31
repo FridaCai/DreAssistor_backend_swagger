@@ -17,15 +17,18 @@ module.exports = class Property{
 		this.refKey = param.refKey;
 		this.status = param.status;
 		this.label = param.label;
+		this.key = param.key;
 	}
 	dump(){
 		return {
+			id: this.id,
 			dropdownId: this.dropdownId,
 			text: this.text,
 			value: this.value,
 			refKey: this.refKey,
 			status: this.status,
-			label: this.label
+			label: this.label,
+			key: this.key,
 		}
 	}
 }

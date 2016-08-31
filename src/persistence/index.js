@@ -68,7 +68,7 @@ var Persistence = class Persistence{
 			`select creatorId, id, label, 
 			UNIX_TIMESTAMP(sorp) as sorp 
 			from project 
-			where flag=0`
+			where flag=0 `
 		];
 
 		if(param.id != undefined){
@@ -77,6 +77,8 @@ var Persistence = class Persistence{
 			if(param.userId != undefined)
 				sqls.push(`and creatorId=${param.userId}`);	
 		}
+
+		sqls.push('order by id desc');
 		
 
 		var sqlClause = sqls.join(' ');
@@ -137,7 +139,8 @@ var Persistence = class Persistence{
 		var getProperties = function(projectId){
 			var sql = `select id, dropdown_id, text, 
 				value, ref_key, status, 
-				label from property where flag=0 and projectId=${projectId}`;
+				label, \`key\` 
+				from property where flag=0 and projectId=${projectId}`;
 
 			return new Promise(function(resolve, reject){
 				dbpool.execute(sql, function(err, rows){
@@ -168,13 +171,14 @@ var Persistence = class Persistence{
 
 						var sql = `select id, dropdown_id, text, 
 							value, ref_key, status, 
-							label 
+							label, \`key\`
 							from property 
 							where engineId=${engineId} 
 							and flag=0`;
 
 						promiseArr.push(new Promise(function(resolve, reject){
 							dbpool.execute(sql, function(err, rows){
+								debugger;
 								if(err){
 									reject(err);
 								}
@@ -184,8 +188,14 @@ var Persistence = class Persistence{
 					});
 
 					Promise.all(promiseArr).then(function(engineParams){
+
 						resolve({
-							rows: engineParams,
+							rows: engineParams.map(function(engineParam, index){
+								return {
+									id: rows[index].id,
+									properties: engineParam
+								}
+							}),
 							err: null	
 						});
 					}, function(err){
@@ -203,14 +213,13 @@ var Persistence = class Persistence{
 			return Promise.all([
 				getTasks(project.id),
 				getTags(project.id),
-
 				getEngines(project.id),
 				getProperties(project.id)
 			]).then(function(args){
 				var tasks = args[0];
 				var tags = args[1];
-				var properies = args[2];
-				var engines = args[3];
+				var engines = args[2];
+				var properies = args[3];
 				debugger;
 
 
