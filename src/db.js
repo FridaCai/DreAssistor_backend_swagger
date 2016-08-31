@@ -22,6 +22,10 @@ exports.execute = function(sql, callback){
     })
 }
 
+var getUnixTime = function(time){
+    var time = Math.round(time/1000);
+    return `FROM_UNIXTIME(${time})`;
+}
 exports.batch2 = function(param, callback){
     return new Promise(function(resolve, reject){
         var projectId = param.projectId;
@@ -42,7 +46,7 @@ exports.batch2 = function(param, callback){
             start_week, end_week, template_type, 
             projectId) 
             values (
-                "${label}", FROM_UNIXTIME(${startTime}), FROM_UNIXTIME(${endTime}),
+                "${label}", ${getUnixTime(startTime)}, ${getUnixTime(endTime)},
                 "${desc}", ${priority}, "${exp}",
                 ${startWeek}, ${endWeek}, ${templateType},
                 ${projectId}
@@ -200,23 +204,26 @@ exports.batch = function(param, callback){
                 var propertyClauseArr = [];
                 for(var i=0; i<affectedRows; i++){
                     var engineId = insertId + i;
-                    var property = engines[i];
+                    var properties = engines[i];
 
-                    var dropdownId = (property.dropdownId == undefined) ? 'NULL': property.dropdownId; 
-                    var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
-                    var value = (property.value == undefined) ? 'NULL': `"${property.value}"`;
-                    var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
-                    var status = (property.status == undefined) ? 'NULL': `${property.status}`;
-                    var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
+                    properties.map(function(property){
+                        var dropdownId = (property.dropdownId == undefined) ? 'NULL': property.dropdownId; 
+                        var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
+                        var value = (property.value == undefined) ? 'NULL': `"${property.value}"`;
+                        var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
+                        var status = (property.status == undefined) ? 'NULL': `${property.status}`;
+                        var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
 
 
-                    propertyClauseArr.push(
-                        `(
-                            ${dropdownId}, ${text}, ${value}, 
-                            ${refKey}, ${status}, ${label}, 
-                            ${engineId}
-                        )`
-                    )
+                        propertyClauseArr.push(
+                            `(
+                                ${dropdownId}, ${text}, ${value}, 
+                                ${refKey}, ${status}, ${label}, 
+                                ${engineId}
+                            )`
+                        )
+                    })
+                    
                 }
 
                 var propertyClause = propertyClauseArr.join(",");
@@ -284,7 +291,7 @@ exports.batch = function(param, callback){
                 var endWeek = task.endWeek;
                 var templateType = task.template.type;
 
-                return `("${label}", FROM_UNIXTIME(${startTime}), FROM_UNIXTIME(${endTime}), 
+                return `("${label}", ${getUnixTime(startTime)},${getUnixTime(endTime)}, 
                     "${desc}", "${exp}",  ${priority}, 
                     ${startWeek}, ${endWeek}, ${templateType}, 
                     ${projectId})`;
@@ -312,7 +319,7 @@ exports.batch = function(param, callback){
                 var label = tag.label;
                 var time = tag.time;
                 var week = tag.week;
-                return `("${label}", FROM_UNIXTIME(${time}), ${week}, ${projectId})`;
+                return `("${label}", ${getUnixTime(time)}, ${week}, ${projectId})`;
             }).join(',');
             
             var sql = `insert into tag(label, time, week, projectId) values ${tagClause}`;
@@ -338,7 +345,8 @@ exports.batch = function(param, callback){
                 return;
             }
 
-            var sql = `insert into project(creatorId, sorp) values ("${param.creatorId}", FROM_UNIXTIME(${param.sorp})`;
+            var sql = `insert into project(creatorId, sorp, label) 
+                values (${param.creatorId}, ${getUnixTime(param.sorp)}, "${param.label}")`;
             conn.query(sql, function(err, result) {       
                 if (err) {
                   conn.rollback(function(err){

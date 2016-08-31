@@ -6,7 +6,7 @@ module.exports = class Tags extends Array{
 		super();
 	}
 
-	initByParam(param){
+	init(param){
 		param.map((function(tagParam){
 			var tag = Tag.create(tagParam);
 			this.push(tag);

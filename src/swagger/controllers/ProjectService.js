@@ -41,13 +41,35 @@ exports.findProjects = function(args, res, next) {
 }
 
 exports.findProjectById = function(args, res, next) {
+  var id = args.id.value;
+  var param = {id: id};
 
+  Persistence.findProjectById(param).then(function(result){
+    var err = result.err;
+    var projects = result.projects;
+
+    if(err){
+      throw new CError(3, '');
+    } 
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(
+      JSON.stringify({
+        errCode: -1,
+        projects: projects.map(function(project){
+          return project.dump();
+        })
+      })
+    );
+  }).catch(function(e){
+    EAction(res, e);
+  });
 }
 
 exports.addProject = function(args, res, next) {
   var param = args.project.value;
   
-  Project.save(param).then(function(result){
+  Persistence.insertProject(param).then(function(result){
     var err = result.err;
     
     if(err){

@@ -9,7 +9,7 @@ var Tasks = class Tasks extends Array{
 		super();
 	}
 
-	initByParam(param){
+	init(param){
 		param.map((function(taskParam){
 			var task = Task.create(taskParam);
 			this.push(task);
