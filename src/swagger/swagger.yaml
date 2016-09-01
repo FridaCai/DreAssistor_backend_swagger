@@ -511,8 +511,6 @@ definitions:
     type: object
     required:
       - type
-      - sheetNames
-      - sheets
     properties:
       type:
         type: integer

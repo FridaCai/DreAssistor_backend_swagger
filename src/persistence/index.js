@@ -66,7 +66,7 @@ var Persistence = class Persistence{
 	static findProjects(param){
 		var sqls = [
 			`select creatorId, id, label, 
-			UNIX_TIMESTAMP(sorp) as sorp 
+			UNIX_TIMESTAMP(sorp)*1000 as sorp 
 			from project 
 			where flag=0 `
 		];
@@ -101,7 +101,7 @@ var Persistence = class Persistence{
 		}
 
 		var getTags = function(projectId){
-			var sql = `select id, label, UNIX_TIMESTAMP(time) as time, 
+			var sql = `select id, label, UNIX_TIMESTAMP(time)*1000 as time, 
 				week 
 				from tag 
 				where flag=0 
@@ -119,8 +119,8 @@ var Persistence = class Persistence{
 		}
 
 		var getTasks = function(projectId){
-			var sql = `select id, label, UNIX_TIMESTAMP(start_time) as startTime, 
-				UNIX_TIMESTAMP(end_time) as endTime 
+			var sql = `select id, label, UNIX_TIMESTAMP(start_time)*1000 as startTime, 
+				UNIX_TIMESTAMP(end_time)*1000 as endTime 
 				from task
 				where flag=0 
 				and projectId=${projectId}`;

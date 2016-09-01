@@ -53,6 +53,11 @@ exports.batch2 = function(param, callback){
             )`;
         var insertPropertyWrapParam = function(conn, sheetNames, taskId){
             return new Promise(function(resolve, reject){
+                if(!sheetNames || sheetNames.length == 0)
+                    resolve();
+
+
+
                 var clause = sheetNames.map(function(sheetName){
                     return `("${sheetName}", ${taskId})`
                 }).join(',');
@@ -75,8 +80,10 @@ exports.batch2 = function(param, callback){
         }
 
         var insertProperties = function(conn, sheets, propertyWrapParam){
-            debugger;
             return new Promise(function(resolve, reject){
+                if(!propertyWrapParam)
+                    resolve();
+
                 var firstWrapParamId = propertyWrapParam.insertId;
 
 
@@ -210,7 +217,16 @@ exports.batch = function(param, callback){
                     properties.map(function(property){
                         var dropdownId = (property.dropdownId == undefined) ? 'NULL': property.dropdownId; 
                         var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
-                        var value = (property.value == undefined) ? 'NULL': `"${property.value}"`;
+
+
+                        //cannot tell where a number or string at client, so ...short tem solution.
+                        //bad.....
+                        var value = (property.value == undefined ) ? 'NULL': `${property.value}`;
+                        if(property.value == "")
+                            value = 0;
+
+
+
                         var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
                         var status = (property.status == undefined) ? 'NULL': `${property.status}`;
                         var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
