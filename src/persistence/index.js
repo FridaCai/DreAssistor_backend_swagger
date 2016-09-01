@@ -137,7 +137,7 @@ var Persistence = class Persistence{
 		}
 
 		var getProperties = function(projectId){
-			var sql = `select id, dropdown_id, text, 
+			var sql = `select id, dropdown, text, 
 				value, ref_key, status, 
 				label, \`key\` 
 				from property where flag=0 and projectId=${projectId}`;
@@ -169,7 +169,7 @@ var Persistence = class Persistence{
 					rows.map(function(row){
 						var engineId = row.id;
 
-						var sql = `select id, dropdown_id, text, 
+						var sql = `select id, dropdown, text, 
 							value, ref_key, status, 
 							label, \`key\`
 							from property 

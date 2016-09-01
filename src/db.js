@@ -113,7 +113,7 @@ exports.batch2 = function(param, callback){
 
 
                 var sql = `insert into property(
-                    dropdown_id, text, value, 
+                    dropdown, text, value, 
                     ref_key, status, label,
                     \`key\`, property_wrap_id
                 ) values ${propertyClause}`;
@@ -246,7 +246,7 @@ exports.batch = function(param, callback){
 
                 var propertyClause = propertyClauseArr.join(",");
                 var sql = `insert into property(
-                    dropdown_id, text, value, 
+                    dropdown, text, value, 
                     ref_key, status, label, 
                     \`key\`, engineId
                 ) values ${propertyClause}`;
@@ -283,7 +283,7 @@ exports.batch = function(param, callback){
             }).join(',');
             
             var sql = `insert into property(
-                dropdown_id, text, value, 
+                dropdown, text, value, 
                 ref_key, status, label, 
                 \`key\`, projectId
             ) values ${propertyClause}`;
