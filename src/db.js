@@ -392,7 +392,6 @@ exports.batch = function(param, callback){
                 }, function(err){
                     throw err;
                 }).catch(function(err){
-                    debugger;
                     conn.rollback(function(err){
                         err && logger.error(err);
                     });

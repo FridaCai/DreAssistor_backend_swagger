@@ -152,7 +152,7 @@ var Persistence = class Persistence{
 			})
 		}
 
-		var getEngines = function(projectId){debugger;
+		var getEngines = function(projectId){
 			var sql = `select id from engine where flag=0 and projectId=${projectId}`;
 
 			return new Promise(function(resolve, reject){
@@ -178,7 +178,6 @@ var Persistence = class Persistence{
 
 						promiseArr.push(new Promise(function(resolve, reject){
 							dbpool.execute(sql, function(err, rows){
-								debugger;
 								if(err){
 									reject(err);
 								}
@@ -220,7 +219,6 @@ var Persistence = class Persistence{
 				var tags = args[1];
 				var engines = args[2];
 				var properies = args[3];
-				debugger;
 
 
 
@@ -246,7 +244,6 @@ var Persistence = class Persistence{
 					project: project
 				})
 			}, function(){
-				debugger;
 			})
 		}
 
