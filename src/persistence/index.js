@@ -57,7 +57,110 @@ var Persistence = class Persistence{
 			});
 		})
 	}
+	static findTaskById(id){
+		var sql = `select id, label, UNIX_TIMESTAMP(start_time)*1000 as startTime, 
+				UNIX_TIMESTAMP(end_time)*1000 as endTime, \`desc\`, priority, 
+				exp, start_week, end_week, 
+				template_type 
+				from task
+				where id=${id} and flag=0`;
 
+
+		var getTaskTemplate = function(rows){
+			return rows.map(function(row){
+				var taskId = row.id;
+
+				var sql = `select p.dropdown, p.text, p.value, 
+						p.ref_key, p.status, p.label
+
+						from property p
+						left join property_wrap pw on p.property_wrap_id=pw.id
+						left join task t on t.id = pw.task_id
+
+						where t.id=${taskId} 
+						and t.flag=0 
+						and p.flag=0 
+						and pw.flag=0`;
+
+
+				return new Promise(function(resolve, reject){
+					dbpool.execute(sql, function(err, templateRows){
+						if(err){
+							reject(err);
+							return;
+						}
+						resolve(templateRows);
+					})
+				})
+			})
+			
+		}
+
+		var assembleTask = function(taskParam, templateParam){
+			var tmp = {};
+			templateParam.map(function(p){
+				tmp[p.property_wrap_id] = p.property_wrap_label;
+			})
+
+			var sheetNames = Object.keys(tmp).map(function(k){
+				return tmp[k];
+			})	
+
+			var tmp2 = {}
+			templateParam.map(function(property){
+				if(!tmp2[property.property_wrap_id])
+					tmp2[property.property_wrap_id] = [];
+				tmp2[property.property_wrap_id].push(property);
+			})
+			var sheets = Object.keys(tmp2).map(function(k){
+				return tmp2[k];
+			})
+
+			return {
+				id: taskParam.id,
+				label: taskParam.label,
+				startTime: taskParam.startTime,
+				endTime: taskParam.endTime,
+				desc: taskParam.desc,
+				priority: taskParam.priority,
+				exp: taskParam.exp, 
+				startWeek: taskParam.startWeek,
+				endWeek: taskParam.endWeek,
+				template: {
+					type: taskParam.template_type,
+					sheetNames: sheetNames,
+					sheets: sheets,
+				}
+			}	
+		}
+
+		return new Promise(function(resolve, reject){
+			dbpool.execute(sql, function(err, rows){
+				if(err){
+					resolve({
+						err: err
+					})
+					return;
+				}
+
+				Promise.all(getTaskTemplate(rows)).then(function(taskParams){
+					var loop = rows.length;
+					var returnTasks = [];
+					for(var i=0; i<loop; i++){
+						var task = assembleTask(rows[i], taskParams[i]);
+						returnTasks.push(task);
+					}
+					resolve({rows: returnTasks});
+				}, function(err){
+					throw err
+				}).catch(function(err){
+					resolve({
+						err: err
+					})
+				})
+			});
+		})
+	}
 
 	/*
 		if performance has problem, not retrieve properties and engines when get/projects
@@ -65,7 +168,7 @@ var Persistence = class Persistence{
 	*/
 	static findProjects(param){
 		var sqls = [
-			`select creatorId, id, label, 
+			`select creator_id, id, label, 
 			UNIX_TIMESTAMP(sorp)*1000 as sorp 
 			from project 
 			where flag=0 `
@@ -75,7 +178,7 @@ var Persistence = class Persistence{
 			sqls.push(`and id=${param.id}`);
 		}else{
 			if(param.userId != undefined)
-				sqls.push(`and creatorId=${param.userId}`);	
+				sqls.push(`and creator_id=${param.userId}`);	
 		}
 
 		sqls.push('order by id desc');
@@ -105,7 +208,7 @@ var Persistence = class Persistence{
 				week 
 				from tag 
 				where flag=0 
-				and projectId=${projectId}`;
+				and project_id=${projectId}`;
 
 
 			return new Promise(function(resolve, reject){
@@ -123,15 +226,21 @@ var Persistence = class Persistence{
 				UNIX_TIMESTAMP(end_time)*1000 as endTime 
 				from task
 				where flag=0 
-				and projectId=${projectId}`;
+				and project_id=${projectId}`;
 
 
 			return new Promise(function(resolve, reject){
 				dbpool.execute(sql, function(err, rows){
+					if(err){
+						resolve({
+							err: err
+						})
+						return;
+					}
+
 					resolve({
-						err: err,
 						rows: rows
-					});
+					})
 				});
 			})
 		}
@@ -140,7 +249,7 @@ var Persistence = class Persistence{
 			var sql = `select id, dropdown, text, 
 				value, ref_key, status, 
 				label, \`key\` 
-				from property where flag=0 and projectId=${projectId}`;
+				from property where flag=0 and project_id=${projectId}`;
 
 			return new Promise(function(resolve, reject){
 				dbpool.execute(sql, function(err, rows){
@@ -153,7 +262,7 @@ var Persistence = class Persistence{
 		}
 
 		var getEngines = function(projectId){
-			var sql = `select id from engine where flag=0 and projectId=${projectId}`;
+			var sql = `select id from engine where flag=0 and project_id=${projectId}`;
 
 			return new Promise(function(resolve, reject){
 				dbpool.execute(sql, function(err, rows){
@@ -173,7 +282,7 @@ var Persistence = class Persistence{
 							value, ref_key, status, 
 							label, \`key\`
 							from property 
-							where engineId=${engineId} 
+							where engine_id=${engineId} 
 							and flag=0`;
 
 						promiseArr.push(new Promise(function(resolve, reject){

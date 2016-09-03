@@ -44,7 +44,7 @@ exports.batch2 = function(param, callback){
         var sql = `insert into task(label, start_time, end_time, 
             \`desc\`, priority, exp, 
             start_week, end_week, template_type, 
-            projectId) 
+            project_id) 
             values (
                 "${label}", ${getUnixTime(startTime)}, ${getUnixTime(endTime)},
                 "${desc}", ${priority}, "${exp}",
@@ -62,7 +62,7 @@ exports.batch2 = function(param, callback){
                     return `("${sheetName}", ${taskId})`
                 }).join(',');
 
-                var sql = `insert into property_wrap(label, taskId) values ${clause}`;
+                var sql = `insert into property_wrap(label, task_id) values ${clause}`;
                 conn.query(sql, function(err, result) {
                     if (err) {
                         reject(new Error(err.stack));
@@ -199,7 +199,7 @@ exports.batch = function(param, callback){
                 )`; 
             }).join(',');
 
-            var sql = `insert into engine(projectId) values ${engineClause}`;
+            var sql = `insert into engine(project_id) values ${engineClause}`;
             conn.query(sql, function(err, result) {
                 if (err) {
                     reject(new Error(err.stack));
@@ -248,7 +248,7 @@ exports.batch = function(param, callback){
                 var sql = `insert into property(
                     dropdown, text, value, 
                     ref_key, status, label, 
-                    \`key\`, engineId
+                    \`key\`, engine_id
                 ) values ${propertyClause}`;
 
 
@@ -285,7 +285,7 @@ exports.batch = function(param, callback){
             var sql = `insert into property(
                 dropdown, text, value, 
                 ref_key, status, label, 
-                \`key\`, projectId
+                \`key\`, project_id
             ) values ${propertyClause}`;
             console.log(sql);
 
@@ -321,7 +321,7 @@ exports.batch = function(param, callback){
                 label, start_time, end_time, 
                 \`desc\`, exp, priority, 
                 start_week, end_week, template_type, 
-                projectId
+                project_id
             ) values ${taskClause}`;
 
             conn.query(sql, function(err, result) {
@@ -342,7 +342,7 @@ exports.batch = function(param, callback){
                 return `("${label}", ${getUnixTime(time)}, ${week}, ${projectId})`;
             }).join(',');
             
-            var sql = `insert into tag(label, time, week, projectId) values ${tagClause}`;
+            var sql = `insert into tag(label, time, week, project_id) values ${tagClause}`;
             
             conn.query(sql, function(err, result) {
                 if (err) {
@@ -365,7 +365,7 @@ exports.batch = function(param, callback){
                 return;
             }
 
-            var sql = `insert into project(creatorId, sorp, label) 
+            var sql = `insert into project(creator_id, sorp, label) 
                 values (${param.creatorId}, ${getUnixTime(param.sorp)}, "${param.label}")`;
             conn.query(sql, function(err, result) {       
                 if (err) {

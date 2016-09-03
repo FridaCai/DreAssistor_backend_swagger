@@ -227,8 +227,29 @@ paths:
 
 
 
+  /task/{id}:
+    get:
+      tags:
+      - "Task"
+      description: ""
+      operationId: "findTaskById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get task by id"
+        required: true
+        type: "integer"
 
-
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: "#/definitions/task"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Task"
 
 
   /task:

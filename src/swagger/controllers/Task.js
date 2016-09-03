@@ -16,7 +16,9 @@ module.exports.taskOptions = function taskOptions (req, res, next) {
 };
 
 
-
+module.exports.findTaskById = function findTaskById(req, res, next) {
+	Task.findTaskById(req.swagger.params, res, next);	
+}
 
 
 
