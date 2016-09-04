@@ -8,6 +8,10 @@ var Persistence = require('../../persistence/index.js');
 exports.taskOptions = function(args, res, next) {
   res.end();
 }
+exports.taskOptions2 = function(args, res, next) {
+  res.end();
+}
+
 
 exports.addTask = function(args, res, next) {
   var param = args.task.value;
@@ -50,3 +54,4 @@ exports.findTaskById = function(args, res, next) {
       EAction(res, e);
     });
 }
+

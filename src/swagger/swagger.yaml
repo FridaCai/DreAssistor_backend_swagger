@@ -252,6 +252,23 @@ paths:
       x-swagger-router-controller: "Task"
 
 
+    options:
+      tags:
+      - "Task"
+      description: "preflight for cors \n"
+      operationId: "taskOptions2"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get task by id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Task"
+
+
   /task:
     post:
       tags:

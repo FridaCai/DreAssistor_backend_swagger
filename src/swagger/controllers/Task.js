@@ -14,6 +14,9 @@ module.exports.addTask = function addTask (req, res, next) {
 module.exports.taskOptions = function taskOptions (req, res, next) {
 	Task.taskOptions(req.swagger.params, res, next);
 };
+module.exports.taskOptions2 = function taskOptions (req, res, next) {
+	Task.taskOptions2(req.swagger.params, res, next);
+};
 
 
 module.exports.findTaskById = function findTaskById(req, res, next) {

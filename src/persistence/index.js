@@ -1,6 +1,7 @@
 'use strict';
 var dbpool = require('../db.js');
 var Project  = require('../model/project.js');
+var Property = require('../model/property.js');
 
 var Persistence = class Persistence{
 	constructor(){
@@ -71,7 +72,8 @@ var Persistence = class Persistence{
 				var taskId = row.id;
 
 				var sql = `select p.dropdown, p.text, p.value, 
-						p.ref_key, p.status, p.label
+						p.ref_key, p.status, p.label,
+						p.key, pw.id as property_wrap_id, pw.label as property_wrap_label
 
 						from property p
 						left join property_wrap pw on p.property_wrap_id=pw.id
@@ -107,10 +109,12 @@ var Persistence = class Persistence{
 			})	
 
 			var tmp2 = {}
-			templateParam.map(function(property){
-				if(!tmp2[property.property_wrap_id])
-					tmp2[property.property_wrap_id] = [];
-				tmp2[property.property_wrap_id].push(property);
+			templateParam.map(function(propertyParam){
+				if(!tmp2[propertyParam.property_wrap_id])
+					tmp2[propertyParam.property_wrap_id] = [];
+
+				var property = Property.create(propertyParam);
+				tmp2[propertyParam.property_wrap_id].push(property.dump());
 			})
 			var sheets = Object.keys(tmp2).map(function(k){
 				return tmp2[k];
