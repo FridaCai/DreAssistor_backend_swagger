@@ -2,7 +2,7 @@
 var logger = require('../../logger.js').logger('normal');
 var jwt = require('jwt-simple');
 var jwtTokenSecret = require('../../constant.js').jwtTokenSecret;
-var User = require('../../model/user.js');
+var UserPersistence = require('../../persistence/user.js');
 
 var EAction = require('../../exception.js').action;
 var CError = require('../../exception.js').CError;
@@ -19,7 +19,7 @@ exports.authTestGet = function(args, res, next) {
     throw new CError(8)
   }
 
-  User.findById(decoded.iss).then(function(result) {
+  UserPersistence.findUserById(decoded.iss).then(function(result) {
     var err = result.err;
     var rows = result.rows;
     

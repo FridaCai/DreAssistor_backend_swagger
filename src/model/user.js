@@ -5,23 +5,6 @@ module.exports = class User {
 		
 	}
 
-	static save(param) {
-  		return Persistence.insertUser(param).then(function(result){
-  			return result;
-  		});
-	}
-
-	static findByEmail(email){
-  		return Persistence.findUserByEmail(email).then(function(result){
-  			return result;
-  		});
-	}
-	static findById(id){
-		return Persistence.findUserById(id).then(function(result){
-			return result;
-		});
-	}
-
 	init(param){
 		this.id = param.id;
 		this.name = param.name;

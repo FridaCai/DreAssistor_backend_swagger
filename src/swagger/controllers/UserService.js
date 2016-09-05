@@ -2,7 +2,7 @@
 var moment = require('moment');
 var jwt = require('jwt-simple');
 var jwtTokenSecret = require('../../constant.js').jwtTokenSecret;
-var User = require('../../model/user.js');
+var UserPersistence = require('../../persistence/user.js');
 
 var EAction = require('../../exception.js').action;
 var CError = require('../../exception.js').CError;
@@ -20,7 +20,7 @@ exports.userGET = function(args, res, next) {
     password: password,
   };
 
-  User.findByEmail(email).then(function(result){
+  UserPersistence.findUserByEmail(email).then(function(result){
     var err = result.err;
     var rows = result.rows;
 
@@ -72,7 +72,7 @@ exports.userPOST = function(args, res, next) {
   var password = param.password;
 
 
-  User.save(param).then(function(result){
+  UserPersistence.insertUser(param).then(function(result){
     var err = result.err;
     var rows = result.rows;
     if(err){

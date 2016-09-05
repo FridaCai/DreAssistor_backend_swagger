@@ -1,12 +1,9 @@
 'use strict';
 var moment = require('moment');
-var Project = require('../../model/project.js');
-
 var EAction = require('../../exception.js').action;
 var CError = require('../../exception.js').CError;
 var logger = require('../../logger').logger('normal');
-
-var Persistence = require('../../persistence/index.js');
+var ProjectPersistence = require('../../persistence/project.js');
 
 exports.projectOptions = function(args, res, next) {
   res.end();
@@ -19,8 +16,7 @@ exports.findProjects = function(args, res, next) {
     userId: userId
   }
 
-  Persistence.findProjects(param).then(function(result){
-
+  ProjectPersistence.findProjects(param).then(function(result){
     var err = result.err;
     var projects = result.projects;
 
@@ -44,7 +40,7 @@ exports.findProjectById = function(args, res, next) {
   var id = args.id.value;
   var param = {id: id};
 
-  Persistence.findProjectById(param).then(function(result){
+  ProjectPersistence.findProjectById(param).then(function(result){
     var err = result.err;
     var projects = result.projects;
 
@@ -69,7 +65,7 @@ exports.findProjectById = function(args, res, next) {
 exports.addProject = function(args, res, next) {
   var param = args.project.value;
   
-  Persistence.insertProject(param).then(function(result){
+  ProjectPersistence.addProject(param).then(function(result){
     var err = result.err;
     
     if(err){

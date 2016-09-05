@@ -22,6 +22,7 @@ exports.execute = function(sql, callback){
     })
 }
 
+//todo: move to util.
 var getUnixTime = function(time){
     var time = Math.round(time/1000);
     return `FROM_UNIXTIME(${time})`;
@@ -30,7 +31,6 @@ exports.batch2 = function(param, callback){
     return new Promise(function(resolve, reject){
         var projectId = param.projectId;
         var task = param.task;
-
         var label = task.label;
         var startTime = task.startTime;
         var endTime = task.endTime;
@@ -186,173 +186,77 @@ exports.batch2 = function(param, callback){
     })
 
 }
-//todo: refactor.
-exports.batch = function(param, callback){
-    var insertEngines = function(conn, engines, projectId){
-        //insert engine, set engine.projectId.
-        //get engineId.
-        //insert propery table, set property.engineId
-        return new Promise(function(resolve, reject){
-            var engineClause = engines.map(function(engine){
-                return `(
-                    ${projectId}
-                )`; 
-            }).join(',');
 
-            var sql = `insert into engine(project_id) values ${engineClause}`;
-            conn.query(sql, function(err, result) {
-                if (err) {
-                    reject(new Error(err.stack));
-                    return;
+/*
+    action = [
+        [function], 
+        [function, function], 
+        [function]
+    ]
+*/
+exports.transaction = function(actions, callback){
+    var loop = actions.length;
+    var cur = 0;
+    
+    pool.getConnection(function(err, conn) {
+        if(err) {
+            callback(err);
+            return;
+        }
+
+        conn.beginTransaction(function(err) {
+            if(err) {
+                callback(err);
+                return;
+            }
+
+            var recursive = function(index, param){
+                if(index === loop){
+                    return Promise.resolve();
                 }
+                
+                
+                
+                return Promise.all(
+                    actions[index].map((function(f){
+                        return f.call(this, param, conn);
+                    }).bind(this))
+                ).then(function(result){
+                    return recursive(++index, result);
+                }, function(e){
+                    throw e;
+                }).catch(function(e){
+                    return Promise.reject(e);
+                })
+            }
 
-                var affectedRows = result.affectedRows;
-                var insertId = result.insertId;
-
-                var propertyClauseArr = [];
-                for(var i=0; i<affectedRows; i++){
-                    var engineId = insertId + i;
-                    var properties = engines[i].properties;
-
-                    properties.map(function(property){
-                        var dropdownId = (property.dropdownId == undefined) ? 'NULL': property.dropdownId; 
-                        var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
-
-
-                        //cannot tell where a number or string at client, so ...short tem solution.
-                        //bad.....
-                        var value = (property.value == undefined ) ? 'NULL': `${property.value}`;
-                        if(property.value == "")
-                            value = 0;
-
-
-
-                        var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
-                        var status = (property.status == undefined) ? 'NULL': `${property.status}`;
-                        var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
-                        var key = `"${property.key}"`;
-
-
-                        propertyClauseArr.push(
-                            `(
-                                ${dropdownId}, ${text}, ${value}, 
-                                ${refKey}, ${status}, ${label}, 
-                                ${key}, ${engineId}
-                            )`
-                        )
-                    })
-                    
-                }
-
-                var propertyClause = propertyClauseArr.join(",");
-                var sql = `insert into property(
-                    dropdown, text, value, 
-                    ref_key, status, label, 
-                    \`key\`, engine_id
-                ) values ${propertyClause}`;
-
-
-                conn.query(sql, function(err, result) {
+            recursive(cur, null).then(function(){
+                conn.commit(function(err) {
                     if (err) {
-                        reject(new Error(err.stack));
-                        return;
+                      throw err;
                     }
-                    resolve();
+                    callback();
                 });
-            });
-        })
-    }
-    var insertProperties = function(conn, properties, projectId){
-        return new Promise(function(resolve, reject){
-            var propertyClause = properties.map(function(property){
-                //undefined; null; 0; ''
-                var dropdownId = (property.dropdownId == undefined) ? 'NULL': property.dropdownId; 
-                var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
-                var value = (property.value == undefined) ? 'NULL': `"${property.value}"`;
-                var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
-                var status = (property.status == undefined) ? 'NULL': `${property.status}`;
-                var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
-                var key = `"${property.key}"`;
-
-                return `(
-                    ${dropdownId}, ${text}, ${value}, 
-                    ${refKey}, ${status}, ${label}, 
-                    ${key}, ${projectId}
-                )`;
-
-            }).join(',');
-            
-            var sql = `insert into property(
-                dropdown, text, value, 
-                ref_key, status, label, 
-                \`key\`, project_id
-            ) values ${propertyClause}`;
-            console.log(sql);
-
-            conn.query(sql, function(err, result) {
-                if (err) {
-                    reject(new Error(err.stack));
-                    return;
+            }, function(e){
+                throw e;
+            }).catch(function(e){
+                if (e) {
+                  conn.rollback(function(err){
+                    err && logger.err(err);
+                  });
+                  callback(e);
+                  return;
                 }
-                resolve();
-            });
-        })
-    }
-    var insertTasks = function(conn, tasks, projectId){
-        return new Promise(function(resolve, reject){
-            var taskClause = tasks.map(function(task){
-                var label = task.label;
-                var startTime = task.startTime;
-                var endTime = task.endTime;
-                var desc = task.desc;
-                var exp = task.exp;
-                var priority = task.priority;
-                var startWeek = task.startWeek;
-                var endWeek = task.endWeek;
-                var templateType = task.template.type;
+            });    
+      
+        });
+        conn.release();
+    });
+}
 
-                return `("${label}", ${getUnixTime(startTime)},${getUnixTime(endTime)}, 
-                    "${desc}", "${exp}",  ${priority}, 
-                    ${startWeek}, ${endWeek}, ${templateType}, 
-                    ${projectId})`;
-            }).join(',');
-            
-            var sql = `insert into task(
-                label, start_time, end_time, 
-                \`desc\`, exp, priority, 
-                start_week, end_week, template_type, 
-                project_id
-            ) values ${taskClause}`;
 
-            conn.query(sql, function(err, result) {
-                if (err) {
-                    reject(new Error(err.stack));
-                    return;
-                }
-                resolve();
-            });
-        })
-    }
-    var insertTags = function(conn, tags, projectId){
-        return new Promise(function(resolve, reject){
-            var tagClause = tags.map(function(tag){
-                var label = tag.label;
-                var time = tag.time;
-                var week = tag.week;
-                return `("${label}", ${getUnixTime(time)}, ${week}, ${projectId})`;
-            }).join(',');
-            
-            var sql = `insert into tag(label, time, week, project_id) values ${tagClause}`;
-            
-            conn.query(sql, function(err, result) {
-                if (err) {
-                    reject(new Error(err.stack));
-                    return;
-                }
-                resolve();
-            });
-        })
-    }
+
+exports.batch_deprecated = function(param, callback){
     pool.getConnection(function(err, conn) {
         if(err) {
             callback(err);
