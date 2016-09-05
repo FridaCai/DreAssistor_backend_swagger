@@ -10,7 +10,7 @@ var TaskPersistence = class TaskPersistence{
 		
 	}
 	
-	static findTaskById(id){
+	static findById(id){
 		var startTime = Util.getOutTime('start_time');
 		var endTime = Util.getOutTime('end_time');
 		var sql = `select id, label, ${startTime} as startTime, 
@@ -120,7 +120,7 @@ var TaskPersistence = class TaskPersistence{
 		})
 	}
 
-	static insertTask(param){
+	static insert(param){
 		var insertTask = function(result, conn){
 			var projectId = param.projectId;
 	        var task = param.task;
@@ -192,7 +192,7 @@ var TaskPersistence = class TaskPersistence{
 	                }
 	            })
             })
-            return PropertyPersistence.insertProperty.call(this, conn, propertyParam);
+            return PropertyPersistence.insertProperty(conn, propertyParam);
         }
 
         var transactionArr = [[insertTask]];
@@ -207,6 +207,95 @@ var TaskPersistence = class TaskPersistence{
 				});
 			});
 		});
+	}
+
+	static deleteById(id){
+		var condition = {
+			key: 'id', 
+			value: id
+		};
+
+		var selectPropertyIds = function(result, conn){
+			var sql = `select p.id as id from property p
+				left join property_wrap pw on p.property_wrap_id=pw.id
+				where pw.task_id = ${id}`; 
+			return new Promise(function(resolve, reject){
+                conn.query(sql, function(err, result) {
+                    if (err) {
+                        reject(sql + '\n' + new Error(err.stack));
+                    }
+                    resolve(result);
+                })    
+            })
+		}
+
+		var deleteTask = function(result, conn){
+			return TaskPersistence.delete(conn, condition);
+		}
+
+
+
+		var deletePropertyWrap = function(result, conn){
+			var sql = `update property_wrap
+                set flag = 1
+                where task_id = ${id}`;
+
+            return new Promise(function(resolve, reject){
+                conn.query(sql, function(err, result) {
+                    if (err) {
+                        reject(sql + '\n' + new Error(err.stack));
+                    }
+                    resolve(result);
+                })    
+            })
+		}
+		var deleteProperty = function(result, conn){
+			var propertyIds = result[0].map(function(row){
+				return row.id
+			})
+			return PropertyPersistence.deleteByIds(conn, propertyIds);
+		}
+
+		var  transactionArr = [[selectPropertyIds], [deleteTask, deletePropertyWrap, deleteProperty]];
+        return new Promise(function(resolve, reject){
+            dbpool.transaction(transactionArr, function(err, rows){
+                resolve({
+                    err: err,
+                });
+            });
+        });
+		
+	}
+
+	static deleteByProjectId(conn, id){
+		var condition = {
+			key: 'project_id', 
+			value:id
+		}
+		return TaskPersistence.delete(conn, condition);		
+	}
+
+	//problem.
+	static delete(conn, condition){
+		var id = (condition.key === 'id') ? condition.value:'NULL';
+		var projectId = (condition.key === 'project_id') ? condition.value:'NULL';
+
+		var sql = `update task t
+			left join subtask st on t.id = st.task_id
+			left join attachment a on t.id = a.task_id
+			left join property_wrap pw on t.id = pw.task_id
+			set t.flag=1, st.flag=1, a.flag=1, pw.flag=1
+			where t.id=${id} 
+			or t.project_id=${projectId}`;
+
+        return new Promise(function(resolve, reject){
+            conn.query(sql, function(err, result) {
+                if (err) {
+                    reject(sql + '\n' + new Error(err.stack));
+                }
+                resolve(result);
+            })    
+        })
 	}
 }
 module.exports = TaskPersistence;

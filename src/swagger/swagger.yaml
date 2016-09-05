@@ -252,7 +252,7 @@ paths:
       tags:
       - "Task"
       description: ""
-      operationId: "findTaskById"
+      operationId: "findById"
       parameters:
       - name: "id"
         in: "path"
@@ -293,7 +293,7 @@ paths:
       tags:
       - "Task"
       description: ""
-      operationId: "deleteTaskById"
+      operationId: "deleteById"
       parameters:
       - name: "id"
         in: "path"
@@ -313,7 +313,7 @@ paths:
       tags:
       - "Task"
       description: ""
-      operationId: "insertTask"
+      operationId: "insert"
       parameters:
       - name: "task"
         in: "body"
@@ -514,12 +514,6 @@ definitions:
         format: "int32"
       errMsg:
         type: "string"
-
-
-
-
-
-
 
   property:
     type: object

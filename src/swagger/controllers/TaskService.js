@@ -13,10 +13,10 @@ exports.taskOptions2 = function(args, res, next) {
 }
 
 
-exports.insertTask = function(args, res, next) {
+exports.insert = function(args, res, next) {
   var param = args.task.value;
   
-  TaskPersistence.insertTask(param).then(function(result){
+  TaskPersistence.insert(param).then(function(result){
     var err = result.err;
     
     if(err){
@@ -33,10 +33,10 @@ exports.insertTask = function(args, res, next) {
   });
 }
 
-exports.findTaskById = function(args, res, next) {
+exports.findById = function(args, res, next) {
     var param = args.id.value;
   
-    TaskPersistence.findTaskById(param).then(function(result){
+    TaskPersistence.findById(param).then(function(result){
       var err = result.err;
       var rows = result.rows;
 
@@ -54,4 +54,32 @@ exports.findTaskById = function(args, res, next) {
       EAction(res, e);
     });
 }
+
+exports.deleteById = function(args, res, next) {
+  var id = args.id.value;
+
+  TaskPersistence.deleteById(id).then(function(result){
+      var err = result.err;
+
+      if(err){
+        logger.error(err.message);
+        throw new CError(3, ''); //currently, there is only db error. not set msg to client.
+      }
+
+      res.setHeader('Content-Type', 'application/json;charset=UTF-8');
+      res.end(JSON.stringify({
+        errCode: -1,
+      }));
+    }).catch(function(e){
+      EAction(res, e);
+    });
+
+}
+
+
+
+
+
+
+
 

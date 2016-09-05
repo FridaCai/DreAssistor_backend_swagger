@@ -3,6 +3,7 @@ var dbpool = require('../db.js');
 var Project  = require('../model/project.js');
 var Util = require('../util.js');
 var PropertyPersistence = require('./property.js');
+var TaskPersistence = require('./task.js');
 
 var ProjectPersistence = class ProjectPersistence {
 	constructor(){
@@ -388,6 +389,51 @@ var ProjectPersistence = class ProjectPersistence {
 
     static findProjectById(param){
         return ProjectPersistence.findProjects(param);
+    }
+
+    static deleteProjectById(param){
+        var id = param.id;
+
+        var deleteProject = function(result, conn){
+            var sql = `update project
+                set flag = 1
+                where id = ${id}`;
+
+            return new Promise(function(resolve, reject){
+                conn.query(sql, function(err, result) {
+                    if (err) {
+                        reject(sql + '\n' + new Error(err.stack));
+                    }
+                    resolve(result);
+                })    
+            })
+        }
+        var deleteTask = function(result, conn){
+            return TaskPersistence.deleteByProjectId(conn, id);
+        }
+
+
+        var deleteTag = function(result, conn){
+            return TagPersistence.deleteByProjectId(conn, id);
+        }
+
+        var deleteProperty = function(result, conn){
+            return PropertyPersistence.deleteByProjectId(conn, id);
+        }
+
+        var deleteEngine = function(result, conn){
+            return EnginePersistence.deleteByProjectId(conn, id);
+        }
+
+
+        var transactionArr = [[deleteProject, deleteTask, deleteTag, deleteProperty, deleteEngine]];
+        return new Promise(function(resolve, reject){
+            dbpool.transaction(transactionArr, function(err, rows){
+                resolve({
+                    err: err,
+                });
+            });
+        });
     }
 }
 module.exports = ProjectPersistence;

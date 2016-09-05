@@ -82,3 +82,7 @@ exports.insertProject = function(args, res, next) {
     EAction(res, e);
   });
 }
+
+exports.deleteProjectById = function(args, res, next) {
+  var id = args.id.value;
+}
