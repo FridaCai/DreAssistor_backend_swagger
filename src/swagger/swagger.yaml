@@ -119,15 +119,16 @@ paths:
 
       
   /project:
+
     post:
       tags:
       - "Project"
       description: ""
-      operationId: "addProject"
+      operationId: "insertProject"
       parameters:
       - name: "project"
         in: "body"
-        description: "add project"
+        description: "insert project"
         required: true
         schema:
           $ref: "#/definitions/postProjectRequest"
@@ -203,6 +204,25 @@ paths:
             $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "Project"
 
+    delete:
+        tags:
+        - "Project"
+        description: ""
+        operationId: "deleteProjectById"
+        parameters:
+        - name: id
+          in: path
+          description: "project id"
+          required: true
+          type: "integer"
+        
+        responses:
+          200:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/errorModel"
+        x-swagger-router-controller: "Project"
+
 
 
 
@@ -269,16 +289,35 @@ paths:
       x-swagger-router-controller: "Task"
 
 
+    delete:
+      tags:
+      - "Task"
+      description: ""
+      operationId: "deleteTaskById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: ""
+        required: true
+        type: "integer"
+
+      responses:
+        200:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Task"
+
   /task:
     post:
       tags:
       - "Task"
       description: ""
-      operationId: "addTask"
+      operationId: "insertTask"
       parameters:
       - name: "task"
         in: "body"
-        description: "add task"
+        description: "insert task"
         required: true
         schema:
           $ref: "#/definitions/postTaskRequest"
@@ -486,7 +525,7 @@ definitions:
     type: object
     properties:
       dropdown:
-        type: integer
+        type: string
       text:
         type: string
       value: 
@@ -497,11 +536,11 @@ definitions:
         type: boolean
       label:
         type: string
-      images:
+      image:
         type: array
         items:
           $ref: '#/definitions/image'
-      attachments:
+      attachment:
         type: array
         items:
           $ref: '#/definitions/attachment'

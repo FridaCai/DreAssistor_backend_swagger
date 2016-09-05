@@ -78,7 +78,7 @@ exports.transaction = function(actions, callback){
             }).catch(function(e){
                 if (e) {
                   conn.rollback(function(err){
-                    err && logger.err(err);
+                    err && logger.error(err);
                   });
                   callback(e);
                   return;

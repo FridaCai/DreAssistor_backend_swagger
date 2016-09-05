@@ -62,10 +62,10 @@ exports.findProjectById = function(args, res, next) {
   });
 }
 
-exports.addProject = function(args, res, next) {
+exports.insertProject = function(args, res, next) {
   var param = args.project.value;
   
-  ProjectPersistence.addProject(param).then(function(result){
+  ProjectPersistence.insertProject(param).then(function(result){
     var err = result.err;
     
     if(err){

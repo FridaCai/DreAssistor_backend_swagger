@@ -19,9 +19,9 @@ module.exports.findProjectById = function findProjectById (req, res, next) {
 	}
 };
 
-module.exports.addProject = function addProject (req, res, next) {
+module.exports.insertProject = function insertProject (req, res, next) {
   	try{
-		Project.addProject(req.swagger.params, res, next);	
+		Project.insertProject(req.swagger.params, res, next);	
 	}catch(e){
 		EAction(res, e);
 	}

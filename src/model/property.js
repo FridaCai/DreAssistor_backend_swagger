@@ -18,17 +18,28 @@ module.exports = class Property{
 		this.status = param.status;
 		this.label = param.label;
 		this.key = param.key;
+
+		this.curve = param.curve;
+		this.attachment = param.attachment;
+		this.image = param.image;
 	}
 	dump(){
-		return {
+		var obj = {
 			id: this.id,
-			dropdown: this.dropdown,
-			text: this.text,
-			value: this.value,
-			refKey: this.refKey,
-			status: this.status,
-			label: this.label,
 			key: this.key,
-		}
+		};
+
+
+		[
+			'dropdown', 'text', 'value', 
+			'refKey', 'status', 'label', 
+			'curve', 'attachment', 'image'
+		].map((function(key){
+			if(this[key] != null){
+				obj[key] = this[key];	
+			}
+		}).bind(this))
+
+		return obj;
 	}
 }

@@ -2,13 +2,14 @@
 var dbpool = require('../db.js');
 var Project  = require('../model/project.js');
 var Util = require('../util.js');
+var PropertyPersistence = require('./property.js');
 
 var ProjectPersistence = class ProjectPersistence {
 	constructor(){
 		
 	}
 
-	static addProject(param){
+	static insertProject(param){
 		var insertProject = function(result, conn){
             var sql = `insert into project(creator_id, sorp, label) 
                     values (${param.creatorId}, ${Util.getInTime(param.sorp)}, "${param.label}")`;
@@ -84,44 +85,17 @@ var ProjectPersistence = class ProjectPersistence {
             })
 	    }
 
+
         var insertProperties = function(result, conn){
-        	var projectId = result[0].insertId;
-        	var properties = param.properties;
-
-	        var propertyClause = properties.map(function(property){
-	            //undefined; null; 0; ''
-	            var dropdown = (property.dropdown == undefined) ? 'NULL': property.dropdown; 
-	            var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
-	            var value = (property.value == undefined) ? 'NULL': `"${property.value}"`;
-	            var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
-	            var status = (property.status == undefined) ? 'NULL': `${property.status}`;
-	            var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
-	            var key = `"${property.key}"`;
-
-	            return `(
-	                ${dropdown}, ${text}, ${value}, 
-	                ${refKey}, ${status}, ${label}, 
-	                ${key}, ${projectId}
-	            )`;
-
-	        }).join(',');
-	        
-	        var sql = `insert into property(
-	            dropdown, text, value, 
-	            ref_key, status, label, 
-	            \`key\`, project_id
-	        ) values ${propertyClause}`;
-	        console.log(sql);
-
-            return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        reject(sql + '\n' + new Error(err.stack));
-                    }
-                    resolve(result);
-                });
+            var projectId = result[0].insertId;
+            return PropertyPersistence.insertProperty.call(this, conn, {
+                properties: param.properties,
+                foreignObj: {
+                    key: 'project_id',
+                    value: projectId
+                }
             })
-	    }
+        }
 
 	    var insertEngines = function(result, conn){
             var projectId = result[0].insertId;
@@ -150,58 +124,22 @@ var ProjectPersistence = class ProjectPersistence {
             var insertId = result[3].insertId;
             var engines = param.engines;
 
-            var propertyClauseArr = [];
+            var param = [];
+
             for(var i=0; i<affectedRows; i++){
                 var engineId = insertId + i;
                 var properties = engines[i].properties;
 
-                properties.map(function(property){
-                    var dropdown = (property.dropdown == undefined) ? 'NULL': property.dropdown; 
-                    var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
-
-
-                    //cannot tell where a number or string at client, so ...short tem solution.
-                    //bad.....
-                    var value = (property.value == undefined ) ? 'NULL': `${property.value}`;
-                    if(property.value == "")
-                        value = 0;
-
-
-
-                    var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
-                    var status = (property.status == undefined) ? 'NULL': `${property.status}`;
-                    var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
-                    var key = `"${property.key}"`;
-
-
-                    propertyClauseArr.push(
-                        `(
-                            ${dropdown}, ${text}, ${value}, 
-                            ${refKey}, ${status}, ${label}, 
-                            ${key}, ${engineId}
-                        )`
-                    )
-                })
-                
-            }
-
-            var propertyClause = propertyClauseArr.join(",");
-            var sql = `insert into property(
-                dropdown, text, value, 
-                ref_key, status, label, 
-                \`key\`, engine_id
-            ) values ${propertyClause}`;
-
-
-            return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        reject(sql + '\n' + new Error(err.stack));
+                param.push({
+                    properties: properties,
+                    foreignObj: {
+                        key: 'engine_id',
+                        value: engineId
                     }
-                    resolve(result);
-                });    
-            })
-    	}
+                })
+	       }
+           return PropertyPersistence.insertProperty.call(this, conn, param);   
+       }
 
 		return new Promise(function(resolve, reject){
 			dbpool.transaction([
@@ -215,7 +153,6 @@ var ProjectPersistence = class ProjectPersistence {
 			});
 		});
 	}
-    
 
     /*
         if performance has problem, not retrieve properties and engines when get/projects
@@ -307,8 +244,11 @@ var ProjectPersistence = class ProjectPersistence {
         var getProperties = function(projectId){
             var sql = `select id, dropdown, text, 
                 value, ref_key, status, 
-                label, \`key\` 
-                from property where flag=0 and project_id=${projectId}`;
+                label, \`key\`, curve, 
+                attachment, image 
+                from property 
+                where flag=0 
+                and project_id=${projectId}`;
 
             return new Promise(function(resolve, reject){
                 dbpool.execute(sql, function(err, rows){
@@ -339,7 +279,8 @@ var ProjectPersistence = class ProjectPersistence {
 
                         var sql = `select id, dropdown, text, 
                             value, ref_key, status, 
-                            label, \`key\`
+                            label, \`key\`, curve,
+                            image, attachment
                             from property 
                             where engine_id=${engineId} 
                             and flag=0`;

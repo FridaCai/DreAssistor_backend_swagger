@@ -3,6 +3,7 @@ var moment = require('moment');
 var jwt = require('jwt-simple');
 var jwtTokenSecret = require('../../constant.js').jwtTokenSecret;
 var UserPersistence = require('../../persistence/user.js');
+var User = require('../../model/user.js');
 
 var EAction = require('../../exception.js').action;
 var CError = require('../../exception.js').CError;

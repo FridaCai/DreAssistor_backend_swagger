@@ -3,6 +3,7 @@ var dbpool = require('../db.js');
 var Project  = require('../model/project.js');
 var Property = require('../model/property.js');
 var Util = require('../util.js');
+var PropertyPersistence = require('./property.js');
 
 var TaskPersistence = class TaskPersistence{
 	constructor(){
@@ -10,8 +11,8 @@ var TaskPersistence = class TaskPersistence{
 	}
 	
 	static findTaskById(id){
-		var startTime = Util.getOutTime('startTime');
-		var endTime = Util.getOutTime('endTime');
+		var startTime = Util.getOutTime('start_time');
+		var endTime = Util.getOutTime('end_time');
 		var sql = `select id, label, ${startTime} as startTime, 
 				${endTime} as endTime, \`desc\`, priority, 
 				exp, start_week, end_week, 
@@ -26,6 +27,7 @@ var TaskPersistence = class TaskPersistence{
 
 				var sql = `select p.dropdown, p.text, p.value, 
 						p.ref_key, p.status, p.label,
+						p.curve, p.attachment, p.image,
 						p.key, pw.id as property_wrap_id, pw.label as property_wrap_label
 
 						from property p
@@ -118,7 +120,7 @@ var TaskPersistence = class TaskPersistence{
 		})
 	}
 
-	static addTask(param){
+	static insertTask(param){
 		var insertTask = function(result, conn){
 			var projectId = param.projectId;
 	        var task = param.task;
@@ -178,42 +180,19 @@ var TaskPersistence = class TaskPersistence{
         var insertProperty = function(result, conn){
         	var sheets = param.task.template.sheets;
         	var insertId = result[0].insertId;
+        	var propertyParam = [];
 
-            var propertyClause = sheets.map(function(sheet, index){
+            sheets.map(function(sheet, index){
                 var propertyWrapId = insertId + index;
-
-                return sheet.map(function(property){
-                    //undefined; null; 0; ''
-                    var dropdown = (property.dropdown == undefined) ? 'NULL': property.dropdown; 
-                    var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
-                    var value = (property.value == undefined) ? 'NULL': `"${property.value}"`;
-                    var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
-                    var status = (property.status == undefined) ? 'NULL': `${property.status}`;
-                    var label = (property.label == undefined) ? 'NULL': `"${property.label}"`;
-                    var key = `"${property.key}"`;
-                    return `(
-                        ${dropdown}, ${text}, ${value}, 
-                        ${refKey}, ${status}, ${label}, 
-                        ${key}, ${propertyWrapId}
-                    )`;
-                }).join(',')
-                
-            }).join(',');
-
-            var sql = `insert into property(
-                dropdown, text, value, 
-                ref_key, status, label,
-                \`key\`, property_wrap_id
-            ) values ${propertyClause}`;
-
-        	return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        reject(sql + '\n' + new Error(err.stack));
-                    }
-                    resolve(result);
-                })    
+            	propertyParam.push({
+	                properties: sheet,
+	                foreignObj: {
+	                    key: 'property_wrap_id',
+	                    value: propertyWrapId
+	                }
+	            })
             })
+            return PropertyPersistence.insertProperty.call(this, conn, propertyParam);
         }
 
         var transactionArr = [[insertTask]];
@@ -224,7 +203,7 @@ var TaskPersistence = class TaskPersistence{
 		return new Promise(function(resolve, reject){
 			dbpool.transaction(transactionArr, function(err, rows){
 				resolve({
-					err: err,
+					err: (err ? err.stack: null)
 				});
 			});
 		});

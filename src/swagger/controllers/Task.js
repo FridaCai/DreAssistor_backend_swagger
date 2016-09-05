@@ -3,9 +3,9 @@ var url = require('url');
 var Task = require('./TaskService');
 var EAction = require('../../exception.js').action;
 
-module.exports.addTask = function addTask (req, res, next) {
+module.exports.insertTask = function insertTask (req, res, next) {
   	try{
-		Task.addTask(req.swagger.params, res, next);
+		Task.insertTask(req.swagger.params, res, next);
 	}catch(e){
 		EAction(res, e);
 	}

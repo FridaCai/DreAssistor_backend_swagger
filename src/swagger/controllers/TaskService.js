@@ -13,10 +13,10 @@ exports.taskOptions2 = function(args, res, next) {
 }
 
 
-exports.addTask = function(args, res, next) {
+exports.insertTask = function(args, res, next) {
   var param = args.task.value;
   
-  TaskPersistence.addTask(param).then(function(result){
+  TaskPersistence.insertTask(param).then(function(result){
     var err = result.err;
     
     if(err){
