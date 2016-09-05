@@ -1,5 +1,4 @@
 'use strict';
-var Persistence = require('../persistence/index.js'); //todo: problem here. call persistence in swagger controller directly.
 var Tasks = require('./tasks');
 var Tags = require('./tags');
 var Engines = require('./engines');

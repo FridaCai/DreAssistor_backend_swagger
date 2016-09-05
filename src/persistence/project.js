@@ -7,20 +7,11 @@ var ProjectPersistence = class ProjectPersistence {
 	constructor(){
 		
 	}
-	static insertProject_deprected(param){
-		return new Promise(function(resolve, reject){
-			dbpool.batch(param, function(err, rows){
-				resolve({
-					err: err,
-				});
-			});
-		})
-	}
 
 	static addProject(param){
 		var insertProject = function(result, conn){
             var sql = `insert into project(creator_id, sorp, label) 
-                    values (${param.creatorId}, ${Util.getUnixTime(param.sorp)}, "${param.label}")`;
+                    values (${param.creatorId}, ${Util.getInTime(param.sorp)}, "${param.label}")`;
 
             return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, result) {
@@ -41,7 +32,7 @@ var ProjectPersistence = class ProjectPersistence {
                 var label = tag.label;
                 var time = tag.time;
                 var week = tag.week;
-                return `("${label}", ${Util.getUnixTime(time)}, ${week}, ${projectId})`;
+                return `("${label}", ${Util.getInTime(time)}, ${week}, ${projectId})`;
             }).join(',');
             var sql = `insert into tag(label, time, week, project_id) values ${tagClause}`;
             
@@ -70,7 +61,7 @@ var ProjectPersistence = class ProjectPersistence {
                 var endWeek = task.endWeek;
                 var templateType = task.template.type;
 
-                return `("${label}", ${Util.getUnixTime(startTime)},${Util.getUnixTime(endTime)}, 
+                return `("${label}", ${Util.getInTime(startTime)},${Util.getInTime(endTime)}, 
                     "${desc}", "${exp}",  ${priority}, 
                     ${startWeek}, ${endWeek}, ${templateType}, 
                     ${projectId})`;
@@ -99,7 +90,7 @@ var ProjectPersistence = class ProjectPersistence {
 
 	        var propertyClause = properties.map(function(property){
 	            //undefined; null; 0; ''
-	            var dropdownId = (property.dropdownId == undefined) ? 'NULL': property.dropdownId; 
+	            var dropdown = (property.dropdown == undefined) ? 'NULL': property.dropdown; 
 	            var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
 	            var value = (property.value == undefined) ? 'NULL': `"${property.value}"`;
 	            var refKey = (property.refKey == undefined) ? 'NULL': `"${property.refKey}"`;
@@ -108,7 +99,7 @@ var ProjectPersistence = class ProjectPersistence {
 	            var key = `"${property.key}"`;
 
 	            return `(
-	                ${dropdownId}, ${text}, ${value}, 
+	                ${dropdown}, ${text}, ${value}, 
 	                ${refKey}, ${status}, ${label}, 
 	                ${key}, ${projectId}
 	            )`;
@@ -165,7 +156,7 @@ var ProjectPersistence = class ProjectPersistence {
                 var properties = engines[i].properties;
 
                 properties.map(function(property){
-                    var dropdownId = (property.dropdownId == undefined) ? 'NULL': property.dropdownId; 
+                    var dropdown = (property.dropdown == undefined) ? 'NULL': property.dropdown; 
                     var text = (property.text == undefined) ? 'NULL': `"${property.text}"`;
 
 
@@ -185,7 +176,7 @@ var ProjectPersistence = class ProjectPersistence {
 
                     propertyClauseArr.push(
                         `(
-                            ${dropdownId}, ${text}, ${value}, 
+                            ${dropdown}, ${text}, ${value}, 
                             ${refKey}, ${status}, ${label}, 
                             ${key}, ${engineId}
                         )`
@@ -231,9 +222,10 @@ var ProjectPersistence = class ProjectPersistence {
         gain tasks, tags, engines, properties when query project by id.
     */
     static findProjects(param){
+        var sorp = Util.getOutTime('sorp');
         var sqls = [
             `select creator_id, id, label, 
-            UNIX_TIMESTAMP(sorp)*1000 as sorp 
+            ${sorp} as sorp 
             from project 
             where flag=0 `
         ];
@@ -268,7 +260,8 @@ var ProjectPersistence = class ProjectPersistence {
         }
 
         var getTags = function(projectId){
-            var sql = `select id, label, UNIX_TIMESTAMP(time)*1000 as time, 
+            var time = Util.getOutTime('time');
+            var sql = `select id, label, ${time} as time, 
                 week 
                 from tag 
                 where flag=0 
@@ -286,8 +279,10 @@ var ProjectPersistence = class ProjectPersistence {
         }
 
         var getTasks = function(projectId){
-            var sql = `select id, label, UNIX_TIMESTAMP(start_time)*1000 as startTime, 
-                UNIX_TIMESTAMP(end_time)*1000 as endTime 
+            var startTime = Util.getOutTime('start_time');
+            var endTime = Util.getOutTime('end_time');
+            var sql = `select id, label, ${startTime} as startTime, 
+                ${endTime} as endTime 
                 from task
                 where flag=0 
                 and project_id=${projectId}`;
@@ -392,8 +387,6 @@ var ProjectPersistence = class ProjectPersistence {
                 var tags = args[1];
                 var engines = args[2];
                 var properies = args[3];
-
-
 
                 var err = tasks.err || tags.err || properies.err || engines.err;
                 if(err){

@@ -1,5 +1,4 @@
 'use strict';
-var Persistence = require('../persistence/index.js');
 module.exports = class User {
 	constructor(){
 		

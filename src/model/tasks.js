@@ -23,6 +23,4 @@ var Tasks = class Tasks extends Array{
 	}
 }
 
-//util.inherits(Tasks, Array); 
-
 module.exports = Tasks;

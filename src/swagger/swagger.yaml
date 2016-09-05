@@ -485,7 +485,7 @@ definitions:
   property:
     type: object
     properties:
-      dropdownId:
+      dropdown:
         type: integer
       text:
         type: string

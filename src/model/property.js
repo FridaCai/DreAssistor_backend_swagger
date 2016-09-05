@@ -11,7 +11,7 @@ module.exports = class Property{
 
 	init(param){
 		this.id = param.id;
-		this.dropdownId = param.dropdownId;
+		this.dropdown = param.dropdown;
 		this.text = param.text;
 		this.value = param.value;
 		this.refKey = param.refKey;
@@ -22,7 +22,7 @@ module.exports = class Property{
 	dump(){
 		return {
 			id: this.id,
-			dropdownId: this.dropdownId,
+			dropdown: this.dropdown,
 			text: this.text,
 			value: this.value,
 			refKey: this.refKey,

@@ -3,7 +3,7 @@ var moment = require('moment');
 var EAction = require('../../exception.js').action;
 var CError = require('../../exception.js').CError;
 var logger = require('../../logger').logger('normal');
-var Persistence = require('../../persistence/index.js');
+var TaskPersistence = require('../../persistence/task.js');
 
 exports.taskOptions = function(args, res, next) {
   res.end();
@@ -16,7 +16,7 @@ exports.taskOptions2 = function(args, res, next) {
 exports.addTask = function(args, res, next) {
   var param = args.task.value;
   
-  Persistence.addTask(param).then(function(result){
+  TaskPersistence.addTask(param).then(function(result){
     var err = result.err;
     
     if(err){
@@ -36,7 +36,7 @@ exports.addTask = function(args, res, next) {
 exports.findTaskById = function(args, res, next) {
     var param = args.id.value;
   
-    Persistence.findTaskById(param).then(function(result){
+    TaskPersistence.findTaskById(param).then(function(result){
       var err = result.err;
       var rows = result.rows;
 
