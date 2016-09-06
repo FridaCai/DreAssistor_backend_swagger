@@ -85,4 +85,20 @@ exports.insertProject = function(args, res, next) {
 
 exports.deleteProjectById = function(args, res, next) {
   var id = args.id.value;
+  ProjectPersistence.deleteProjectById(id).then(function(result){
+    var err = result.err;
+    
+    if(err){
+      logger.error(err.message);
+      throw new CError(3, ''); //currently, there is only db error. not set msg to client.
+    }
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      errCode: -1,
+      //projectId: projectId,  //return project json.
+    }));
+  }).catch(function(e){
+    EAction(res, e);
+  });
 }

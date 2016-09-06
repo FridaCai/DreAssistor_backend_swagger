@@ -391,49 +391,58 @@ var ProjectPersistence = class ProjectPersistence {
         return ProjectPersistence.findProjects(param);
     }
 
-    static deleteProjectById(param){
-        var id = param.id;
+    static deleteProjectById(projectId){
+        var flag = 1;
 
-        var deleteProject = function(result, conn){
-            var sql = `update project
-                set flag = 1
-                where id = ${id}`;
+        var sql = `update project 
+                left join tag on tag.project_id=project.id
+                left join task on task.project_id=project.id
+                    left join subtask on task.id=subtask.task_id
+                    left join attachment a1 on task.id = a1.task_id
+                    left join property_wrap on property_wrap.task_id=task.id
+                        left join property p1 on p1.property_wrap_id=property_wrap.id
+                            left join curve c1 on c1.property_id=p1.id
+                            left join attachment a2 on a2.property_id=p1.id
+                            left join image i1 on i1.property_id=p1.id
+                left join property p2 on p2.project_id=project.id
+                    left join curve c2 on c2.property_id=p2.id
+                    left join attachment a3 on a3.property_id=p2.id
+                    left join image i2 on i2.property_id=p2.id
+                left join engine on engine.project_id=project.id
+                    left join property p3 on p3.engine_id=engine.id
+                        left join curve c3 on c3.property_id=p3.id
+                        left join attachment a4 on a4.property_id=p3.id
+                        left join image i3 on i3.property_id=p3.id        
+                set 
+                tag.flag=${flag}, 
+                    task.flag=${flag}, 
+                        subtask.flag =${flag},
+                        a1.flag = ${flag},
+                        property_wrap.flag = ${flag},
+                            p1.flag = ${flag},
+                                c1.flag = ${flag},
+                                a2.flag = ${flag},
+                                i1.flag = ${flag},
+                    p2.flag = ${flag},
+                        c2.flag = ${flag},
+                        a3.flag = ${flag},
+                        i2.flag = ${flag},
+                    engine.flag = ${flag},
+                        p3.flag = ${flag},
+                            c3.flag = ${flag},
+                            a4.flag = ${flag},
+                            i3.flag = ${flag}
+                where project.id=${projectId}`;
 
-            return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        reject(sql + '\n' + new Error(err.stack));
-                    }
-                    resolve(result);
-                })    
-            })
-        }
-        var deleteTask = function(result, conn){
-            return TaskPersistence.deleteByProjectId(conn, id);
-        }
+                
 
-
-        var deleteTag = function(result, conn){
-            return TagPersistence.deleteByProjectId(conn, id);
-        }
-
-        var deleteProperty = function(result, conn){
-            return PropertyPersistence.deleteByProjectId(conn, id);
-        }
-
-        var deleteEngine = function(result, conn){
-            return EnginePersistence.deleteByProjectId(conn, id);
-        }
-
-
-        var transactionArr = [[deleteProject, deleteTask, deleteTag, deleteProperty, deleteEngine]];
         return new Promise(function(resolve, reject){
-            dbpool.transaction(transactionArr, function(err, rows){
+            dbpool.execute(sql, function(err, rows){
                 resolve({
                     err: err,
                 });
             });
-        });
+        })
     }
 }
 module.exports = ProjectPersistence;
