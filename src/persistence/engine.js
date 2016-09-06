@@ -24,6 +24,7 @@ var EnginePersistence = class EnginePersistence {
 	            conn.query(sql, function(err, result) {
 	                if (err) {
 	                    reject(sql + '\n' + new Error(err.stack));
+	                    return;
 	                }
 	                resolve(result);
 	            })    

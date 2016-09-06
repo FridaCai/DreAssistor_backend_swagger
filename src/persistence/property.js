@@ -95,6 +95,7 @@ param:
             conn.query(sql, function(err, result) {
                 if (err) {
                     reject(sql + '\n' + new Error(err.stack));
+                    return;
                 }
                 resolve(result);
             })    
@@ -112,7 +113,7 @@ param:
 	            var key = `"${property.key}"`;
 	            var label = (property.label === undefined) ? 'NULL': `"${property.label}"`;
 	            var text = (property.text === undefined) ? 'NULL': `"${property.text}"`;
-	            var value = (property.value === undefined) ? 'NULL': `"${property.value}"`;
+	            var value = (property.value === undefined) ? 'NULL': `${property.value}`;
 	            var dropdown = (property.dropdown === undefined) ? 'NULL': `"${property.dropdown}"`; 
 	            var refKey = (property.refKey === undefined) ? 'NULL': `"${property.refKey}"`;
 
@@ -152,6 +153,7 @@ param:
             conn.query(sql, function(err, result) {
                 if (err) {
                     reject(sql + '\n' + new Error(err.stack));
+                    return;
                 }
                 resolve(result);
             });

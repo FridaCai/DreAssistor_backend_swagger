@@ -5,6 +5,11 @@ var util=require('util');
 
  
 var Tasks = class Tasks extends Array{
+	static create(param){
+		var tasks = new Tasks();
+		tasks.init(param);
+		return tasks;
+	}
 	constructor(){
 		super();
 	}

@@ -19,9 +19,13 @@ module.exports = class Property{
 		this.label = param.label;
 		this.key = param.key;
 
-		this.curve = param.curve;
-		this.attachment = param.attachment;
-		this.image = param.image;
+
+		//tricky. NULL -- no-need; 0 -- to be defined; 
+		//never send 0 value to client, it does not make sense.
+		//the same rule for attachment and image.
+		this.curve = (param.curve === 0 ? {} : param.curve); 
+		this.attachment = (param.attachment === 0 ? [] : param.attachment);
+		this.image = (param.image === 0 ? [] : param.image);
 	}
 	dump(){
 		var obj = {

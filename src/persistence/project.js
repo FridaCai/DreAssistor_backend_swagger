@@ -19,6 +19,7 @@ var ProjectPersistence = class ProjectPersistence {
                 conn.query(sql, function(err, result) {
                     if (err) {
                         reject(sql + '\n' + new Error(err.stack));
+                        return;
                     }
                     resolve(result);
                 })    
@@ -42,6 +43,7 @@ var ProjectPersistence = class ProjectPersistence {
                 conn.query(sql, function(err, result) {
                     if (err) {
                         reject(sql + '\n' + new Error(err.stack));
+                        return;
                     }
                     resolve(result);
                 });
@@ -80,6 +82,7 @@ var ProjectPersistence = class ProjectPersistence {
                 conn.query(sql, function(err, result) {
                     if (err) {
                         reject(sql + '\n' + new Error(err.stack));
+                        return;
                     }
                     resolve(result);
                 });
@@ -89,13 +92,13 @@ var ProjectPersistence = class ProjectPersistence {
 
         var insertProperties = function(result, conn){
             var projectId = result[0].insertId;
-            return PropertyPersistence.insertProperty.call(this, conn, {
+            return PropertyPersistence.insertProperty.call(this, conn, [{
                 properties: param.properties,
                 foreignObj: {
                     key: 'project_id',
                     value: projectId
                 }
-            })
+            }])
         }
 
 	    var insertEngines = function(result, conn){
@@ -113,6 +116,7 @@ var ProjectPersistence = class ProjectPersistence {
                 conn.query(sql, function(err, result) {
                     if (err) {
                         reject(sql + '\n' + new Error(err.stack));
+                        return;
                     }
                     resolve(result);
                 });    
@@ -125,13 +129,13 @@ var ProjectPersistence = class ProjectPersistence {
             var insertId = result[3].insertId;
             var engines = param.engines;
 
-            var param = [];
+            var enginePropertiesParam = [];
 
             for(var i=0; i<affectedRows; i++){
                 var engineId = insertId + i;
                 var properties = engines[i].properties;
 
-                param.push({
+                enginePropertiesParam.push({
                     properties: properties,
                     foreignObj: {
                         key: 'engine_id',
@@ -139,7 +143,7 @@ var ProjectPersistence = class ProjectPersistence {
                     }
                 })
 	       }
-           return PropertyPersistence.insertProperty.call(this, conn, param);   
+           return PropertyPersistence.insertProperty.call(this, conn, enginePropertiesParam);   
        }
 
 		return new Promise(function(resolve, reject){
@@ -290,6 +294,7 @@ var ProjectPersistence = class ProjectPersistence {
                             dbpool.execute(sql, function(err, rows){
                                 if(err){
                                     reject(err);
+                                    return;
                                 }
                                 resolve(rows);  
                             })

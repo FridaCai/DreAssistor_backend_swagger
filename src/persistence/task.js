@@ -4,6 +4,7 @@ var Project  = require('../model/project.js');
 var Property = require('../model/property.js');
 var Util = require('../util.js');
 var PropertyPersistence = require('./property.js');
+var Tasks = require('../model/tasks.js');
 
 var TaskPersistence = class TaskPersistence{
 	constructor(){
@@ -26,7 +27,7 @@ var TaskPersistence = class TaskPersistence{
 				var taskId = row.id;
 
 				var sql = `select p.dropdown, p.text, p.value, 
-						p.ref_key, p.status, p.label,
+						p.ref_key as refKey, p.status, p.label,
 						p.curve, p.attachment, p.image,
 						p.key, pw.id as property_wrap_id, pw.label as property_wrap_label
 
@@ -103,12 +104,14 @@ var TaskPersistence = class TaskPersistence{
 
 				Promise.all(getTaskTemplate(rows)).then(function(taskParams){
 					var loop = rows.length;
-					var returnTasks = [];
+					var tasksParam = [];
 					for(var i=0; i<loop; i++){
 						var task = assembleTask(rows[i], taskParams[i]);
-						returnTasks.push(task);
+						tasksParam.push(task);
 					}
-					resolve({rows: returnTasks});
+
+					var tasks = Tasks.create(tasksParam);
+					resolve({rows: tasks.dump()});
 				}, function(err){
 					throw err
 				}).catch(function(err){
@@ -149,6 +152,7 @@ var TaskPersistence = class TaskPersistence{
                 conn.query(sql, function(err, result) {
                     if (err) {
                         reject(sql + '\n' + new Error(err.stack));
+                        return;
                     }
                     resolve(result);
                 })    
@@ -171,6 +175,7 @@ var TaskPersistence = class TaskPersistence{
                 conn.query(sql, function(err, result) {
                     if (err) {
                         reject(sql + '\n' + new Error(err.stack));
+                        return;
                     }
                     resolve(result);
                 })    
@@ -196,7 +201,7 @@ var TaskPersistence = class TaskPersistence{
         }
 
         var transactionArr = [[insertTask]];
-        if(param.task.template || param.task.template.sheets.length!=0){
+        if(param.task.template && param.task.template.sheets.length!=0){
         	transactionArr.push([insertPropertyWrap]);
         	transactionArr.push([insertProperty]);
         }
@@ -223,6 +228,7 @@ var TaskPersistence = class TaskPersistence{
                 conn.query(sql, function(err, result) {
                     if (err) {
                         reject(sql + '\n' + new Error(err.stack));
+                        return;
                     }
                     resolve(result);
                 })    
@@ -244,6 +250,7 @@ var TaskPersistence = class TaskPersistence{
                 conn.query(sql, function(err, result) {
                     if (err) {
                         reject(sql + '\n' + new Error(err.stack));
+                        return;
                     }
                     resolve(result);
                 })    
@@ -292,6 +299,7 @@ var TaskPersistence = class TaskPersistence{
             conn.query(sql, function(err, result) {
                 if (err) {
                     reject(sql + '\n' + new Error(err.stack));
+                    return;
                 }
                 resolve(result);
             })    
