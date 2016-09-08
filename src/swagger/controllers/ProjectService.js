@@ -69,7 +69,7 @@ exports.insertProject = function(args, res, next) {
     var err = result.err;
     
     if(err){
-      logger.error(err.message);
+      logger.error(err.stack);
       throw new CError(3, ''); //currently, there is only db error. not set msg to client.
     }
 
@@ -89,7 +89,27 @@ exports.deleteProjectById = function(args, res, next) {
     var err = result.err;
     
     if(err){
-      logger.error(err.message);
+      logger.error(err.stack);
+      throw new CError(3, ''); //currently, there is only db error. not set msg to client.
+    }
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      errCode: -1,
+      //projectId: projectId,  //return project json.
+    }));
+  }).catch(function(e){
+    EAction(res, e);
+  });
+}
+exports.update = function(args, res, next) {
+  var project = args.project.value;
+
+  ProjectPersistence.update(project).then(function(result){
+    var err = result.err;
+    
+    if(err){
+      logger.error(err.stack);
       throw new CError(3, ''); //currently, there is only db error. not set msg to client.
     }
 

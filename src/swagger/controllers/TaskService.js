@@ -20,7 +20,7 @@ exports.insert = function(args, res, next) {
     var err = result.err;
     
     if(err){
-      logger.error(err.message);
+      logger.error(err.stack);
       throw new CError(3, ''); //currently, there is only db error. not set msg to client.
     }
 
@@ -41,7 +41,7 @@ exports.findById = function(args, res, next) {
       var rows = result.rows;
 
       if(err){
-        logger.error(err.message);
+        logger.error(err.stack);
         throw new CError(3, ''); //currently, there is only db error. not set msg to client.
       }
 
@@ -62,7 +62,7 @@ exports.deleteById = function(args, res, next) {
       var err = result.err;
 
       if(err){
-        logger.error(err.message);
+        logger.error(err.stack);
         throw new CError(3, ''); //currently, there is only db error. not set msg to client.
       }
 

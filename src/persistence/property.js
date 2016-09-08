@@ -94,7 +94,8 @@ param:
         return new Promise(function(resolve, reject){
             conn.query(sql, function(err, result) {
                 if (err) {
-                    reject(sql + '\n' + new Error(err.stack));
+                    var errmsg = sql + '\n' + err.stack;
+                    reject(new Error(errmsg));
                     return;
                 }
                 resolve(result);
@@ -152,12 +153,79 @@ param:
         return new Promise(function(resolve, reject){
             conn.query(sql, function(err, result) {
                 if (err) {
-                    reject(sql + '\n' + new Error(err.stack));
+                    var errmsg = sql + '\n' + err.stack;
+                    reject(new Error(errmsg));
                     return;
                 }
                 resolve(result);
             });
         })
+    }
+
+    static update(conn, conditions, params){
+    	var sqls = [];
+		var loop = conditions.length;
+		for(var i=0; i<loop; i++){
+			var param = params[i];
+			var text = (param.text == undefined ? 'NULL': param.text);
+			var value = (param.value == undefined ? 'NULL': param.value);
+			var dropdown = (param.dropdown == undefined ? 'NULL': param.dropdown);
+			var curve = (param.curve == undefined ? 'NULL': 0);
+			var image = (param.image == undefined ? 'NULL': 0);
+			var attachment = (param.attachment == undefined ? 'NULL': 0);
+			var status = (param.status == undefined ? 'NULL': param.status);
+
+
+			//if use SQL clause: replace or update on duplicate key, what about the id? it will be guid from client rather than auto-generated id.
+		
+			var condition = conditions[i];
+			var id = 'NULL';
+			var projectId = 'NULL';
+			var engineId = 'NULL';
+			var propertyWrapId = 'NULL';
+
+			switch(condition.key){
+				case 'id':
+					id = condition.value;
+					break;
+				case 'project_id':
+					projectId = condition.value;
+					break;
+				case 'engine_id':
+					engineId = condition.value;
+					break;
+				case 'property_wrap_id':
+					propertyWrapId = condition.value;
+					break;
+			}
+
+			sqls.push(`update property p
+		    	set text = "${text}", 
+		    	value = ${value}, 
+		    	dropdown = "${dropdown}", 
+		    	curve = ${curve}, 
+		    	attachment = ${attachment},
+		    	image = ${image}, 
+		    	status = ${status} 
+		    	where p.id = ${id}
+					or p.project_id=${projectId}
+					or p.engine_id=${engineId}
+					or p.property_wrap_id=${propertyWrapId}`);
+		}
+
+		var sql = sqls.join(';');
+
+       return new Promise(function(resolve, reject){
+            conn.query(sql, function(err, result) {
+                if (err) {
+                    var errmsg = sql + '\n' + err.stack;
+                    reject(new Error(errmsg));
+                    return;
+                }
+                resolve(result);
+            });
+        })
+       //todo: update curve , attachment, image, more component like time... refer to front end code.
     }
 }
 

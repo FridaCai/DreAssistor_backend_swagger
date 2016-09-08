@@ -4,12 +4,160 @@ var Project  = require('../model/project.js');
 var Util = require('../util.js');
 var PropertyPersistence = require('./property.js');
 var TaskPersistence = require('./task.js');
+var EnginePersistence = require('./engine.js');
 
 var ProjectPersistence = class ProjectPersistence {
 	constructor(){
 		
 	}
+    static update(param){
+        var projectId = param.id;
 
+        var updateProject = function(result, conn){
+            var label = param.label;
+            var sorp = param.sorp;
+            var sql = `update project 
+                set label = "${label}",
+                sorp = ${Util.getInTime(sorp)}
+                where id = ${projectId}`;
+
+            return new Promise(function(resolve, reject){
+                conn.query(sql, function(err, result) {
+                    if (err) {
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
+                        return;
+                    }
+                    resolve(result);
+                });    
+            })
+        }
+
+        var updateTag = function(result, conn){
+            var tags = param.tags;
+            if(tags.length === 0){
+                return Promise.resolve({err: null})
+            }
+
+            var sql = tags.map(function(tag){
+                var time = tag.time;
+                var id = tag.id;
+                var label = tag.label;
+                return `update tag 
+                    set time=${Util.getInTime(time)},
+                    label = "${label}"
+                    where id=${id}`;
+            }).join(';');
+
+            return new Promise(function(resolve, reject){
+                conn.query(sql, function(err, result) {
+                    if (err) {
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
+                        return;
+                    }
+                    resolve(result);
+                });    
+            })
+        }
+
+        var updateTask = function(result, conn){
+            return Promise.resolve()
+        }
+
+        var updateProperty = function(result, conn){
+            var properties = param.properties;
+            var conditions = properties.map(function(property){
+                return {
+                    key: 'id',
+                    value: property.id
+                }
+            })
+            var properties = param.properties;
+            return PropertyPersistence.update(conn, conditions, properties);
+        }
+/*
+        var selectEngine = function(result, conn){
+            var sql = `select id from engine where project_id=${projectId}`;
+            return new Promise(function(resolve, reject){
+                conn.query(sql, function(err, result) {
+                    if (err) {
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
+                        return;
+                    }
+                    resolve(result);
+                });    
+            })
+        }
+
+        var updateEngine = function(result, conn){
+            var engineOldIds = result.rows;
+            var engineNewParam = param.engines;
+
+            var update = function(result, conn){
+                var updateParam = [];
+                engineNewParam.map(function(engine){
+                    if(engineOldIds.indexOf(engine.id)!=-1){
+                        updateParam.push(engine);
+                    }
+                })
+                return EnginePersistence.update(result, conn, updateParam);    
+            }
+            
+
+
+
+
+
+            var deleteParams = function(){
+                var deleteParam = [];
+                engineOldIds.map(function(oldId){
+                    var findEngine = engineNewParam.find(function(engine){
+                        return engine.id === oldId;
+                    })
+                    if(!findEngine){
+                        deleteParam.push(oldId);
+                    }
+                });
+                return EnginePersistence.deleteByIds(conn, deleteParam);
+            };
+
+
+            var insertParams = function(){
+                var insertParam = [];
+                engineNewParam.map(function(engine){
+                    if(engineOldIds.indexOf(engine.id)==-1){
+                        insertParam.push(engine);
+                    }
+                })
+                return EnginePersistence.insert(conn, insertparam);
+            }
+
+        }*/
+        /*return new Promise(function(resolve, reject){
+            dbpool.transaction([
+                [updateProject, updateTag, updateTask, updateProperty], 
+                [selectEngine],
+                [updateEngine]
+            ], function(err, rows){
+                resolve({
+                    err: err,
+                });
+            });
+        });*/
+
+
+        return new Promise(function(resolve, reject){
+            dbpool.transaction([
+                [updateProject, updateTag, updateTask, updateProperty]
+            ], function(err, rows){
+                resolve({
+                    err: err,
+                });
+            });
+        });
+    }
 	static insertProject(param){
 		var insertProject = function(result, conn){
             var sql = `insert into project(creator_id, sorp, label) 
@@ -18,7 +166,8 @@ var ProjectPersistence = class ProjectPersistence {
             return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, result) {
                     if (err) {
-                        reject(sql + '\n' + new Error(err.stack));
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
                         return;
                     }
                     resolve(result);
@@ -33,7 +182,7 @@ var ProjectPersistence = class ProjectPersistence {
 
             var tagClause = tags.map(function(tag){
                 var label = tag.label;
-                var time = tag.time;
+                var time = tag.time || 'NULL';
                 var week = tag.week;
                 return `("${label}", ${Util.getInTime(time)}, ${week}, ${projectId})`;
             }).join(',');
@@ -42,7 +191,8 @@ var ProjectPersistence = class ProjectPersistence {
             return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, result) {
                     if (err) {
-                        reject(sql + '\n' + new Error(err.stack));
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
                         return;
                     }
                     resolve(result);
@@ -81,7 +231,8 @@ var ProjectPersistence = class ProjectPersistence {
             return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, result) {
                     if (err) {
-                        reject(sql + '\n' + new Error(err.stack));
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
                         return;
                     }
                     resolve(result);
@@ -103,54 +254,14 @@ var ProjectPersistence = class ProjectPersistence {
 
 	    var insertEngines = function(result, conn){
             var projectId = result[0].insertId;
-            var engines = param.engines;
-            var engineClause = engines.map(function(engine){
-                return `(
-                    ${projectId}
-                )`; 
-            }).join(',');
-
-            var sql = `insert into engine(project_id) values ${engineClause}`;
-
-            return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        reject(sql + '\n' + new Error(err.stack));
-                        return;
-                    }
-                    resolve(result);
-                });    
-            })
-            
+            return EnginePersistence.insert(conn, projectId, param.engines);
     	}
 
-    	var insertEngineProperties = function(result, conn){
-            var affectedRows = result[3].affectedRows;
-            var insertId = result[3].insertId;
-            var engines = param.engines;
-
-            var enginePropertiesParam = [];
-
-            for(var i=0; i<affectedRows; i++){
-                var engineId = insertId + i;
-                var properties = engines[i].properties;
-
-                enginePropertiesParam.push({
-                    properties: properties,
-                    foreignObj: {
-                        key: 'engine_id',
-                        value: engineId
-                    }
-                })
-	       }
-           return PropertyPersistence.insertProperty.call(this, conn, enginePropertiesParam);   
-       }
 
 		return new Promise(function(resolve, reject){
 			dbpool.transaction([
 	    		[insertProject], 
-	    		[insertTags, insertTasks, insertProperties, insertEngines],
-	    		[insertEngineProperties]
+	    		[insertTags, insertTasks, insertProperties, insertEngines]
 			], function(err, rows){
 				resolve({
 					err: err,
@@ -419,7 +530,8 @@ var ProjectPersistence = class ProjectPersistence {
                         left join attachment a4 on a4.property_id=p3.id
                         left join image i3 on i3.property_id=p3.id        
                 set 
-                tag.flag=${flag}, 
+                project.flag = ${flag}
+                    tag.flag=${flag}, 
                     task.flag=${flag}, 
                         subtask.flag =${flag},
                         a1.flag = ${flag},

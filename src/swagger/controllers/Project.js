@@ -33,7 +33,11 @@ module.exports.projectOptions = function projectOptions (req, res, next) {
 
 module.exports.deleteProjectById = function deleteProjectById(req, res, next){
 	Project.deleteProjectById(req.swagger.params, res, next);
-}
+};
+
+module.exports.update = function update(req, res, next){
+	Project.update(req.swagger.params, res, next);
+};
 
 
 

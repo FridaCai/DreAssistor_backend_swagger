@@ -7,7 +7,8 @@ var pool = mysql.createPool({
     user: 'root',
     password: 'mapi1111111111!',
     database: 'dreassistor',
-    port: 3306
+    port: 3306,
+    multipleStatements: true
 });
 
 
@@ -78,7 +79,7 @@ exports.transaction = function(actions, callback){
             }).catch(function(e){
                 if (e) {
                   conn.rollback(function(err){
-                    err && logger.error(err);
+                    err && logger.error(err.stack);
                   });
                   callback(e);
                   return;

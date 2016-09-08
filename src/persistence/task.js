@@ -151,7 +151,8 @@ var TaskPersistence = class TaskPersistence{
             return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, result) {
                     if (err) {
-                        reject(sql + '\n' + new Error(err.stack));
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
                         return;
                     }
                     resolve(result);
@@ -174,7 +175,8 @@ var TaskPersistence = class TaskPersistence{
             return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, result) {
                     if (err) {
-                        reject(sql + '\n' + new Error(err.stack));
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
                         return;
                     }
                     resolve(result);
@@ -227,7 +229,8 @@ var TaskPersistence = class TaskPersistence{
 			return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, result) {
                     if (err) {
-                        reject(sql + '\n' + new Error(err.stack));
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
                         return;
                     }
                     resolve(result);
@@ -249,7 +252,8 @@ var TaskPersistence = class TaskPersistence{
             return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, result) {
                     if (err) {
-                        reject(sql + '\n' + new Error(err.stack));
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
                         return;
                     }
                     resolve(result);
@@ -298,7 +302,8 @@ var TaskPersistence = class TaskPersistence{
         return new Promise(function(resolve, reject){
             conn.query(sql, function(err, result) {
                 if (err) {
-                    reject(sql + '\n' + new Error(err.stack));
+                    var errmsg = sql + '\n' + err.stack;
+                    reject(new Error(errmsg));
                     return;
                 }
                 resolve(result);
