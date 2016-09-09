@@ -45,7 +45,7 @@ param:
 				value: id
 			}
 		});
-		return PropertyPersistence.delete(conn, condition)
+		return PropertyPersistence.delete(conn, condition);
 	}
 	static deleteByWrapIds(conn, ids){
 		var condition = ids.map(function(id){
@@ -167,9 +167,9 @@ param:
 		var loop = conditions.length;
 		for(var i=0; i<loop; i++){
 			var param = params[i];
-			var text = (param.text == undefined ? 'NULL': param.text);
+			var text = (param.text == undefined ? 'NULL': `"${param.text}"`);
 			var value = (param.value == undefined ? 'NULL': param.value);
-			var dropdown = (param.dropdown == undefined ? 'NULL': param.dropdown);
+			var dropdown = (param.dropdown == undefined ? 'NULL': `"${param.dropdown}"`);
 			var curve = (param.curve == undefined ? 'NULL': 0);
 			var image = (param.image == undefined ? 'NULL': 0);
 			var attachment = (param.attachment == undefined ? 'NULL': 0);
@@ -200,9 +200,9 @@ param:
 			}
 
 			sqls.push(`update property p
-		    	set text = "${text}", 
-		    	value = ${value}, 
-		    	dropdown = "${dropdown}", 
+		    	set \`text\` = ${text}, 
+		    	\`value\` = ${value}, 
+		    	dropdown = ${dropdown}, 
 		    	curve = ${curve}, 
 		    	attachment = ${attachment},
 		    	image = ${image}, 

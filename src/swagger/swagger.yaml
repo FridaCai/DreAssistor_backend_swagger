@@ -497,7 +497,7 @@ definitions:
     - properties
     properties:
       id:
-        type: string
+        type: integer
       properties:
         type: array
         items:
@@ -648,13 +648,6 @@ definitions:
     - label
     - startTime
     - endTime
-    - desc
-    - exp
-    - priority
-    - privacy
-    - startWeek
-    - endWeek
-    - template
     properties:
       label:
         type: string
