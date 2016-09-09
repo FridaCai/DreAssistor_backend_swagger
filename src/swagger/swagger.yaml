@@ -119,36 +119,13 @@ paths:
 
       
   /project:
-    put:
-      tags:
-      - "Project"
-      description: ""
-      operationId: "update"
-      parameters:
-      - name: "project"
-        in: "body"
-        description: "update project"
-        required: true
-        schema:
-          $ref: "#/definitions/postProjectRequest"
-      responses:
-        200:
-          description: "Successful response"
-          schema:
-            $ref: "#/definitions/postProjectResponse"
-        default:
-          description: "unexpected error"
-          schema:
-            $ref: "#/definitions/errorModel"
-      x-swagger-router-controller: "Project"
-
-
     post:
       tags:
       - "Project"
       description: ""
       operationId: "insertProject"
       parameters:
+      
       - name: "project"
         in: "body"
         description: "insert project"
@@ -165,7 +142,7 @@ paths:
           schema:
             $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "Project"
-      
+
     options:
       tags:
       - "Project"
@@ -245,6 +222,39 @@ paths:
             schema:
               $ref: "#/definitions/errorModel"
         x-swagger-router-controller: "Project"
+
+
+
+    put:
+      tags:
+      - "Project"
+      description: ""
+      operationId: "update"
+      parameters:
+      - name: id
+        in: path
+        description: "project id"
+        required: true
+        type: "integer"
+      - name: "project"
+        in: "body"
+        description: "update project"
+        required: true
+        schema:
+          $ref: "#/definitions/postProjectRequest"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: "#/definitions/postProjectResponse"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Project"
+
+
+    
 
 
 
@@ -493,7 +503,6 @@ definitions:
   engine:
     type: object
     required:
-    - id
     - properties
     properties:
       id:

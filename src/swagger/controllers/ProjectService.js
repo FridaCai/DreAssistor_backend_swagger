@@ -103,6 +103,7 @@ exports.deleteProjectById = function(args, res, next) {
   });
 }
 exports.update = function(args, res, next) {
+  var projectId = args.id.value;
   var project = args.project.value;
 
   ProjectPersistence.update(project).then(function(result){
