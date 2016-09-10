@@ -35,8 +35,8 @@ module.exports.deleteProjectById = function deleteProjectById(req, res, next){
 	Project.deleteProjectById(req.swagger.params, res, next);
 };
 
-module.exports.update = function update(req, res, next){
-	Project.update(req.swagger.params, res, next);
+module.exports.updateProject = function updateProject(req, res, next){
+	Project.updateProject(req.swagger.params, res, next);
 };
 
 

@@ -102,7 +102,7 @@ exports.deleteProjectById = function(args, res, next) {
     EAction(res, e);
   });
 }
-exports.update = function(args, res, next) {
+exports.updateProject = function(args, res, next) {
   var projectId = args.id.value;
   var project = args.project.value;
 

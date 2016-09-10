@@ -167,6 +167,7 @@ param:
 		var loop = conditions.length;
 		for(var i=0; i<loop; i++){
 			var param = params[i];
+			var label = (param.label == undefined ? 'NULL': `"${param.label}"`);
 			var text = (param.text == undefined ? 'NULL': `"${param.text}"`);
 			var value = (param.value == undefined ? 'NULL': param.value);
 			var dropdown = (param.dropdown == undefined ? 'NULL': `"${param.dropdown}"`);
@@ -200,7 +201,9 @@ param:
 			}
 
 			sqls.push(`update property p
-		    	set \`text\` = ${text}, 
+		    	set 
+		    	label = ${label},
+		    	\`text\` = ${text}, 
 		    	\`value\` = ${value}, 
 		    	dropdown = ${dropdown}, 
 		    	curve = ${curve}, 

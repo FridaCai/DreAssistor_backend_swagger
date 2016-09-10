@@ -229,7 +229,7 @@ paths:
       tags:
       - "Project"
       description: ""
-      operationId: "update"
+      operationId: "updateProject"
       parameters:
       - name: id
         in: path
@@ -254,45 +254,48 @@ paths:
       x-swagger-router-controller: "Project"
 
 
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   /task/{id}:
+    put:
+      tags:
+      - "Task"
+      description: "modify task"
+      operationId: "updateTask"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "task id"
+        required: true
+        type: "integer"
+      - name: "task"
+        in: "body"
+        description: "insert task"
+        required: true
+        schema:
+          $ref: "#/definitions/postTaskRequest"
+
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: "#/definitions/postTaskResponse"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Task"
+      
+      
     get:
       tags:
       - "Task"
       description: ""
-      operationId: "findById"
+      operationId: "findTaskById"
       parameters:
       - name: "id"
         in: "path"
         description: "get task by id"
         required: true
         type: "integer"
-
       responses:
         200:
           description: "Successful response"
@@ -326,7 +329,7 @@ paths:
       tags:
       - "Task"
       description: ""
-      operationId: "deleteById"
+      operationId: "deleteTaskById"
       parameters:
       - name: "id"
         in: "path"
@@ -346,7 +349,7 @@ paths:
       tags:
       - "Task"
       description: ""
-      operationId: "insert"
+      operationId: "insertTask"
       parameters:
       - name: "task"
         in: "body"

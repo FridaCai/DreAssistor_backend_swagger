@@ -172,7 +172,6 @@ var ProjectPersistence = class ProjectPersistence {
             })
 	    }
 
-
         var insertProperties = function(result, conn){
             var projectId = result[0].insertId;
             return PropertyPersistence.insertProperty.call(this, conn, [{
