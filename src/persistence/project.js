@@ -8,7 +8,6 @@ var EnginePersistence = require('./engine.js');
 
 var ProjectPersistence = class ProjectPersistence {
 	constructor(){
-		
 	}
     static update(param){
         var projectId = param.id;
@@ -205,29 +204,27 @@ var ProjectPersistence = class ProjectPersistence {
         if performance has problem, not retrieve properties and engines when get/projects
         gain tasks, tags, engines, properties when query project by id.
     */
-    static findProjects(param){
-        var sorp = Util.getOutTime('sorp');
-        var sqls = [
-            `select creator_id, id, label, 
-            ${sorp} as sorp 
-            from project 
-            where flag=0 `
-        ];
-
-        if(param.id != undefined){
-            sqls.push(`and id=${param.id}`);
-        }else{
-            if(param.userId != undefined)
-                sqls.push(`and creator_id=${param.userId}`);    
-        }
-
-        sqls.push('order by id desc');
-        
-
-        var sqlClause = sqls.join(' ');
-
-
+    static findProjectById(param){
         var getProjects = function(){
+            var sorp = Util.getOutTime('sorp');
+            var sqls = [
+                `select creator_id, id, label, 
+                ${sorp} as sorp 
+                from project 
+                where flag=0 `
+            ];
+
+            if(param.id != undefined){
+                sqls.push(`and id=${param.id}`);
+            }else{
+                if(param.userId != undefined)
+                    sqls.push(`and creator_id=${param.userId}`);    
+            }
+
+            sqls.push('order by id desc');
+            
+
+            var sqlClause = sqls.join(' ');
             return new Promise(function(resolve, reject){
                 dbpool.execute(sqlClause, function(err, rows){
                     var projects = rows.map(function(row){
@@ -434,8 +431,87 @@ var ProjectPersistence = class ProjectPersistence {
         })
     }
 
-    static findProjectById(param){
-        return ProjectPersistence.findProjects(param);
+    static findProjects(param){
+        var startTime = Util.getOutTime('task.start_time');
+        var endTime = Util.getOutTime('task.end_time');
+        var tagTime = Util.getOutTime('tag.time');
+        var sorp = Util.getOutTime('p.sorp ');
+
+        var sql = `select p.id as project_id, p.label as project_label, ${sorp} as project_sorp, 
+            task.id as task_id,
+            task.label as task_label, ${startTime} as task_startTime, ${endTime} as task_endTime,
+            tag.id as tag_id, tag.label as tag_label, ${tagTime} as tag_time, tag.week as tag_week
+            from project p
+            left join task on p.id = task.project_id
+            left join tag on p.id = tag.project_id`;
+
+        var wrap = function(rows){
+            var projects = {};
+            
+            rows.map(function(row){
+                var projectId = row.project_id;
+                var projectLabel = row.project_label;
+                var projectSorp = row.project_sorp;
+                
+                var taskId = row.task_id;
+                var taskLabel = row.task_label;
+                var taskStartTime = row.task_startTime;
+                var taskEndTime = row.task_endTime;
+
+                var tagId = row.tag_id;
+                var tagLabel = row.tag_label;
+                var tagTime = row.tag_time;
+                var tagWeek = row.tag_week;
+
+                projects[projectId] = projects[projectId] || {
+                    id: projectId,
+                    label: projectLabel,
+                    sorp: projectSorp,
+                    tasks: {}, 
+                    tags: {}
+                }
+
+                projects[projectId].tasks[taskId] = projects[projectId].tasks[taskId] || {
+                    id: taskId,
+                    label: taskLabel,
+                    startTime: taskStartTime,
+                    endTime: taskEndTime
+                }   
+
+                projects[projectId].tags[tagId] = projects[projectId].tags[tagId] || {
+                    id: tagId,
+                    label: tagLabel,
+                    time: tagTime,
+                    week: tagWeek
+                }
+            })
+
+            var returnArr = Object.keys(projects).map(function(key){
+                var project = projects[key];
+                return {
+                    id: project.id,
+                    label: project.label,
+                    sorp: project.sorp,
+                    tasks: Object.keys(project.tasks).map(function(key){
+                        return (project.tasks[key])
+                    }),
+                    tags: Object.keys(project.tags).map(function(key){
+                        return project.tags[key];
+                    })
+                }
+            })
+            returnArr.reverse(); 
+            return returnArr;
+        }
+
+        return new Promise(function(resolve, reject){
+            dbpool.execute(sql, function(err, rows){
+                resolve({
+                    err: err,
+                    projects: wrap(rows)
+                });
+            });
+        })
     }
 
     static deleteProjectById(projectId){
