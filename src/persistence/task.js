@@ -171,12 +171,9 @@ var TaskPersistence = class TaskPersistence{
             })
 		}
 
-
-
-		//conn, sheetNames, taskId
 		var insertPropertyWrap = function(result, conn){
-			var sheetNames = param.task.template.sheetNames;
-			var sheets = param.task.template.sheets;
+			var sheetNames = task.template.sheetNames;
+			var sheets = task.template.sheets;
 			var taskId = result[0].insertId;
 
             var clause = sheetNames.map(function(sheetName){
@@ -198,7 +195,7 @@ var TaskPersistence = class TaskPersistence{
         }
 
         var insertProperty = function(result, conn){
-        	var sheets = param.task.template.sheets;
+        	var sheets = task.template.sheets;
         	var insertId = result[0].insertId;
         	var propertyParam = [];
 
@@ -216,7 +213,7 @@ var TaskPersistence = class TaskPersistence{
         }
 
         var transactionArr = [[insertTask]];
-        if(param.task.template && param.task.template.sheets.length!=0){
+        if(task.template && task.template.sheets.length!=0){
         	transactionArr.push([insertPropertyWrap]);
         	transactionArr.push([insertProperty]);
         }
@@ -323,7 +320,7 @@ var TaskPersistence = class TaskPersistence{
         })
 	}
 
-	static update(task){
+	static update(task, projectId){
 		var updateTask = function(result, conn){
 			var taskId = task.id;
 			var label = task.label;
@@ -335,7 +332,6 @@ var TaskPersistence = class TaskPersistence{
 			var startWeek = task.startWeek;
 	        var endWeek = task.endWeek;
 	        var templateType = task.template.type;
-	        var projectId = task.projectId; //takecare...
 	        
 	        var sql = `update task set
 	        	label = "${label}",
@@ -378,11 +374,12 @@ var TaskPersistence = class TaskPersistence{
 
 		}
 		var insertSubtask = function(result, conn){
-			if(task.subtask.length ===0 )
+			if(task.subtask.length ===0)
 				return Promise.resolve();
 
 			var sqls = [];
 			task.subtask.map(function(st){
+				//todo.
 				var id = (st.id == undefined ? 'NULL' : st.id);
 				var label = (st.label == undefined ? 'NULL' : `"${st.label}"`);
 				var status = st.status;
@@ -467,7 +464,7 @@ var TaskPersistence = class TaskPersistence{
 					params.push(property)
 				})
 			})
-			PropertyPersistence.update(conn, conditions, params);
+			return PropertyPersistence.update(conn, conditions, params);
 		}
 
 		var transactionArr = [[updateTask, deleteAllSubtask, insertSubtask, deleteAllAttachment, insertAttachment, updateProperty]];

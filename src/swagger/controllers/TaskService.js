@@ -15,8 +15,10 @@ exports.taskOptions2 = function(args, res, next) {
 
 exports.insertTask = function(args, res, next) {
   var param = args.task.value;
+  var task = param.task;
+  var projectId = param.projectId;
   
-  TaskPersistence.insert(param).then(function(result){
+  TaskPersistence.insert(task, projectId).then(function(result){
     var err = result.err;
     
     if(err){

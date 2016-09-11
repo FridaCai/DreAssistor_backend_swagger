@@ -7,6 +7,76 @@ var EnginePersistence = class EnginePersistence {
 		
 	}
 
+	static insert(conn, projectId, engines){
+		return new Promise(
+			function(resolve, reject){
+	            dbpool.transaction([
+	                [EnginePersistence._insertEngine.bind(this, engines, projectId)], 
+	                [EnginePersistence._insertProperties.bind(this, engines)]
+	            ], function(err, rows){
+	                resolve({
+	                    err: err,
+	                });
+	            });
+	        }
+        );
+        return new Promise(function(){})
+	}
+
+
+	static _insertEngine(engines, projectId, result, conn){
+		debugger;
+		if(engines.length === 0){
+			return Promise.resolve({
+				affectedRows: []
+			});
+		}
+
+		var engineClause = engines.map(function(engine){
+            return `(
+                ${projectId}
+            )`; 
+        }).join(',');
+
+        var sql = `insert into engine(project_id) values ${engineClause}`;
+
+        return new Promise(function(resolve, reject){
+            conn.query(sql, function(err, result) {
+                if (err) {
+                    var errmsg = sql + '\n' + err.stack;
+                    reject(new Error(errmsg));
+                    return;
+                }
+                resolve(result);
+            });    
+        })
+	}
+
+	static _insertProperties(engines, result, conn){
+		debugger;
+		var affectedRows = result[0].affectedRows;
+		if(affectedRows.length === 0)
+			return Promise.resolve();
+
+        var insertId = result[0].insertId;
+
+        var enginePropertiesParam = [];
+
+        for(var i=0; i<affectedRows; i++){
+            var engineId = insertId + i;
+            var properties = engines[i].properties;
+
+            enginePropertiesParam.push({
+                properties: properties,
+                foreignObj: {
+                    key: 'engine_id',
+                    value: engineId
+                }
+            })
+       }
+       return PropertyPersistence.insertProperty.call(this, conn, enginePropertiesParam);   
+	}
+
 	static assembleUpdateHandlers(engines, projectId){
 		var select = function(result, conn){
 			var sql = `select id from engine where project_id=${projectId}`;
@@ -132,60 +202,10 @@ var EnginePersistence = class EnginePersistence {
 			return PropertyPersistence.update(conn, conditions, properties);
 		}
 
-		var insert = function(result, conn){
-			var params = result[0].insertEngineParam;
-			if(params.length === 0)
-				return Promise.resolve({
-					affectedRows: []
-				});
-
-	        var engineClause = params.map(function(engine){
-	            return `(
-	                ${projectId}
-	            )`; 
-	        }).join(',');
-
-	        var sql = `insert into engine(project_id) values ${engineClause}`;
-
-	        return new Promise(function(resolve, reject){
-	            conn.query(sql, function(err, result) {
-	                if (err) {
-	                    var errmsg = sql + '\n' + err.stack;
-	                    reject(new Error(errmsg));
-	                    return;
-	                }
-	                resolve(result);
-	            });    
-	        })
-		}
-		var insertProperties = function(result, conn){
-			var affectedRows = result[0].affectedRows;
-			if(affectedRows.length === 0)
-				return Promise.resolve();
-
-            var insertId = result[0].insertId;
-
-            var enginePropertiesParam = [];
-
-            for(var i=0; i<affectedRows; i++){
-                var engineId = insertId + i;
-                var properties = engines[i].properties;
-
-                enginePropertiesParam.push({
-                    properties: properties,
-                    foreignObj: {
-                        key: 'engine_id',
-                        value: engineId
-                    }
-                })
-	       }
-           return PropertyPersistence.insertProperty.call(this, conn, enginePropertiesParam);   
-		}
-
 		return [
 			[select], 
-			[insert, deleteEngine, deleteProperties, update, updateProperties],
-			[insertProperties]
+			[EnginePersistence._insertEngine.bind(this, engines, projectId), deleteEngine, deleteProperties, update, updateProperties],
+			[EnginePersistence._insertProperties.bind(this, engines)]
 		];
 	}
 }

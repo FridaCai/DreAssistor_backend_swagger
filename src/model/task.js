@@ -46,8 +46,8 @@ module.exports = class Task {
 			desc: this.desc,
 			exp: this.exp,
 			priority: this.priority,
-			attachment: this.attachment.dump(),
-			subtask: this.subtask.dump()
+			attachment: this.attachment ? this.attachment.dump(): [],
+			subtask: this.subtask ? this.subtask.dump(): []
 		}
 		if(this.template){
 			obj.template = {

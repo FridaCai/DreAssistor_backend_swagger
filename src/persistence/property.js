@@ -217,7 +217,6 @@ param:
 		}
 
 		var sql = sqls.join(';');
-
        return new Promise(function(resolve, reject){
             conn.query(sql, function(err, result) {
                 if (err) {
