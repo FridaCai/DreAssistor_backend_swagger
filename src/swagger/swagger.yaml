@@ -252,6 +252,23 @@ paths:
           schema:
             $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "Project"
+      
+      
+    options:
+      tags:
+      - "Project"
+      description: "preflight for cors \n"
+      operationId: "projectOptions2"
+      parameters:
+      - name: id
+        in: path
+        description: "project id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Project"
 
 
   /task/{id}:

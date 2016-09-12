@@ -230,7 +230,7 @@ var ProjectPersistence = class ProjectPersistence {
                     var projects = rows.map(function(row){
                         return Project.create({
                             id: row.id,
-                            creatorId: row.creatorId,
+                            creatorId: row.creator_id,
                             label: row.label,
                             sorp: row.sorp
                         })

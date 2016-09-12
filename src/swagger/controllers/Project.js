@@ -30,6 +30,9 @@ module.exports.insertProject = function insertProject (req, res, next) {
 module.exports.projectOptions = function projectOptions (req, res, next) {
 	Project.projectOptions(req.swagger.params, res, next);
 };
+module.exports.projectOptions2 = function projectOptions (req, res, next) {
+	Project.projectOptions2(req.swagger.params, res, next);
+};
 
 module.exports.deleteProjectById = function deleteProjectById(req, res, next){
 	Project.deleteProjectById(req.swagger.params, res, next);

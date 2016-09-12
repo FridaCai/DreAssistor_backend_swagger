@@ -8,6 +8,9 @@ var ProjectPersistence = require('../../persistence/project.js');
 exports.projectOptions = function(args, res, next) {
   res.end();
 }
+exports.projectOptions2 = function(args, res, next) {
+  res.end();
+}
 
 exports.findProjects = function(args, res, next) {
   //how to get user?
