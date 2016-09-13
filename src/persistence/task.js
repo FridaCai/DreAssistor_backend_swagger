@@ -252,8 +252,6 @@ var TaskPersistence = class TaskPersistence{
 			return TaskPersistence.delete(conn, condition);
 		}
 
-
-
 		var deletePropertyWrap = function(result, conn){
 			var sql = `update property_wrap
                 set flag = 1

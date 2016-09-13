@@ -82,7 +82,6 @@ var ProjectPersistence = class ProjectPersistence {
         transactionArr = transactionArr.concat(engineArr);
         return new Promise(function(resolve, reject){
             dbpool.transaction(transactionArr, function(err, rows){
-                debugger;
                 resolve({
                     err: err,
                 });
@@ -184,14 +183,17 @@ var ProjectPersistence = class ProjectPersistence {
 
 	    var insertEngines = function(result, conn){
             var projectId = result[0].insertId;
-            return EnginePersistence.insert(conn, projectId, param.engines);
+            return EnginePersistence.insertEngine(conn, projectId, param.engines);
     	}
-
+        var insertEngineProperties = function(result, conn){
+            return EnginePersistence.insertProperties(result, conn, param.engines);
+        }
 
 		return new Promise(function(resolve, reject){
 			dbpool.transaction([
 	    		[insertProject], 
-	    		[insertTags, insertTasks, insertProperties, insertEngines]
+	    		[insertEngines, insertTags, insertTasks, insertProperties],
+                [insertEngineProperties]
 			], function(err, rows){
 				resolve({
 					err: err,
@@ -305,7 +307,7 @@ var ProjectPersistence = class ProjectPersistence {
         }
 
         var getEngines = function(projectId){
-            var sql = `select id from engine where flag=0 and project_id=${projectId}`;
+            var sql = `select id from engine where flag=0 and project_id=${projectId} order by id desc`;
 
             return new Promise(function(resolve, reject){
                 dbpool.execute(sql, function(err, rows){
@@ -442,8 +444,10 @@ var ProjectPersistence = class ProjectPersistence {
             task.label as task_label, ${startTime} as task_startTime, ${endTime} as task_endTime,
             tag.id as tag_id, tag.label as tag_label, ${tagTime} as tag_time, tag.week as tag_week
             from project p
-            left join task on p.id = task.project_id
-            left join tag on p.id = tag.project_id`;
+            left join task on (p.id = task.project_id and task.flag=0)
+            left join tag on (p.id = tag.project_id and tag.flag=0)
+            where p.flag=0`;
+
 
         var wrap = function(rows){
             var projects = {};
@@ -537,7 +541,7 @@ var ProjectPersistence = class ProjectPersistence {
                         left join attachment a4 on a4.property_id=p3.id
                         left join image i3 on i3.property_id=p3.id        
                 set 
-                project.flag = ${flag}
+                project.flag = ${flag},
                     tag.flag=${flag}, 
                     task.flag=${flag}, 
                         subtask.flag =${flag},

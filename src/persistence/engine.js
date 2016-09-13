@@ -7,25 +7,7 @@ var EnginePersistence = class EnginePersistence {
 		
 	}
 
-	static insert(conn, projectId, engines){
-		return new Promise(
-			function(resolve, reject){
-	            dbpool.transaction([
-	                [EnginePersistence._insertEngine.bind(this, engines, projectId)], 
-	                [EnginePersistence._insertProperties.bind(this, engines)]
-	            ], function(err, rows){
-	                resolve({
-	                    err: err,
-	                });
-	            });
-	        }
-        );
-        return new Promise(function(){})
-	}
-
-
-	static _insertEngine(engines, projectId, result, conn){
-		debugger;
+	static insertEngine(conn, projectId, engines){
 		if(engines.length === 0){
 			return Promise.resolve({
 				affectedRows: []
@@ -52,21 +34,19 @@ var EnginePersistence = class EnginePersistence {
         })
 	}
 
-	static _insertProperties(engines, result, conn){
-		debugger;
+
+	static insertProperties(result, conn, engines){
 		var affectedRows = result[0].affectedRows;
-		if(affectedRows.length === 0)
-			return Promise.resolve();
+        if(affectedRows.length === 0)
+            return Promise.resolve();
 
         var insertId = result[0].insertId;
-
-        var enginePropertiesParam = [];
-
+        var conditions = [];
         for(var i=0; i<affectedRows; i++){
             var engineId = insertId + i;
             var properties = engines[i].properties;
 
-            enginePropertiesParam.push({
+            conditions.push({
                 properties: properties,
                 foreignObj: {
                     key: 'engine_id',
@@ -74,12 +54,13 @@ var EnginePersistence = class EnginePersistence {
                 }
             })
        }
-       return PropertyPersistence.insertProperty.call(this, conn, enginePropertiesParam);   
+       return PropertyPersistence.insertProperty(conn, conditions);   
 	}
+
 
 	static assembleUpdateHandlers(engines, projectId){
 		var select = function(result, conn){
-			var sql = `select id from engine where project_id=${projectId}`;
+			var sql = `select id from engine where project_id=${projectId} and flag=0` ;
 			return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, result) {
                     if (err) {
@@ -198,14 +179,27 @@ var EnginePersistence = class EnginePersistence {
 					properties.push(property);
 				})
 			})
-
 			return PropertyPersistence.update(conn, conditions, properties);
 		}
+		var insertEngine = function(result, conn){
+			var params = result[0].insertEngineParam;
+			return EnginePersistence.insertEngine(conn, projectId, params);
+		}
+		var insertEngineProperties = function(result, conn){
+			return EnginePersistence.insertProperties(result, conn, engines);
+		}
+
 
 		return [
 			[select], 
-			[EnginePersistence._insertEngine.bind(this, engines, projectId), deleteEngine, deleteProperties, update, updateProperties],
-			[EnginePersistence._insertProperties.bind(this, engines)]
+			[
+				insertEngine,
+				deleteEngine, 
+				deleteProperties, 
+				update, 
+				updateProperties
+			],
+			[insertEngineProperties]
 		];
 	}
 }
