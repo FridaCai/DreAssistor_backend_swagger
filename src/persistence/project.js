@@ -446,8 +446,9 @@ var ProjectPersistence = class ProjectPersistence {
             from project p
             left join task on (p.id = task.project_id and task.flag=0)
             left join tag on (p.id = tag.project_id and tag.flag=0)
-            where p.flag=0`;
-
+            where p.flag=0
+            limit 20`;
+ //todo: add offset and limit;
 
         var wrap = function(rows){
             var projects = {};

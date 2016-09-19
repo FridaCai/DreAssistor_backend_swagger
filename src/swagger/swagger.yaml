@@ -413,6 +413,58 @@ paths:
 
 
 
+
+
+  /statical:
+    get:
+      tags:
+      - "Statical"
+      description: ""
+      operationId: "getStaticalData"
+      parameters:
+      - name: "projectCreator"
+        in: "query"
+        description: "filter statical data by project creator"
+        required: false
+        type: "integer"
+      - name: "taskType"
+        in: "query"
+        description: "filter statical data by task type"
+        required: false
+        type: "integer"
+      - name: "searchClause"
+        in: "query"
+        description: "filter statical data by search clause"
+        required: false
+        type: "string"
+
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/project'
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Statical"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 definitions:
   authTestResponse:
     type: "object"
