@@ -206,26 +206,53 @@ var ProjectPersistence = class ProjectPersistence {
         if performance has problem, not retrieve properties and engines when get/projects
         gain tasks, tags, engines, properties when query project by id.
     */
-    static findProjectById(param){
+    static findProjectById(id){
+        //too complex.
+        /*
+            set @projectId=210;
+            select p.id as project_id, p.label as project_label, p.creator_id as project_creator_id, 
+                p.sorp as project_sorp,
+                
+                t.id as tag_id, t.label as tag_label, 
+                UNIX_TIMESTAMP(t.time)*1000 as tag_time, t.week as tag_week,
+                
+                ta.id as task_id, ta.label as task_label, 
+                UNIX_TIMESTAMP(ta.start_time)*1000 as task_starttime, 
+                UNIX_TIMESTAMP(ta.end_time)*1000 as task_endtime,
+                
+                pro.id as property_id, pro.dropdown as property_dropdown, pro.text as property_text,
+                pro.value as property_value, pro.ref_key as property_ref_key, pro.status as property_status,
+                pro.label as property_label, pro.`key` as property_key, pro.curve as property_curve,
+                pro.attachment as property_attachment, pro.image as property_image,
+                
+                epro.id as engine_property_id, epro.dropdown as engine_property_dropdown, epro.text as engine_property_text,
+                epro.`value` as engine_property_value, epro.ref_key as engine_property_ref_key, epro.status as engine_property_status,
+                epro.label as engine_property_label, epro.`key` as engine_property_key, epro.curve as engine_property_curve,
+                epro.attachment as engine_property_attachment, epro.image as engine_property_image
+                
+                
+            from project p 
+            left join tag t on (t.project_id=p.id and t.flag=0)
+            left join task ta on (ta.project_id=p.id and ta.flag=0)
+            left join property pro on (pro.project_id=p.id and pro.flag=0)
+            left join `engine` e on e.project_id=p.id and e.flag=0
+            left join property epro on epro.engine_id =e.id and epro.flag=0
+
+            where p.flag=0 
+            and p.id=@projectId;
+        */
         var getProjects = function(){
             var sorp = Util.getOutTime('sorp');
             var sqls = [
                 `select creator_id, id, label, 
                 ${sorp} as sorp 
                 from project 
-                where flag=0 `
+                where flag=0 
+                and id=${id}`
             ];
 
-            if(param.id != undefined){
-                sqls.push(`and id=${param.id}`);
-            }else{
-                if(param.userId != undefined)
-                    sqls.push(`and creator_id=${param.userId}`);    
-            }
-
-            sqls.push('order by id desc');
             
-
+             
             var sqlClause = sqls.join(' ');
             return new Promise(function(resolve, reject){
                 dbpool.execute(sqlClause, function(err, rows){
@@ -425,7 +452,7 @@ var ProjectPersistence = class ProjectPersistence {
                     
                     resolve({
                         err: null,
-                        projects: projects
+                        project: projects[0] //bad.
                     }); 
                 })
             })
@@ -439,16 +466,18 @@ var ProjectPersistence = class ProjectPersistence {
         var tagTime = Util.getOutTime('tag.time');
         var sorp = Util.getOutTime('p.sorp ');
 
-        var sql = `select p.id as project_id, p.label as project_label, ${sorp} as project_sorp, 
-            task.id as task_id,
+        var sqls = [`select p.id as project_id, p.label as project_label, ${sorp} as project_sorp, 
+            p.creator_id as project_creator_id, task.id as task_id,
             task.label as task_label, ${startTime} as task_startTime, ${endTime} as task_endTime,
             tag.id as tag_id, tag.label as tag_label, ${tagTime} as tag_time, tag.week as tag_week
             from project p
             left join task on (p.id = task.project_id and task.flag=0)
             left join tag on (p.id = tag.project_id and tag.flag=0)
-            where p.flag=0
-            limit 20`;
- //todo: add offset and limit;
+            where p.flag=0`];//todo: add offset and limit;
+ 
+        if(param.userId != undefined)
+            sqls.push(`and p.creator_id=${param.userId}`);
+        var sql = sqls.join(' ')
 
         var wrap = function(rows){
             var projects = {};
@@ -457,6 +486,7 @@ var ProjectPersistence = class ProjectPersistence {
                 var projectId = row.project_id;
                 var projectLabel = row.project_label;
                 var projectSorp = row.project_sorp;
+                var projectCreatorId = row.project_creator_id;
                 
                 var taskId = row.task_id;
                 var taskLabel = row.task_label;
@@ -472,8 +502,9 @@ var ProjectPersistence = class ProjectPersistence {
                     id: projectId,
                     label: projectLabel,
                     sorp: projectSorp,
+                    creatorId: projectCreatorId,
                     tasks: {}, 
-                    tags: {}
+                    tags: {},
                 }
 
                 projects[projectId].tasks[taskId] = projects[projectId].tasks[taskId] || {
@@ -505,7 +536,7 @@ var ProjectPersistence = class ProjectPersistence {
                     })
                 }
             })
-            returnArr.reverse(); 
+            returnArr.reverse();  //might have problem.
             return returnArr;
         }
 

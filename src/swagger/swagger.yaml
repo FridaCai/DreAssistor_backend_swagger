@@ -397,25 +397,17 @@ paths:
       x-swagger-router-controller: "Task"
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   /statical:
+    options:
+      tags:
+      - "Statical"
+      description: "preflight for cors \n"
+      operationId: "staticalOptions"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Statical"
+
     get:
       tags:
       - "Statical"
@@ -458,6 +450,147 @@ paths:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+  /statical/task/{id}:
+    options:
+      tags:
+      - "Statical"
+      description: "preflight for cors \n"
+      operationId: "findStaticalTaskByIdOptions"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get statical task by id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Statical"
+
+    get:
+      tags:
+      - "Statical"
+      description: ""
+      operationId: "findStaticalTaskById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get task detail for statical purpose"
+        required: true
+        type: "integer"
+      
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: '#/definitions/task'
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Statical"
+
+
+
+
+
+
+
+
+  /statical/engine/{id}:
+    options:
+      tags:
+      - "Statical"
+      description: "preflight for cors \n"
+      operationId: "findStaticalEngineByIdOptions"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get statical engine by id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Statical"
+
+    get:
+      tags:
+      - "Statical"
+      description: ""
+      operationId: "findStaticalEngineById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get engine detail for statical purpose"
+        required: true
+        type: "integer"
+      
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: '#/definitions/engine'
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Statical"
+
+
+
+
+
+
+  /statical/project/{id}:
+    options:
+      tags:
+      - "Statical"
+      description: "preflight for cors \n"
+      operationId: "findStaticalProjectByIdOptions"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get project by id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Statical"
+    get:
+      tags:
+      - "Statical"
+      description: ""
+      operationId: "findStaticalProjectById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get project detail for statical purpose"
+        required: true
+        type: "integer"
+      
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: '#/definitions/project'
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Statical"
 
 
 

@@ -41,7 +41,7 @@ exports.findTaskById = function(args, res, next) {
   
     TaskPersistence.findById(param).then(function(result){
       var err = result.err;
-      var rows = result.rows;
+      var task = result.task;
 
       if(err){
         logger.error(err.stack);
@@ -51,7 +51,7 @@ exports.findTaskById = function(args, res, next) {
       res.setHeader('Content-Type', 'application/json;charset=UTF-8');
       res.end(JSON.stringify({
         errCode: -1,
-        task: rows
+        task: task
       }));
     }).catch(function(e){
       EAction(res, e);

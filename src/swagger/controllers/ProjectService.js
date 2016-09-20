@@ -39,11 +39,9 @@ exports.findProjects = function(args, res, next) {
 
 exports.findProjectById = function(args, res, next) {
   var id = args.id.value;
-  var param = {id: id};
-
-  ProjectPersistence.findProjectById(param).then(function(result){
+  ProjectPersistence.findProjectById(id).then(function(result){
     var err = result.err;
-    var projects = result.projects;
+    var project = result.project;
 
     if(err){
       throw new CError(3, '');
@@ -53,9 +51,7 @@ exports.findProjectById = function(args, res, next) {
     res.end(
       JSON.stringify({
         errCode: -1,
-        projects: projects.map(function(project){
-          return project.dump();
-        })
+        project: project
       })
     );
   }).catch(function(e){

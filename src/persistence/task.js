@@ -130,7 +130,7 @@ var TaskPersistence = class TaskPersistence{
             dbpool.execute(sql, function(err, rows){
                 resolve({
                     err: err,
-                    rows: wrap(rows)
+                    task: wrap(rows)
                 });
             });
         })
