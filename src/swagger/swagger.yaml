@@ -787,7 +787,7 @@ definitions:
       refKey:
         type: string
       status:
-        type: integer
+        type: boolean
       label:
         type: string
       image:

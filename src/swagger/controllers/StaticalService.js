@@ -76,8 +76,7 @@ exports.findStaticalEngineById = function(args, res, next) {
   var id = args.id.value;
   StaticalPersistence.findStaticalEngineById(id).then(function(result){
     var err = result.err;
-    var project = result.projects; //bad.
-
+    var engine = result.engine;
     if(err){
       throw new CError(3, '');
     } 
@@ -85,7 +84,7 @@ exports.findStaticalEngineById = function(args, res, next) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({
       errCode: -1,
-      entity: project
+      entity: engine
     }));
   }).catch(function(e){
     EAction(res, e);

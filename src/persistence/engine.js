@@ -202,6 +202,46 @@ var EnginePersistence = class EnginePersistence {
 			[insertEngineProperties]
 		];
 	}
+
+	static findEngineById(id){
+		var sql = `select p.id as property_id, p.key as propery_key, p.label as property_label,
+			p.text as property_text, p.value as property_value, p.dropdown as property_dropdown, 
+			p.ref_key as property_ref_key, p.curve as property_curve, p.attachment as property_attachment,
+			p.image as property_image, p.status as property_status,
+			p.engine_id as engine_id
+			from property p 
+			where p.engine_id=${id} 
+			and p.flag=0`;
+
+		var wrap = function(rows){
+			var id = rows[0].engine_id;
+			return {
+				id: id,
+				properties: rows.map(function(row){
+					return {
+						id: row.property_id,
+						dropdown: row.property_dropdown,
+						text: row.property_text,
+						value: row.property_value,
+						status: row.property_status,
+						label: row.property_label,
+						key: row.propery_key,
+						curve: row.property_curve,
+						attachment: row.property_attachment,
+						image: row.property_image
+					}
+				})
+			}
+		}
+		return new Promise(function(resolve, reject){
+            dbpool.execute(sql, function(err, rows){
+                resolve({
+                    err: err,
+                    engine: wrap(rows)
+                });
+            });
+        })
+	}
 }
 
 module.exports = EnginePersistence;
