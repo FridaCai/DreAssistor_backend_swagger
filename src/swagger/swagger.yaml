@@ -62,12 +62,12 @@ paths:
       operationId: "userGET"
       parameters:
       - name: "email"
-        in: "query"
+        in: query
         description: "user email"
         required: true
         type: "string"
       - name: "password"
-        in: "query"
+        in: query
         description: "password"
         required: true
         type: "string"
@@ -160,7 +160,7 @@ paths:
       operationId: "findProjects"
       parameters:
       - name: "userId"
-        in: "query"
+        in: query
         description: "project ownerId"
         required: false
         type: "integer"
@@ -215,7 +215,12 @@ paths:
           description: "project id"
           required: true
           type: "integer"
-        
+        - name: restore
+          in: query
+          description: "restore deleted project"
+          required: false
+          type: boolean
+
         responses:
           200:
             description: "unexpected error"
@@ -415,17 +420,17 @@ paths:
       operationId: "getStaticalData"
       parameters:
       - name: "projectCreator"
-        in: "query"
+        in: query
         description: "filter statical data by project creator"
         required: false
         type: "integer"
       - name: "taskType"
-        in: "query"
+        in: query
         description: "filter statical data by task type"
         required: false
         type: "integer"
       - name: "searchClause"
-        in: "query"
+        in: query
         description: "filter statical data by search clause"
         required: false
         type: "string"

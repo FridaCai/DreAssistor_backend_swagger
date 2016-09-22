@@ -550,8 +550,8 @@ var ProjectPersistence = class ProjectPersistence {
         })
     }
 
-    static deleteProjectById(projectId){
-        var flag = 1;
+    static deleteProjectById(projectId, restore){
+        var flag = restore ? 0: 1;
 
         var sql = `update project 
                 left join tag on tag.project_id=project.id

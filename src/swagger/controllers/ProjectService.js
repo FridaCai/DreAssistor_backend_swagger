@@ -82,7 +82,8 @@ exports.insertProject = function(args, res, next) {
 
 exports.deleteProjectById = function(args, res, next) {
   var id = args.id.value;
-  ProjectPersistence.deleteProjectById(id).then(function(result){
+  var restore = args.restore.value;
+  ProjectPersistence.deleteProjectById(id, restore).then(function(result){
     var err = result.err;
     
     if(err){
