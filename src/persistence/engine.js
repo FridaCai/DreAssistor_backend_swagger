@@ -7,6 +7,18 @@ var EnginePersistence = class EnginePersistence {
 		
 	}
 
+
+	static wrapEngine(engines, row){
+		engines = engines || {};
+		engines[row.engine_id] = engines[row.engine_id] || {
+            id: row.engine_id,
+            properties: {}
+        };
+        var prefix = 'engine_';
+        PropertyPersistence.wrapProperty(engines[row.engine_id].properties, row, prefix);
+	}
+
+
 	static insertEngine(conn, projectId, engines){
 		if(engines.length === 0){
 			return Promise.resolve({

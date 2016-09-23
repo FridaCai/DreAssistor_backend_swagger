@@ -8,6 +8,66 @@ var PropertyPersistence = class PropertyPersistence {
 		
 	}
 
+	static wrapProperty(properties, row, prefix){
+		prefix = prefix || '';
+
+		var get = function(key){
+			return row[`${prefix}${key}`];
+		}
+
+		var propertyId = get('property_id');
+		var propertyLabel = get('property_label');
+		var propertyKey = get('property_key');
+		var propertyDropdown = get('property_dropdown');
+		var propertyText = get('property_text');
+		var propertyValue = get('property_value');
+		var propertyRefkey = get('property_ref_key');
+		var propertyStatus = get('property_status');
+		var propertyCurve = get('property_curve');
+		var propertyAttachment = get('property_attachment');
+		var propertyImaget = get('property_image');
+
+		properties = properties || {};
+        properties[propertyId] = properties[propertyId] || {
+            id: propertyId,
+            key: propertyKey,
+            label: propertyLabel,
+        };
+
+        
+        if(propertyDropdown != undefined){ //todo. correct???
+            properties[propertyId].dropdown = propertyDropdown;
+        }
+        if(propertyText != undefined){
+            properties[propertyId].text = propertyText;
+        }
+        if(propertyValue != undefined){
+            properties[propertyId].value = parseFloat(propertyValue);   
+        }
+        if(propertyRefkey != undefined){
+            properties[propertyId].ref_key = propertyRefkey;   
+        }
+        if(propertyStatus != undefined){
+            properties[propertyId].status = propertyStatus;   
+        }
+        if(propertyCurve != undefined){
+            properties[propertyId].curve = propertyCurve;   
+        }
+        if(propertyAttachment != undefined){
+            properties[propertyId].attachment = propertyAttachment;   
+        }
+        if(propertyImaget != undefined){
+            properties[propertyId].image = propertyImaget;   
+        }
+	}
+
+
+
+
+
+
+
+
 /*	
 param:
 	[{

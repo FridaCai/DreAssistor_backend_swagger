@@ -75,23 +75,11 @@ var TaskPersistence = class TaskPersistence{
 					if(!propertyWrap[row.property_wrap_id]){
 						propertyWrap[row.property_wrap_id] = {
 							sheetName: row.property_wrap_label,
-							sheets: []
+							sheets: {}
 						};
 					}
 
-					propertyWrap[row.property_wrap_id].sheets.push({
-						id: row.property_id,
-						key: row.property_key,
-						label: row.property_label,
-						dropdown: row.property_dropdown,
-						text: row.property_text,
-						value: row.property_value,
-						refKey: row.property_refKey,
-						status: row.property_status,
-						curve: row.property_curve,
-						attachment: row.property_attachment,
-						image: row.property_image
-					})
+					PropertyPersistence.wrapProperty(propertyWrap[row.property_wrap_id].sheets, row);
 				}
 			})
 
@@ -118,7 +106,11 @@ var TaskPersistence = class TaskPersistence{
 						return propertyWrap[key].sheetName;
 					}),
 					sheets: Object.keys(propertyWrap).map(function(key){
-						return propertyWrap[key].sheets;
+						var properties = propertyWrap[key].sheets;
+						return Object.keys(properties).map(function(key){
+							return properties[key];
+						})
+
 					})
 				}
 			};

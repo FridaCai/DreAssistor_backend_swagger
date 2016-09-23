@@ -206,12 +206,11 @@ var ProjectPersistence = class ProjectPersistence {
         if performance has problem, not retrieve properties and engines when get/projects
         gain tasks, tags, engines, properties when query project by id.
     */
-    static findProjectById(id){
-        //too complex.
-        /*
-            set @projectId=210;
-            select p.id as project_id, p.label as project_label, p.creator_id as project_creator_id, 
-                p.sorp as project_sorp,
+    /*
+        sql:
+set @projectId=211;
+select p.id as project_id, p.label as project_label, p.creator_id as project_creator_id, 
+                UNIX_TIMESTAMP(p.sorp)*1000 as project_sorp,
                 
                 t.id as tag_id, t.label as tag_label, 
                 UNIX_TIMESTAMP(t.time)*1000 as tag_time, t.week as tag_week,
@@ -239,225 +238,117 @@ var ProjectPersistence = class ProjectPersistence {
             left join property epro on epro.engine_id =e.id and epro.flag=0
 
             where p.flag=0 
-            and p.id=@projectId;
-        */
-        var getProjects = function(){
-            var sorp = Util.getOutTime('sorp');
-            var sqls = [
-                `select creator_id, id, label, 
-                ${sorp} as sorp 
-                from project 
-                where flag=0 
-                and id=${id}`
-            ];
+            and p.id=@projectId;  
 
+    */
+    static findProjectById(id){
+        var sql = `select p.id as project_id, p.label as project_label, p.creator_id as project_creator_id, 
+                ${Util.getOutTime('p.sorp')} as project_sorp,
+                
+                t.id as tag_id, t.label as tag_label, 
+                ${Util.getOutTime('t.time')} as tag_time, t.week as tag_week,
+                
+                ta.id as task_id, ta.label as task_label, 
+                ${Util.getOutTime('ta.start_time')} as task_starttime, 
+                ${Util.getOutTime('ta.end_time')} as task_endtime,
+                
+                pro.id as property_id, pro.dropdown as property_dropdown, pro.text as property_text,
+                pro.value as property_value, pro.ref_key as property_ref_key, pro.status as property_status,
+                pro.label as property_label, pro.\`key\` as property_key, pro.curve as property_curve,
+                pro.attachment as property_attachment, pro.image as property_image,
+                
+                e.id as engine_id,
+                epro.id as engine_property_id, epro.dropdown as engine_property_dropdown, epro.text as engine_property_text,
+                epro.\`value\` as engine_property_value, epro.ref_key as engine_property_ref_key, epro.status as engine_property_status,
+                epro.label as engine_property_label, epro.\`key\` as engine_property_key, epro.curve as engine_property_curve,
+                epro.attachment as engine_property_attachment, epro.image as engine_property_image
+                
+                
+            from project p 
+            left join tag t on (t.project_id=p.id and t.flag=0)
+            left join task ta on (ta.project_id=p.id and ta.flag=0)
+            left join property pro on (pro.project_id=p.id and pro.flag=0)
+            left join \`engine\` e on e.project_id=p.id and e.flag=0
+            left join property epro on epro.engine_id =e.id and epro.flag=0
+
+            where p.flag=0 
+            and p.id=${id};`;  
+
+
+
+        var wrap = function(rows){
+            //todo: engine. order by id desc.            
+            //todo: if property value/text... === null, do not return please.
             
-             
-            var sqlClause = sqls.join(' ');
-            return new Promise(function(resolve, reject){
-                dbpool.execute(sqlClause, function(err, rows){
-                    var projects = rows.map(function(row){
-                        return Project.create({
-                            id: row.id,
-                            creatorId: row.creator_id,
-                            label: row.label,
-                            sorp: row.sorp
-                        })
-                    })
-                    resolve(projects);
-                })
-            })
-        }
+            var row0 = rows[0];
 
-        var getTags = function(projectId){
-            var time = Util.getOutTime('time');
-            var sql = `select id, label, ${time} as time, 
-                week 
-                from tag 
-                where flag=0 
-                and project_id=${projectId}`;
-
-
-            return new Promise(function(resolve, reject){
-                dbpool.execute(sql, function(err, rows){
-                    resolve({
-                        err: err,
-                        rows: rows
-                    });
-                });
-            })
-        }
-
-        var getTasks = function(projectId){
-            var startTime = Util.getOutTime('start_time');
-            var endTime = Util.getOutTime('end_time');
-            var sql = `select id, label, ${startTime} as startTime, 
-                ${endTime} as endTime 
-                from task
-                where flag=0 
-                and project_id=${projectId}`;
-
-
-            return new Promise(function(resolve, reject){
-                dbpool.execute(sql, function(err, rows){
-                    if(err){
-                        resolve({
-                            err: err
-                        })
-                        return;
-                    }
-
-                    resolve({
-                        rows: rows
-                    })
-                });
-            })
-        }
-
-        var getProperties = function(projectId){
-            var sql = `select id, dropdown, text, 
-                value, ref_key, status, 
-                label, \`key\`, curve, 
-                attachment, image 
-                from property 
-                where flag=0 
-                and project_id=${projectId}`;
-
-            return new Promise(function(resolve, reject){
-                dbpool.execute(sql, function(err, rows){
-                    resolve({
-                        err: err,
-                        rows: rows
-                    });
-                });
-            })
-        }
-
-        var getEngines = function(projectId){
-            var sql = `select id from engine where flag=0 and project_id=${projectId} order by id desc`;
-
-            return new Promise(function(resolve, reject){
-                dbpool.execute(sql, function(err, rows){
-
-                    if(err){
-                        resolve({
-                            err: err,
-                        });
-                        return;
-                    }
-
-                    var promiseArr = [];
-                    rows.map(function(row){
-                        var engineId = row.id;
-
-                        var sql = `select id, dropdown, text, 
-                            value, ref_key, status, 
-                            label, \`key\`, curve,
-                            image, attachment
-                            from property 
-                            where engine_id=${engineId} 
-                            and flag=0`;
-
-                        promiseArr.push(new Promise(function(resolve, reject){
-                            dbpool.execute(sql, function(err, rows){
-                                if(err){
-                                    reject(err);
-                                    return;
-                                }
-                                resolve(rows);  
-                            })
-                        }))
-                    });
-
-                    Promise.all(promiseArr).then(function(engineParams){
-
-                        resolve({
-                            rows: engineParams.map(function(engineParam, index){
-                                return {
-                                    id: rows[index].id,
-                                    properties: engineParam
-                                }
-                            }),
-                            err: null   
-                        });
-                    }, function(err){
-                        throw err;
-                    }).catch(function(err){
-                        resolve({
-                            err: err
-                        });
-                    })
-                });
-            })
-        }
-
-        var getOtherInfo = function(project){
-            return Promise.all([
-                getTasks(project.id),
-                getTags(project.id),
-                getEngines(project.id),
-                getProperties(project.id)
-            ]).then(function(args){
-                var tasks = args[0];
-                var tags = args[1];
-                var engines = args[2];
-                var properies = args[3];
-
-                var err = tasks.err || tags.err || properies.err || engines.err;
-                if(err){
-                    return({
-                        err: err
-                    })
+            var project = {
+                id: row0.project_id,
+                label: row0.project_label,
+                creatorId: row0.project_creator_id,
+                sorp: row0.project_sorp,
+                tasks: {},
+                tags: {},
+                properties: {},
+                engines: {}
+            };
+            rows.map(function(row){
+                project.tags[row.tag_id] = project.tags[row.tag_id] || {
+                    id: row.tag_id,
+                    label: row.tag_label,
+                    time: row.tag_time,
+                    week: row.tag_week
                 }
 
-                var tasks = args[0].rows;
-                var tags = args[1].rows;
-                var engines = args[2].rows;
-                var properties = args[3].rows;
-                
-                project.setTasksByParam(tasks);
-                project.setTagsByParam(tags);
-                project.setEnginesByParam(engines);
-                project.setPropertiesByParam(properties);
-                
-                return({
-                    err: null,
-                    project: project
-                })
-            }, function(){
+                project.tasks[row.task_id] = project.tasks[row.task_id] || {
+                    id: row.task_id,
+                    label: row.task_label,
+                    startTime: row.task_starttime,
+                    endTime: row.task_endtime
+                }   
+                PropertyPersistence.wrapProperty(project.properties, row);
+                EnginePersistence.wrapEngine(project.engines, row);
             })
+
+
+
+            var returnArr = {
+                id: project.id,
+                label: project.label,
+                creatorId: project.creatorId,
+                sorp: project.sorp,
+                tasks: Object.keys(project.tasks).map(function(key){
+                    return (project.tasks[key])
+                }),
+                tags: Object.keys(project.tags).map(function(key){
+                    return project.tags[key];
+                }),
+                properties: Object.keys(project.properties).map(function(key){
+                    return project.properties[key];
+                }),
+                engines: Object.keys(project.engines).sort(function(k1, k2){
+                    return (k1-k2 < 0);
+                }).map(function(key){
+                    var engine =  project.engines[key];
+                    engine.properties = Object.keys(engine.properties).map(function(propertyKey){
+                        return engine.properties[propertyKey];
+                    });
+                    return engine;
+
+                })
+                //todo: engine.
+            }
+            return returnArr;
         }
 
         return new Promise(function(resolve, reject){
-            getProjects().then(function(projects){
-                var projectPromises = [];
-                projects.map(function(project){
-                    projectPromises.push(getOtherInfo(project));    
-                })
-                
-                Promise.all(projectPromises).then(function(args){
-                    var projects = [];
-                    for(var i=0; i<args.length; i++){
-                        var arg = args[i];
-
-                        if(arg.err){
-                            resolve({
-                                err: err,
-                            }); 
-                            return;
-                        }
-
-                        projects.push(arg.project)
-                    }
-                    
-                    resolve({
-                        err: null,
-                        project: projects[0] //bad.
-                    }); 
-                })
-            })
-    
-        })
+            dbpool.execute(sql, function(err, rows){
+                resolve({
+                    err: err,
+                    project: wrap(rows)
+                });
+            });
+        })      
     }
 
     static findProjects(param){
