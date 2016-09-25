@@ -51,7 +51,7 @@ exports.transaction = function(actions, callback){
 
             var recursive = function(index, param){
                 if(index === loop){
-                    return Promise.resolve();
+                    return Promise.resolve(param);
                 }
                 
                 return Promise.all(
@@ -67,12 +67,12 @@ exports.transaction = function(actions, callback){
                 })
             }
 
-            recursive(cur, null).then(function(){
-                conn.commit(function(err) {
+            recursive(cur, null).then(function(result){
+                conn.commit(function(err, rows) {
                     if (err) {
                       throw err;
                     }
-                    callback();
+                    callback(err, result);
                 });
             }, function(e){
                 throw e;

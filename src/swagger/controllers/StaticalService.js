@@ -12,9 +12,9 @@ exports.getStaticalData = function(args, res, next) {
   var taskType = args.taskType.value;
   var searchClause = args.searchClause.value;
 
-  StaticalPersistence.getStaticalData().then(function(result){
+  StaticalPersistence.getStaticalData(projectCreator, taskType, searchClause).then(function(result){
     var err = result.err;
-    var projects = result.projects;
+    var projects = result.rows;
 
     if(err){
       throw new CError(3, '');
