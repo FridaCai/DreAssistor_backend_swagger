@@ -26,6 +26,7 @@ exports.userGET = function(args, res, next) {
     var rows = result.rows;
 
     if(err){
+      logger.error(err.stack);
       throw new CError(2, JSON.stringify(err));
     } 
 

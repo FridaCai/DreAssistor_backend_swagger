@@ -24,6 +24,7 @@ exports.findProjects = function(args, res, next) {
     var projects = result.projects;
 
     if(err){
+      logger.error(err.stack);
       throw new CError(3, '');
     } 
 
@@ -44,6 +45,7 @@ exports.findProjectById = function(args, res, next) {
     var project = result.project;
 
     if(err){
+      logger.error(err.stack);
       throw new CError(3, '');
     } 
 

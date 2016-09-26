@@ -17,6 +17,7 @@ exports.getStaticalData = function(args, res, next) {
     var projects = result.rows;
 
     if(err){
+      logger.error(err.stack);
       throw new CError(3, '');
     } 
 
@@ -39,6 +40,7 @@ exports.findStaticalProjectById = function(args, res, next) {
     var project = result.project; //bad.
 
     if(err){
+      logger.error(err.stack);
       throw new CError(3, '');
     } 
 
@@ -60,6 +62,7 @@ exports.findStaticalTaskById = function(args, res, next) {
     var task = result.task;
 
     if(err){
+      logger.error(err.stack);
       throw new CError(3, '');
     } 
 
@@ -78,6 +81,7 @@ exports.findStaticalEngineById = function(args, res, next) {
     var err = result.err;
     var engine = result.engine;
     if(err){
+      logger.error(err.stack);
       throw new CError(3, '');
     } 
 

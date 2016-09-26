@@ -4,6 +4,8 @@ var ProjectPersistence = require('./project.js');
 var TaskPersistence = require('./task.js');
 var EnginePersistence = require('./engine.js');
 
+var propertyKeyMapping = require('../config/propertyKey_searchExpress_mapping.js');
+
 var StaticalPersistence = class StaticalPersistence {
 	constructor(){
 		
@@ -11,9 +13,9 @@ var StaticalPersistence = class StaticalPersistence {
     
     static getStaticalData(projectCreator, taskType, searchExpress){
         var wrapProperty = function(rows){
-            var engineId = [];
-            var projectId = [];
-            var propertyWrapId = [];
+            var engineId = [-1];
+            var projectId = [-1];
+            var propertyWrapId = [-1];
             rows.map(function(row){
                 if(row.engine_id != null && engineId.indexOf(row.engine_id) === -1){
                     engineId.push(row.engine_id);
@@ -36,20 +38,21 @@ var StaticalPersistence = class StaticalPersistence {
             var sqls = [
                 `select engine_id, project_id, property_wrap_id 
                  from property 
-                 where label like %${searchExpress}%
-                 or text like %${searchExpress}%, 
-                 or value like %${searchExpress}%, 
-                 or dropdown like %${searchExpress}%`
-            ];    
+                 where label like '%${searchExpress}%'
+                 or text like '%${searchExpress}%'
+                 or value like '%${searchExpress}%' 
+                 or dropdown like '%${searchExpress}%'`
+            ];   
+            var sql = sqls.join(' '); 
 
             return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, rows) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
+                    if(err){
+                        var errmsg = `${sql} \n ${err.stack}`;
+                        reject(new Error(errmsg));   
+                    }else{
+                        resolve(wrapProperty(rows));    
                     }
-                    resolve(wrapProperty(rows));
                 });    
             })
         }
@@ -59,11 +62,15 @@ var StaticalPersistence = class StaticalPersistence {
 
 
         var search = function(result, conn){
+            var hasSearchExpress = result ? true:false;
+            
             var sqls = [`select p.id as project_id, p.label as project_label, p.creator_id as project_creator_id,
                 t.id as task_id, t.label as task_label, t.template_type as task_templateType,
                 e.id as engine_id, 
                 pro.id as engine_property_id, pro.key as engine_property_key, pro.text as engine_property_text, 
-                pro.label as engine_property_label
+                pro.label as engine_property_label,
+
+                e.id as engine_id, p.id as project_id, pw.id as property_wrap_id
                 
                 from project p
                 left join task t on t.project_id=p.id 
@@ -86,19 +93,25 @@ var StaticalPersistence = class StaticalPersistence {
             sqls.push(taskTypeClause);
 
 
-            var obj = (result && result[0]) ? result[0] : null;
+            if(hasSearchExpress){ //condition search or random search
+                var obj = result[0];
 
-            var engineIdClause = (obj && obj.engineId.length) ? `and e.id in (${obj.engineId.join(',')})`: '';
-            sqls.push(engineIdClause);
+                var engineIdClause = `and e.id in (${obj.engineId.join(',')})`; 
+                sqls.push(engineIdClause);
 
-            var projectIdClause = (obj && obj.projectId.length) ? `and p.id in (${obj.projectId.join(',')})`: '';
-            sqls.push(projectIdClause);
+                var projectIdClause = `or p.id in (${obj.projectId.join(',')})`; 
+                sqls.push(projectIdClause);
 
-            var propertyWrapClause = (obj && obj.propertyWrapId.length) ? `and pw.id in (${obj.propertyWrapId.join(',')})`: '';
-            sqls.push(propertyWrapClause);
+                var propertyWrapClause = `or pw.id in (${obj.propertyWrapId.join(',')})`; 
+                sqls.push(propertyWrapClause);
+            }
+            
+
+            
 
 
             var sql = sqls.join(' ');
+            console.log(sql);
 
             var wrap = function(rows){
                 if(!rows)
@@ -118,6 +131,10 @@ var StaticalPersistence = class StaticalPersistence {
                     var enginePropertyText = row.engine_property_text;
                     var enginePropertyLabel = row.engine_property_label;
 
+                    var engineId = row.enigne_id;
+                    var projectId = row.project_id;
+                    var propertyWrapId = row.property_wrap_id;
+
                     projects[projectId] = projects[projectId] || {
                         id: projectId,
                         label: projectLabel,
@@ -126,14 +143,20 @@ var StaticalPersistence = class StaticalPersistence {
                         engines: {}
                     }
 
-                    projects[projectId].tasks[taskId] = projects[projectId].tasks[taskId] || {
-                        id: taskId,
-                        label: taskLabel,
-                        template: {
-                            type: taskType
-                        }
-                    }   
+                    if(hasSearchExpress){ //condition search or random search
+                        var obj = result[0];
 
+                        if(obj.propertyWrapId.length > 1){
+                            projects[projectId].tasks[taskId] = projects[projectId].tasks[taskId] || {
+                                id: taskId,
+                                label: taskLabel,
+                                template: {
+                                    type: taskType
+                                }
+                            }   
+                        }                    
+                    }
+                    
                     projects[projectId].engines[engineId] = projects[projectId].engines[engineId] || {
                         id: engineId,
                         properties: [{
@@ -143,7 +166,6 @@ var StaticalPersistence = class StaticalPersistence {
                             label: enginePropertyLabel
                         }]
                     }
-
                 })
 
 
@@ -163,6 +185,9 @@ var StaticalPersistence = class StaticalPersistence {
                     }
                 })
                 returnArr.reverse(); 
+
+
+
                 return returnArr;
             }
 
@@ -194,10 +219,10 @@ where 1=1
 ;
 */
         var conditionSearch = function(result, conn){
-            var clauses = [`select p1.engine_id as engine_id, 
-                p1.project_id as project_id, 
-                p1.property_wrap_id as property_wrap_id
-                from property p1`];
+            var clauses = [`select p0.engine_id as engine_id, 
+                p0.project_id as project_id, 
+                p0.property_wrap_id as property_wrap_id
+                from property p0`];
 
             var conditions = searchExpress.split('&').map(function(condition){
                 var key = condition.split('=')[0].trim();
@@ -212,7 +237,11 @@ where 1=1
             var whereClauses = [`where 1=1`];
 
             conditions.map(function(condition, index){
-                var key = condition.key;
+                var keys = propertyKeyMapping[condition.key];
+                var keyClause = keys.map(function(k){
+                    return `'${k}'`;
+                }).join(',');
+
                 var value = condition.value;
 
                 if(index > 0){
@@ -222,11 +251,11 @@ where 1=1
                         or (p${index-1}.property_wrap_id=p${index}.property_wrap_id and p${index}.property_wrap_id is not null) `)    
                 }
 
-                whereClauses.push(`and p${index}.label like '%${key}%'`)
+                whereClauses.push(`and p${index}.key in (${keyClause})`);
                 if(value !='*'){
-                    whereClauses.push(`and (p${index}.text like %${value}% 
-                        or p${index}.value like %${value}% 
-                        or p${index}.dropdown like %${value}%)`);
+                    whereClauses.push(`and (p${index}.text like '%${value}%' 
+                        or p${index}.value like '%${value}%'
+                        or p${index}.dropdown like '%${value}%')`);
                 }
             })
 
@@ -234,6 +263,7 @@ where 1=1
                 .concat(whereClauses)
                 .join(' ');
 
+            console.log(sql);
             return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, rows) {
                     if (err) {
