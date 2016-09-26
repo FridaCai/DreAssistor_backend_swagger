@@ -26,13 +26,7 @@ var TagPersistence = class TagPersistence {
         })
 	}
 
-	static deleteByProjectId(conn, id){
-		var condition = {
-			key: 'project_id',
-			value: id
-		}
-		return TagPersistence.delete(conn, condition);
-	}
+	
 }
 
 module.exports = TagPersistence;

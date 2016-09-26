@@ -60,8 +60,9 @@ exports.findTaskById = function(args, res, next) {
 
 exports.deleteTaskById = function(args, res, next) {
   var id = args.id.value;
+  var restore = args.restore.value;
 
-  TaskPersistence.deleteById(id).then(function(result){
+  TaskPersistence.deleteById(id, restore).then(function(result){
       var err = result.err;
 
       if(err){

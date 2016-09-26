@@ -358,6 +358,11 @@ paths:
         description: ""
         required: true
         type: "integer"
+      - name: restore
+        in: query
+        description: "restore deleted task"
+        required: false
+        type: boolean
 
       responses:
         200:

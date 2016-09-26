@@ -11,7 +11,9 @@ var StaticalPersistence = class StaticalPersistence {
 		
 	}
     
-    static getStaticalData(projectCreator, taskType, searchExpress){
+    static getStaticalData(projectCreator, taskType, _searchExpress){
+        
+
         var wrapProperty = function(rows){
             var engineId = [-1];
             var projectId = [-1];
@@ -44,6 +46,7 @@ var StaticalPersistence = class StaticalPersistence {
                  or dropdown like '%${searchExpress}%'`
             ];   
             var sql = sqls.join(' '); 
+            console.log(sql);
 
             return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, rows) {
@@ -56,11 +59,6 @@ var StaticalPersistence = class StaticalPersistence {
                 });    
             })
         }
-
-
-
-
-
         var search = function(result, conn){
             var hasSearchExpress = result ? true:false;
             
@@ -70,7 +68,7 @@ var StaticalPersistence = class StaticalPersistence {
                 pro.id as engine_property_id, pro.key as engine_property_key, pro.text as engine_property_text, 
                 pro.label as engine_property_label,
 
-                e.id as engine_id, p.id as project_id, pw.id as property_wrap_id
+                pw.id as property_wrap_id
                 
                 from project p
                 left join task t on t.project_id=p.id 
@@ -131,8 +129,6 @@ var StaticalPersistence = class StaticalPersistence {
                     var enginePropertyText = row.engine_property_text;
                     var enginePropertyLabel = row.engine_property_label;
 
-                    var engineId = row.enigne_id;
-                    var projectId = row.project_id;
                     var propertyWrapId = row.property_wrap_id;
 
                     projects[projectId] = projects[projectId] || {
@@ -143,19 +139,23 @@ var StaticalPersistence = class StaticalPersistence {
                         engines: {}
                     }
 
+                    var appendTask = true;
                     if(hasSearchExpress){ //condition search or random search
                         var obj = result[0];
-
-                        if(obj.propertyWrapId.length > 1){
-                            projects[projectId].tasks[taskId] = projects[projectId].tasks[taskId] || {
-                                id: taskId,
-                                label: taskLabel,
-                                template: {
-                                    type: taskType
-                                }
-                            }   
-                        }                    
+                        if(obj.propertyWrapId.length < 2){
+                            appendTask = false;
+                        }
                     }
+                    if(appendTask){
+                        projects[projectId].tasks[taskId] = projects[projectId].tasks[taskId] || {
+                            id: taskId,
+                            label: taskLabel,
+                            template: {
+                                type: taskType
+                            }
+                        }   
+                    }    
+                                            
                     
                     projects[projectId].engines[engineId] = projects[projectId].engines[engineId] || {
                         id: engineId,
@@ -276,6 +276,9 @@ where 1=1
             })
         }
 
+
+
+        var searchExpress = _searchExpress ? decodeURIComponent(_searchExpress):_searchExpress;
         var transactionArr;
         if(!searchExpress){
             transactionArr = [[search]];

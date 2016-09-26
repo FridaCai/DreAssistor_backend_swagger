@@ -61,33 +61,6 @@ var PropertyPersistence = class PropertyPersistence {
         }
 	}
 
-
-
-
-
-
-
-
-/*	
-param:
-	[{
-		properties: [{dropdown, text, value, key...}, {}, {}],
-		foreignObj: {key: project_id, value: projectId}
-	}, {
-		properties: [{dropdown, text, value, key...}, {}, {}],
-		foreignObj: {key: engine_id, value: engineId}
-	}]
-*/
-	static deleteByProjectId(conn, id){
-		var condition = [
-			{
-				key: 'project_id',
-				value: id
-			}
-		];
-		return PropertyPersistence.delete(conn, condition);
-	}
-
 	static deleteByIds(conn, ids){
 		var condition = ids.map(function(id){
 			return {

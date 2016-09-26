@@ -41,7 +41,7 @@ var TaskPersistence = class TaskPersistence{
 				and t.flag = 0`;
 
 				//query property_attachment, property_curve, property_image when expand cell_expander.
-
+		console.log(sql);
 
 		
 		var wrap = function(rows){
@@ -110,7 +110,6 @@ var TaskPersistence = class TaskPersistence{
 						return Object.keys(properties).map(function(key){
 							return properties[key];
 						})
-
 					})
 				}
 			};
@@ -218,72 +217,33 @@ var TaskPersistence = class TaskPersistence{
 		});
 	}
 
-	static deleteById(id){
-		var condition = {
-			key: 'id', 
-			value: id
-		};
-
-		var selectPropertyIds = function(result, conn){
-			var sql = `select p.id as id from property p
-				left join property_wrap pw on p.property_wrap_id=pw.id
-				where pw.task_id = ${id}`; 
-			return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
-                    }
-                    resolve(result);
-                })    
-            })
-		}
-
-		var deleteTask = function(result, conn){
-			return TaskPersistence.delete(conn, condition);
-		}
-
-		var deletePropertyWrap = function(result, conn){
-			var sql = `update property_wrap
-                set flag = 1
-                where task_id = ${id}`;
-
-            return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
-                    }
-                    resolve(result);
-                })    
-            })
-		}
-		var deleteProperty = function(result, conn){
-			var propertyIds = result[0].map(function(row){
-				return row.id
-			})
-			return PropertyPersistence.deleteByIds(conn, propertyIds);
-		}
-
-		var  transactionArr = [[selectPropertyIds], [deleteTask, deletePropertyWrap, deleteProperty]];
+	static deleteById(id, restore){
+		var flag = restore ? 0: 1;
+        var sql = `update task 
+                    left join subtask on task.id=subtask.task_id
+                    left join attachment a1 on task.id = a1.task_id
+                    left join property_wrap on property_wrap.task_id=task.id
+                        left join property p1 on p1.property_wrap_id=property_wrap.id
+                            left join curve c1 on c1.property_id=p1.id
+                            left join attachment a2 on a2.property_id=p1.id
+                            left join image i1 on i1.property_id=p1.id
+	                set 
+	                    task.flag=${flag}, 
+	                        subtask.flag =${flag},
+	                        a1.flag = ${flag},
+	                        property_wrap.flag = ${flag},
+	                            p1.flag = ${flag},
+	                                c1.flag = ${flag},
+	                                a2.flag = ${flag},
+	                                i1.flag = ${flag}
+	                where task.id=${id}`;
         return new Promise(function(resolve, reject){
-            dbpool.transaction(transactionArr, function(err, rows){
+            dbpool.execute(sql, function(err, rows){
                 resolve({
                     err: err,
                 });
             });
-        });
-		
-	}
-
-	static deleteByProjectId(conn, id){
-		var condition = {
-			key: 'project_id', 
-			value:id
-		}
-		return TaskPersistence.delete(conn, condition);		
+        })
 	}
 
 	static delete(conn, condition){
