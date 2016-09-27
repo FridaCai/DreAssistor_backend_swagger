@@ -4,6 +4,7 @@ var Project  = require('../model/project.js');
 var Property = require('../model/property.js');
 var Util = require('../util.js');
 var PropertyPersistence = require('./property.js');
+var CurvePersistence = require('./curve.js');
 var Task = require('../model/task.js');
 
 var TaskPersistence = class TaskPersistence{
@@ -59,7 +60,7 @@ var TaskPersistence = class TaskPersistence{
 					subtask[row.subtask_id] = {
 						id: row.subtask_id,
 						label: row.subtask_label,
-						status: row.subtask_status
+						status: row.subtask_status ? true:false
 					}	
 				}
 				if(row.attachment_id != undefined){
@@ -203,6 +204,7 @@ var TaskPersistence = class TaskPersistence{
             return PropertyPersistence.insertProperty(conn, propertyParam);
         }
 
+      
         var transactionArr = [[insertTask]];
         if(task.template && task.template.sheets.length!=0){
         	transactionArr.push([insertPropertyWrap]);
@@ -400,13 +402,66 @@ var TaskPersistence = class TaskPersistence{
                 })    
             })
 		}
+
+		var deleteCurve = function(result, conn){
+			var sheets = task.template.sheets;
+        	var propertyIds = [];
+        	sheets.map(function(sheet, index){
+        		sheet.map(function(property){
+        			if(CurvePersistence.isDefined(property.curve)){ /*todo: should in Curve data model.*/
+	        			propertyIds.push(property.id);
+	        		}
+        		})
+        	})
+        	return CurvePersistence.delete(propertyIds, conn);
+		}
+
+		var insertCurve = function(result, conn){
+			debugger;
+			var sheets = task.template.sheets;
+        	var curveParam = [];
+
+        	sheets.map(function(sheet, index){
+        		sheet.map(function(property){
+
+        			var propertyId = property.id;	
+        			if(CurvePersistence.isDefined(property.curve)){ /*todo: should in Curve data model.*/
+	        			curveParam.push({
+		        			curve: property.curve,
+		        			propertyId: propertyId
+		        		});
+	        		}
+        		})
+        	})
+        	return CurvePersistence.insert(curveParam, conn);
+		}
+
 		var updateProperty = function(result, conn){
+			debugger;
+			var rowId = result[0].insertId;
 			var conditions = [];
 			var params = [];
+			var index = 0;
 
 			var sheets = task.template.sheets;
 			sheets.map(function(sheet){
 				sheet.map(function(property){
+					
+					
+					if(CurvePersistence.isDefined(property.curve)){ //todo: should in Curve data model.
+						var curveId = rowId + index;
+						property.curve = curveId;
+						index ++;
+					}else if(CurvePersistence.isNeed(property.curve)){
+						property.curve = 0;
+					}else if(CurvePersistence.notNeed(property.curve)){
+						property.curve = 'NULL';
+					}else{
+						console.error('error in taskPersistence.update.');
+					}
+
+
+
 					conditions.push({
 						key: 'id',
 						value: property.id
@@ -417,7 +472,7 @@ var TaskPersistence = class TaskPersistence{
 			return PropertyPersistence.update(conn, conditions, params);
 		}
 
-		var transactionArr = [[updateTask, deleteAllSubtask, insertSubtask, deleteAllAttachment, insertAttachment, updateProperty]];
+		var transactionArr = [[updateTask, deleteAllSubtask, insertSubtask, deleteAllAttachment, insertAttachment, deleteCurve], [insertCurve], [updateProperty]];
         return new Promise(function(resolve, reject){
             dbpool.transaction(transactionArr, function(err, rows){
                 resolve({

@@ -1,0 +1,96 @@
+'use strict';
+var dbpool = require('../db.js');
+
+var CurvePersistence = class CurvePersistence {
+	constructor(){
+		
+	}
+
+	static findById(id){
+		var sql = `select * from curve where id=${id}`;
+		var wrap = function(row){
+			return {
+				id: id,
+				caption: row.caption,
+				data: row.data,
+				series: row.series
+			}
+		}
+		return new Promise(function(resolve, reject){
+            conn.query(sql, function(err, result) {
+                if (err) {
+                    var errmsg = sql + '\n' + err.stack;
+                    reject(new Error(errmsg));
+                    return;
+                }
+                resolve(wrap(result));
+            });
+        })
+	}
+
+
+	//curve: 
+	//undefined -- no need, 
+	//{} --to be defined,  
+	//{data:[], series:{}, chapter:''} --defined
+	static isDefined(curve){
+		if(curve != undefined && Object.keys(curve)!=0){
+			return true;
+		}
+		return false;
+	}
+	static isNeed(curve){
+		return !(curve == undefined);
+	}
+	static notNeed(curve){
+		return (curve == undefined);	
+	}
+	static delete(propertyIds, conn){
+		var propertyIdClause = propertyIds.join(',');
+		var sql = `update curve set flag=1 where property_id in (${propertyIdClause})`;
+		console.log(sql);
+        return new Promise(function(resolve, reject){
+            conn.query(sql, function(err, result) {
+                if (err) {
+                    var errmsg = sql + '\n' + err.stack;
+                    reject(new Error(errmsg));
+                    return;
+                }
+                resolve(result);
+            });
+        })
+	}
+	static insert(condition, conn){
+		if(condition.length === 0)
+			return Promise.resolve();
+
+		var curveClauses = condition.map(function(c){
+			var curve = c.curve;
+			var caption = curve.caption || "";
+			var data = curve.data || 'NULL';
+			var series = curve.series || 'NULL';
+			var propertyId = c.propertyId;
+
+			return `("${caption}", '${JSON.stringify(data)}', '${JSON.stringify(series)}', ${propertyId})`;
+		})
+		var curveClause = curveClauses.join(',');
+
+		var sql = `insert into curve(
+			caption, data, series, property_id
+        ) values ${curveClause}`;
+
+        console.log(sql);
+        return new Promise(function(resolve, reject){
+            conn.query(sql, function(err, result) {
+                if (err) {
+                    var errmsg = sql + '\n' + err.stack;
+                    reject(new Error(errmsg));
+                    return;
+                }
+                resolve(result);
+            });
+        })
+	}
+}
+
+module.exports = CurvePersistence;

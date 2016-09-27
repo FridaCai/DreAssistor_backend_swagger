@@ -22,8 +22,24 @@ var PropertyPersistence = class PropertyPersistence {
 		var propertyText = get('property_text');
 		var propertyValue = get('property_value');
 		var propertyRefkey = get('property_ref_key');
-		var propertyStatus = get('property_status');
-		var propertyCurve = get('property_curve');
+		var propertyStatus = get('property_status') ? true: false;
+		
+		//convert db curve to client;
+		var propertyCurve = (function(curve){
+			if(curve == undefined){
+				return curve;
+			}else if(curve === 0){
+				return {};
+			}else{
+				return {
+					id: curve
+				}
+			}
+		})(get('property_curve'));
+		
+
+
+
 		var propertyAttachment = get('property_attachment');
 		var propertyImaget = get('property_image');
 
@@ -136,6 +152,7 @@ var PropertyPersistence = class PropertyPersistence {
         })
 	}
 
+	
 	static insertProperty(conn, param){
 		var propertyClauseArr = [];
 
@@ -204,7 +221,9 @@ var PropertyPersistence = class PropertyPersistence {
 			var text = (param.text == undefined ? 'NULL': `"${param.text}"`);
 			var value = (param.value == undefined ? 'NULL': param.value);
 			var dropdown = (param.dropdown == undefined ? 'NULL': `"${param.dropdown}"`);
-			var curve = (param.curve == undefined ? 'NULL': 0);
+
+			var curve = param.curve;
+
 			var image = (param.image == undefined ? 'NULL': 0);
 			var attachment = (param.attachment == undefined ? 'NULL': 0);
 			var status = (param.status == undefined ? 'NULL': param.status);

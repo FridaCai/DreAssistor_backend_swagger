@@ -405,6 +405,36 @@ paths:
         200:
           description: "Successful response"
       x-swagger-router-controller: "Task"
+  
+
+
+
+  /curve/{id}:
+    get:
+      tags:
+      - "Curve"
+      description: ""
+      operationId: "findCurveById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get curve by id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: object
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Curve"
+
+
+
+
 
 
   /statical:
@@ -818,7 +848,7 @@ definitions:
             items: 
               type: array
               items: 
-                type: integer
+                type: number
           series:
             type: array
             items: 
@@ -829,7 +859,7 @@ definitions:
                 isShowCurve:
                   type: boolean
                 data:
-                  type: integer
+                  type: number
 
   attachment:
     type: object
