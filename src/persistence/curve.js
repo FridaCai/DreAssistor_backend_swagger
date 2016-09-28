@@ -8,22 +8,25 @@ var CurvePersistence = class CurvePersistence {
 
 	static findById(id){
 		var sql = `select * from curve where id=${id}`;
-		var wrap = function(row){
+		var wrap = function(rows){
+			if(!rows || rows.length === 0){
+				return "";
+			}
+			
+			var row = rows[0];
 			return {
 				id: id,
 				caption: row.caption,
-				data: row.data,
-				series: row.series
+				data: JSON.parse(row.data),
+				series: JSON.parse(row.series)
 			}
 		}
 		return new Promise(function(resolve, reject){
-            conn.query(sql, function(err, result) {
-                if (err) {
-                    var errmsg = sql + '\n' + err.stack;
-                    reject(new Error(errmsg));
-                    return;
-                }
-                resolve(wrap(result));
+            dbpool.execute(sql, function(err, rows){
+                resolve({
+                    err: err,
+                    curve: wrap(rows)
+                });
             });
         })
 	}

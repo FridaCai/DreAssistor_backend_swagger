@@ -431,6 +431,22 @@ paths:
           schema:
             $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "Curve"
+    
+    options:
+      tags:
+      - "Curve"
+      description: "preflight for cors \n"
+      operationId: "curveOptions"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get curve by id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Curve"
 
 
 

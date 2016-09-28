@@ -18,8 +18,13 @@ exports.findCurveById = function(args, res, next){
 		res.setHeader('Content-Type', 'application/json;charset=UTF-8');
 		res.end(JSON.stringify({
 		  errCode: -1,
+		  curve: result.curve
 		}));
 	}).catch(function(e){
 		EAction(res, e);
 	});
+}
+
+exports.curveOptions = function(args, res, next){
+	res.end();
 }

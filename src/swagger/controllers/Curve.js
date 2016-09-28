@@ -10,3 +10,6 @@ module.exports.findCurveById = function findCurveById (req, res, next) {
 		EAction(res, e);
 	}
 };
+module.exports.curveOptions = function curveOptions (req, res, next) {
+	Curve.curveOptions(req.swagger.params, res, next);
+}
