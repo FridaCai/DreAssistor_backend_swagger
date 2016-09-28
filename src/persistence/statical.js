@@ -12,8 +12,6 @@ var StaticalPersistence = class StaticalPersistence {
 	}
     
     static getStaticalData(projectCreator, taskType, _searchExpress){
-        
-
         var wrapProperty = function(rows){
             var engineId = [-1];
             var projectId = [-1];

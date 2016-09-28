@@ -59,8 +59,8 @@ module.exports.findStaticalTaskByIdOptions = function findStaticalTaskByIdOption
 module.exports.findStaticalEngineByIdOptions = function findStaticalEngineByIdOptions (req, res, next) {
 	Statical.findStaticalEngineByIdOptions(req.swagger.params, res, next);
 };
-module.exports.findStaticalTaskByIdsOptions = function findStaticalTaskByIdsOptions (req, res, next) {
-	Statical.findStaticalTaskByIdsOptions(req.swagger.params, res, next);
+module.exports.findStaticalTasksByIdsOptions = function findStaticalTasksByIdsOptions (req, res, next) {
+	Statical.findStaticalTasksByIdsOptions(req.swagger.params, res, next);
 };
 
 

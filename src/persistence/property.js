@@ -41,7 +41,7 @@ var PropertyPersistence = class PropertyPersistence {
 
 
 		var propertyAttachment = get('property_attachment');
-		var propertyImaget = get('property_image');
+		var propertyImage = get('property_image');
 
 		properties = properties || {};
         properties[propertyId] = properties[propertyId] || {
@@ -72,8 +72,8 @@ var PropertyPersistence = class PropertyPersistence {
         if(propertyAttachment != undefined){
             properties[propertyId].attachment = propertyAttachment;   
         }
-        if(propertyImaget != undefined){
-            properties[propertyId].image = propertyImaget;   
+        if(propertyImage != undefined){
+            properties[propertyId].image = propertyImage;   
         }
 	}
 

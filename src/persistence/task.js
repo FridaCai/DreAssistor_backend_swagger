@@ -58,29 +58,32 @@ var TaskPersistence = class TaskPersistence{
 				tasks[id] = tasks[id] || row;
 
 				tasks[id]['subtask'] = tasks[id]['subtask'] || {};
-				tasks[id]['subtask'][row.subtask_id] = {
-					id: row.subtask_id,
-					label: row.subtask_label,
-					status: row.subtask_status ? true: false,
-				};
+				if(row.subtask_id != undefined){
+					tasks[id]['subtask'][row.subtask_id] = {
+						id: row.subtask_id,
+						label: row.subtask_label,
+						status: row.subtask_status ? true: false,
+					};
+				}
 				
 
 				
 				tasks[id]['attachment'] = tasks[id]['attachment'] || {};
-				tasks[id]['attachment'][row.attachment_id] = {
-					id: row.attachment_id,
-					label: row.attachment_label,
-					url: row.attachment_url
+				if(row.attachment_id != undefined){
+					tasks[id]['attachment'][row.attachment_id] = {
+						id: row.attachment_id,
+						label: row.attachment_label,
+						url: row.attachment_url
+					}	
 				}
-
-
+				
 
 				tasks[id]['propertyWrap'] = tasks[id]['propertyWrap']|| {};
 				tasks[id]['propertyWrap'][row.property_wrap_id]  = tasks[id]['propertyWrap'][row.property_wrap_id] ||{};
 
 
 				var sheets = tasks[id]['propertyWrap'][row.property_wrap_id].sheets || {};
-				PropertyPersistence.wrapProperty(tasks[id]['propertyWrap'][row.property_wrap_id].sheets, row);
+				PropertyPersistence.wrapProperty(sheets, row);
 
 				tasks[id]['propertyWrap'][row.property_wrap_id] = {
 					sheetName: row.property_wrap_label,

@@ -37,7 +37,11 @@ exports.findStaticalProjectById = function(args, res, next) {
 
   StaticalPersistence.findStaticalProjectById(id).then(function(result){
     var err = result.err;
-    var project = result.project; //bad.
+    var project = result.project;
+    
+    //avoid to update tasks and engines;
+    project.tasks = undefined;
+    project.engines = undefined;
 
     if(err){
       logger.error(err.stack);
@@ -81,7 +85,7 @@ exports.findStaticalTaskById = function(args, res, next) {
   var id = args.id.value;
   StaticalPersistence.findStaticalTaskById(id).then(function(result){
     var err = result.err;
-    var task = result.task;
+    var task = result.tasks[0];
 
     if(err){
       logger.error(err.stack);
@@ -133,7 +137,7 @@ exports.findStaticalTaskByIdOptions = function(args, res, next) {
 exports.findStaticalEngineByIdOptions = function(args, res, next) {
   res.end();
 }
-exports.findStaticalTaskByIdsOptions = function(args, res, next) {
+exports.findStaticalTasksByIdsOptions = function(args, res, next) {
   res.end();
 }
 
