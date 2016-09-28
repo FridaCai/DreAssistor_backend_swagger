@@ -39,9 +39,9 @@ exports.insertTask = function(args, res, next) {
 exports.findTaskById = function(args, res, next) {
     var param = args.id.value;
   
-    TaskPersistence.findById(param).then(function(result){
+    TaskPersistence.findByIds([param]).then(function(result){
       var err = result.err;
-      var task = result.task;
+      var task = result.tasks[0];
 
       if(err){
         logger.error(err.stack);

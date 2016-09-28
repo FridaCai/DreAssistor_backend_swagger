@@ -302,7 +302,10 @@ where 1=1
     }
     
     static findStaticalTaskById(id){
-        return TaskPersistence.findById(id);
+        return TaskPersistence.findByIds([id]);
+    }
+    static findStaticalTasksByIds(ids){
+        return TaskPersistence.findByIds(ids);
     }
     
     static findStaticalEngineById(id){

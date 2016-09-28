@@ -54,7 +54,29 @@ exports.findStaticalProjectById = function(args, res, next) {
   });
 }
 
-//todo.
+
+exports.findStaticalTasksByIds = function(args, res, next) {
+  var ids = args.ids.value.split(',');
+  StaticalPersistence.findStaticalTasksByIds(ids).then(function(result){
+    var err = result.err;
+    var tasks = result.tasks;
+
+    if(err){
+      logger.error(err.stack);
+      throw new CError(3, '');
+    } 
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      errCode: -1,
+      entity: tasks
+    }));
+  }).catch(function(e){
+    EAction(res, e);
+  });
+}
+
+
 exports.findStaticalTaskById = function(args, res, next) {
   var id = args.id.value;
   StaticalPersistence.findStaticalTaskById(id).then(function(result){
@@ -111,3 +133,10 @@ exports.findStaticalTaskByIdOptions = function(args, res, next) {
 exports.findStaticalEngineByIdOptions = function(args, res, next) {
   res.end();
 }
+exports.findStaticalTaskByIdsOptions = function(args, res, next) {
+  res.end();
+}
+
+
+
+

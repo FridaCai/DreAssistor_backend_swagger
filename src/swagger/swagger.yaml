@@ -509,6 +509,47 @@ paths:
 
 
 
+  /statical/tasks/{ids}:
+    options:
+      tags:
+      - "Statical"
+      description: "preflight for cors \n"
+      operationId: "findStaticalTasksByIdsOptions"
+      parameters:
+      - name: "ids"
+        in: "path"
+        description: "get statical task by ids"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Statical"
+
+    get:
+      tags:
+      - "Statical"
+      description: ""
+      operationId: "findStaticalTasksByIds"
+      parameters:
+      - name: "ids"
+        in: "path"
+        description: "get task detail for statical purpose"
+        required: true
+        type: "string"
+      
+      responses:
+        200:
+          description: "Successful response"
+          schema: 
+            type: array
+            items:
+              $ref: '#/definitions/task'
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Statical"
 
 
 

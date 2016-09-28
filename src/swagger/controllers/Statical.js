@@ -25,6 +25,15 @@ module.exports.findStaticalTaskById = function findStaticalTaskById (req, res, n
 		EAction(res, e);
 	}
 };
+module.exports.findStaticalTasksByIds = function findStaticalTasksByIds (req, res, next) {
+	try{
+		Statical.findStaticalTasksByIds(req.swagger.params, res, next);		
+	}catch(e){
+		EAction(res, e);
+	}
+};
+
+
 module.exports.findStaticalEngineById = function findStaticalEngineById (req, res, next) {
 	try{
 		Statical.findStaticalEngineById(req.swagger.params, res, next);		
@@ -50,3 +59,9 @@ module.exports.findStaticalTaskByIdOptions = function findStaticalTaskByIdOption
 module.exports.findStaticalEngineByIdOptions = function findStaticalEngineByIdOptions (req, res, next) {
 	Statical.findStaticalEngineByIdOptions(req.swagger.params, res, next);
 };
+module.exports.findStaticalTaskByIdsOptions = function findStaticalTaskByIdsOptions (req, res, next) {
+	Statical.findStaticalTaskByIdsOptions(req.swagger.params, res, next);
+};
+
+
+

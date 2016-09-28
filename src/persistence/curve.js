@@ -64,9 +64,6 @@ var CurvePersistence = class CurvePersistence {
         })
 	}
 	static insert(condition, conn){
-		if(condition.length === 0)
-			return Promise.resolve();
-
 		var curveClauses = condition.map(function(c){
 			var curve = c.curve;
 			var caption = curve.caption || "";

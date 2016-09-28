@@ -12,9 +12,10 @@ var TaskPersistence = class TaskPersistence{
 		
 	}
 	
-	static findById(id){
+	static findByIds(ids){
 		var startTime = Util.getOutTime('t.start_time');
 		var endTime = Util.getOutTime('t.end_time');
+		var idsClause = ids.join(',');
 		var sql =`select t.id as task_id, t.label as task_label, ${startTime} as task_startTime, 
 				${endTime} as task_endTime, t.\`desc\` as task_desc, t.priority as task_priority, 
 				t.exp as task_exp, t.start_week as task_startWeek, t.end_week as task_endWeek, 
@@ -38,7 +39,7 @@ var TaskPersistence = class TaskPersistence{
 				left join property p on (p.property_wrap_id = pw.id and p.flag=0)
 
 
-				where t.id = ${id}
+				where t.id in (${idsClause})
 				and t.flag = 0`;
 
 				//query property_attachment, property_curve, property_image when expand cell_expander.
@@ -46,83 +47,91 @@ var TaskPersistence = class TaskPersistence{
 
 		
 		var wrap = function(rows){
+			
 			if(!rows || rows.length === 0){
 				return "";
 			}
-
-			var baseInfo = rows[0];
-			var subtask = {};
-			var attachment = {};
-			var propertyWrap = {};
+			var tasks = {};
 
 			rows.map(function(row){
-				if(row.subtask_id != undefined){
-					subtask[row.subtask_id] = {
-						id: row.subtask_id,
-						label: row.subtask_label,
-						status: row.subtask_status ? true:false
-					}	
-				}
-				if(row.attachment_id != undefined){
-					attachment[row.attachment_id] = {
-						id: row.attachment_id,
-						label: row.attachment_label,
-						url: row.attachment_url
-					}	
+				var id = row.task_id;
+				tasks[id] = tasks[id] || row;
+
+				tasks[id]['subtask'] = tasks[id]['subtask'] || {};
+				tasks[id]['subtask'][row.subtask_id] = {
+					id: row.subtask_id,
+					label: row.subtask_label,
+					status: row.subtask_status ? true: false,
+				};
+				
+
+				
+				tasks[id]['attachment'] = tasks[id]['attachment'] || {};
+				tasks[id]['attachment'][row.attachment_id] = {
+					id: row.attachment_id,
+					label: row.attachment_label,
+					url: row.attachment_url
 				}
 
 
-				if(row.property_wrap_id != undefined){
-					if(!propertyWrap[row.property_wrap_id]){
-						propertyWrap[row.property_wrap_id] = {
-							sheetName: row.property_wrap_label,
-							sheets: {}
-						};
-					}
 
-					PropertyPersistence.wrapProperty(propertyWrap[row.property_wrap_id].sheets, row);
-				}
+				tasks[id]['propertyWrap'] = tasks[id]['propertyWrap']|| {};
+				tasks[id]['propertyWrap'][row.property_wrap_id]  = tasks[id]['propertyWrap'][row.property_wrap_id] ||{};
+
+
+				var sheets = tasks[id]['propertyWrap'][row.property_wrap_id].sheets || {};
+				PropertyPersistence.wrapProperty(tasks[id]['propertyWrap'][row.property_wrap_id].sheets, row);
+
+				tasks[id]['propertyWrap'][row.property_wrap_id] = {
+					sheetName: row.property_wrap_label,
+					sheets: sheets
+				};
+				
 			})
 
-			var taskObj = {
-				id: baseInfo.task_id,
-				projectId: baseInfo.task_projectId,
-				label: baseInfo.task_label,
-				startTime: baseInfo.task_startTime,
-				endTime: baseInfo.task_endTime,
-				desc: baseInfo.task_desc,
-				priority: baseInfo.task_priority,
-				exp: baseInfo.task_exp,
-				startWeek: baseInfo.task_startWeek,
-				endWeek: baseInfo.task_endWeek,
-				subtask: Object.keys(subtask).map(function(st){
-					return subtask[st]
-				}),
-				attachment: Object.keys(attachment).map(function(at){
-					return attachment[at]
-				}),
-				template: {
-					type: baseInfo.task_templateType,
-					sheetNames: Object.keys(propertyWrap).map(function(key){
-						return propertyWrap[key].sheetName;
+
+			
+			var tasksObj = Object.keys(tasks).map(function(key){
+				var task = tasks[key];
+				return {
+					id: task.task_id,
+					projectId: task.task_projectId,
+					label: task.task_label,
+					startTime: task.task_startTime,
+					endTime: task.task_endTime,
+					desc: task.task_desc,
+					priority: task.task_priority,
+					exp: task.task_exp,
+					startWeek: task.task_startWeek,
+					endWeek: task.task_endWeek,
+					subtask: Object.keys(task.subtask).map(function(st){
+						return task.subtask[st]
 					}),
-					sheets: Object.keys(propertyWrap).map(function(key){
-						var properties = propertyWrap[key].sheets;
-						return Object.keys(properties).map(function(key){
-							return properties[key];
+					attachment: Object.keys(task.attachment).map(function(at){
+						return task.attachment[at]
+					}),
+					template: {
+						type: task.task_templateType,
+						sheetNames: Object.keys(task.propertyWrap).map(function(key){
+							return task.propertyWrap[key].sheetName;
+						}),
+						sheets: Object.keys(task.propertyWrap).map(function(key){
+							var properties = task.propertyWrap[key].sheets;
+							return Object.keys(properties).map(function(key){
+								return properties[key];
+							})
 						})
-					})
+					}
 				}
-			};
-			var task = Task.create(taskObj);
-			return task.dump();
+			})
+			return tasksObj;
 		}
 
 		return new Promise(function(resolve, reject){
             dbpool.execute(sql, function(err, rows){
                 resolve({
                     err: err,
-                    task: wrap(rows)
+                    tasks: wrap(rows)
                 });
             });
         })
@@ -413,6 +422,9 @@ var TaskPersistence = class TaskPersistence{
 	        		}
         		})
         	})
+        	if(propertyIds.length === 0)
+        		return Promise.resolve();
+
         	return CurvePersistence.delete(propertyIds, conn);
 		}
 
@@ -433,12 +445,20 @@ var TaskPersistence = class TaskPersistence{
 	        		}
         		})
         	})
+
+        	if(curveParam.length === 0){
+        		return Promise.resolve();
+        	}
+
         	return CurvePersistence.insert(curveParam, conn);
 		}
 
 		var updateProperty = function(result, conn){
+			//return for some reason.
+
+
 			debugger;
-			var rowId = result[0].insertId;
+			var insertCurveFirstId = result[0] ? result[0].insertId:undefined;
 			var conditions = [];
 			var params = [];
 			var index = 0;
@@ -447,18 +467,22 @@ var TaskPersistence = class TaskPersistence{
 			sheets.map(function(sheet){
 				sheet.map(function(property){
 					
-					
-					if(CurvePersistence.isDefined(property.curve)){ //todo: should in Curve data model.
-						var curveId = rowId + index;
-						property.curve = curveId;
-						index ++;
-					}else if(CurvePersistence.isNeed(property.curve)){
-						property.curve = 0;
-					}else if(CurvePersistence.notNeed(property.curve)){
-						property.curve = 'NULL';
+					if(insertCurveFirstId){
+						if(CurvePersistence.isDefined(property.curve)){ //todo: should in Curve data model.
+							var curveId = insertCurveFirstId + index;
+							property.curve = curveId;
+							index ++;
+						}else if(CurvePersistence.isNeed(property.curve)){
+							property.curve = 0;
+						}else if(CurvePersistence.notNeed(property.curve)){
+							property.curve = 'NULL';
+						}else{
+							console.error('error in taskPersistence.update.');
+						}	
 					}else{
-						console.error('error in taskPersistence.update.');
+						property.curve = 'NULL';
 					}
+					
 
 
 
