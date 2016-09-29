@@ -22,7 +22,7 @@ var PropertyPersistence = class PropertyPersistence {
 		var propertyText = get('property_text');
 		var propertyValue = get('property_value');
 		var propertyRefkey = get('property_ref_key');
-		var propertyStatus = get('property_status') ? true: false;
+		var propertyStatus = get('property_status');
 		
 		//convert db curve to client;
 		var propertyCurve = (function(curve){
@@ -64,7 +64,7 @@ var PropertyPersistence = class PropertyPersistence {
             properties[propertyId].ref_key = propertyRefkey;   
         }
         if(propertyStatus != undefined){
-            properties[propertyId].status = propertyStatus;   
+            properties[propertyId].status = propertyStatus ? true: false;   
         }
         if(propertyCurve != undefined){
             properties[propertyId].curve = propertyCurve;   

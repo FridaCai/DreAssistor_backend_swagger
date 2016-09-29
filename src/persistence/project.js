@@ -327,7 +327,7 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
                     return project.properties[key];
                 }),
                 engines: Object.keys(project.engines).sort(function(k1, k2){
-                    return (k1-k2 < 0);
+                    return (k1.id-k2.id < 0);
                 }).map(function(key){
                     var engine =  project.engines[key];
                     engine.properties = Object.keys(engine.properties).map(function(propertyKey){
