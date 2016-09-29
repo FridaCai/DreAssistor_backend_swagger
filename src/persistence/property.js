@@ -222,7 +222,11 @@ var PropertyPersistence = class PropertyPersistence {
 			var value = (param.value == undefined ? 'NULL': param.value);
 			var dropdown = (param.dropdown == undefined ? 'NULL': `"${param.dropdown}"`);
 
-			var curve = param.curve;
+
+			var curve = (param.curve == undefined ? 'NULL': param.curve);
+			//tricky before demo
+			curve = (typeof curve==='object') ? 0:curve;
+
 
 			var image = (param.image == undefined ? 'NULL': 0);
 			var attachment = (param.attachment == undefined ? 'NULL': 0);
