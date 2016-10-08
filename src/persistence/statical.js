@@ -5,6 +5,8 @@ var TaskPersistence = require('./task.js');
 var EnginePersistence = require('./engine.js');
 
 var propertyKeyMapping = require('../config/propertyKey_searchExpress_mapping.js');
+var Util = require('../util.js');
+
 
 var StaticalPersistence = class StaticalPersistence {
 	constructor(){
@@ -62,6 +64,7 @@ var StaticalPersistence = class StaticalPersistence {
             
             var sqls = [`select p.id as project_id, p.label as project_label, p.creator_id as project_creator_id,
                 t.id as task_id, t.label as task_label, t.template_type as task_templateType,
+                ${Util.getOutTime('t.start_time')} as task_startTime, ${Util.getOutTime('t.end_time')} as task_endTime, 
                 e.id as engine_id, 
                 pro.id as engine_property_id, pro.key as engine_property_key, pro.text as engine_property_text, 
                 pro.label as engine_property_label,
@@ -121,6 +124,8 @@ var StaticalPersistence = class StaticalPersistence {
                     var taskId = row.task_id;
                     var taskLabel = row.task_label;
                     var taskType = row.task_templateType;
+                    var taskStartTime = row.task_startTime;
+                    var taskEndTime = row.task_endTime;
                     var engineId = row.engine_id;
                     var enginePropertyId = row.engine_property_id;
                     var enginePropertyKey = row.engine_property_key;
@@ -148,6 +153,8 @@ var StaticalPersistence = class StaticalPersistence {
                         projects[projectId].tasks[taskId] = projects[projectId].tasks[taskId] || {
                             id: taskId,
                             label: taskLabel,
+                            startTime: taskStartTime,
+                            endTime: taskEndTime,
                             template: {
                                 type: taskType
                             }
