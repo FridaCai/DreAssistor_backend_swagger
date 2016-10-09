@@ -368,7 +368,9 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
  
         if(param.userId != undefined)
             sqls.push(`and p.creator_id=${param.userId}`);
-        var sql = sqls.join(' ')
+        var sql = sqls.join(' ');
+
+        console.log(sql);
 
         var wrap = function(rows){
             var projects = {};
@@ -433,10 +435,16 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
 
         return new Promise(function(resolve, reject){
             dbpool.execute(sql, function(err, rows){
-                resolve({
-                    err: err,
-                    projects: wrap(rows)
-                });
+                if(err){
+                    resolve({
+                        err: err
+                    })
+                }else{
+                    resolve({
+                        projects: wrap(rows)
+                    });
+                }
+                
             });
         })
     }
