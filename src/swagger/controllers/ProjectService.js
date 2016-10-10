@@ -15,13 +15,18 @@ exports.projectOptions2 = function(args, res, next) {
 exports.findProjects = function(args, res, next) {
   //how to get user?
   var userId = args.userId.value;
+  var offset = args.offset.value;
+  var limit = args.limit.value;
   var param = {
-    userId: userId
+    userId: userId,
+    offset: offset,
+    limit: limit
   }
 
   ProjectPersistence.findProjects(param).then(function(result){
     var err = result.err;
     var projects = result.projects;
+    var count = result.count;
 
     if(err){
       logger.error(err.stack);
@@ -31,7 +36,8 @@ exports.findProjects = function(args, res, next) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({
       errCode: -1,
-      projects: projects
+      projects: projects,
+      count: count,
     }));
   }).catch(function(e){
     EAction(res, e);

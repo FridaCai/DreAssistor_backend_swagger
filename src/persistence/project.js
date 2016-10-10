@@ -352,93 +352,145 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
     }
 
     static findProjects(param){
-        var startTime = Util.getOutTime('task.start_time');
-        var endTime = Util.getOutTime('task.end_time');
-        var tagTime = Util.getOutTime('tag.time');
-        var sorp = Util.getOutTime('p.sorp ');
+        var userId = param.userId;
+        var offset = param.offset;
+        var limit = param.limit;
 
-        var sqls = [`select p.id as project_id, p.label as project_label, ${sorp} as project_sorp, 
-            p.creator_id as project_creator_id, task.id as task_id,
-            task.label as task_label, ${startTime} as task_startTime, ${endTime} as task_endTime,
-            tag.id as tag_id, tag.label as tag_label, ${tagTime} as tag_time, tag.week as tag_week
-            from project p
-            left join task on (p.id = task.project_id and task.flag=0)
-            left join tag on (p.id = tag.project_id and tag.flag=0)
-            where p.flag=0`];//todo: add offset and limit;
- 
-        if(param.userId != undefined)
-            sqls.push(`and p.creator_id=${param.userId}`);
-        var sql = sqls.join(' ')
-
-        var wrap = function(rows){
-            var projects = {};
-            
-            rows.map(function(row){
-                var projectId = row.project_id;
-                var projectLabel = row.project_label;
-                var projectSorp = row.project_sorp;
-                var projectCreatorId = row.project_creator_id;
-                
-                var taskId = row.task_id;
-                var taskLabel = row.task_label;
-                var taskStartTime = row.task_startTime;
-                var taskEndTime = row.task_endTime;
-
-                var tagId = row.tag_id;
-                var tagLabel = row.tag_label;
-                var tagTime = row.tag_time;
-                var tagWeek = row.tag_week;
-
-                projects[projectId] = projects[projectId] || {
-                    id: projectId,
-                    label: projectLabel,
-                    sorp: projectSorp,
-                    creatorId: projectCreatorId,
-                    tasks: {}, 
-                    tags: {},
-                }
-
-                projects[projectId].tasks[taskId] = projects[projectId].tasks[taskId] || {
-                    id: taskId,
-                    label: taskLabel,
-                    startTime: taskStartTime,
-                    endTime: taskEndTime
-                }   
-
-                projects[projectId].tags[tagId] = projects[projectId].tags[tagId] || {
-                    id: tagId,
-                    label: tagLabel,
-                    time: tagTime,
-                    week: tagWeek
-                }
+        var queryCount = function(result, conn){
+            var sql = `select count(*) as count from project where flag = 0`;
+            return new Promise(function(resolve, reject){
+                conn.query(sql, function(err, result) {
+                    if (err) {
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
+                        return;
+                    }
+                    resolve(result);
+                });    
             })
-
-            var returnArr = Object.keys(projects).map(function(key){
-                var project = projects[key];
-                return {
-                    id: project.id,
-                    label: project.label,
-                    sorp: project.sorp,
-                    tasks: Object.keys(project.tasks).map(function(key){
-                        return (project.tasks[key])
-                    }),
-                    tags: Object.keys(project.tags).map(function(key){
-                        return project.tags[key];
-                    })
-                }
-            })
-            returnArr.reverse();  //might have problem.
-            return returnArr;
         }
 
+
+        var queryProjects = function(result, conn){
+            var condition = (userId != undefined ? `and p.creator_id=${userId}` : '');
+            var sql = `select id from project p where p.flag=0 ${condition} order by id desc limit ${offset},${limit} `;
+            return new Promise(function(resolve, reject){
+                conn.query(sql, function(err, result) {
+                    if (err) {
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
+                        return;
+                    }
+                    resolve(result);
+                });    
+            })
+        }
+
+        var queryOtherInfo = function(result, conn){
+            var count = result[0][0].count;
+            var projectIds = result[1].map(function(row){return row.id}).join(',');
+
+            var startTime = Util.getOutTime('task.start_time');
+            var endTime = Util.getOutTime('task.end_time');
+            var tagTime = Util.getOutTime('tag.time');
+            var sorp = Util.getOutTime('p.sorp ');
+
+            var sql = `select p.id as project_id, p.label as project_label, ${sorp} as project_sorp, 
+                p.creator_id as project_creator_id, task.id as task_id,
+                task.label as task_label, ${startTime} as task_startTime, ${endTime} as task_endTime,
+                tag.id as tag_id, tag.label as tag_label, ${tagTime} as tag_time, tag.week as tag_week
+                from project p
+                left join task on (p.id = task.project_id and task.flag=0)
+                left join tag on (p.id = tag.project_id and tag.flag=0)
+                where p.id in (${projectIds})`;
+
+            var wrap = function(rows){
+                var projects = {};
+                
+                rows.map(function(row){
+                    var projectId = row.project_id;
+                    var projectLabel = row.project_label;
+                    var projectSorp = row.project_sorp;
+                    var projectCreatorId = row.project_creator_id;
+                    
+                    var taskId = row.task_id;
+                    var taskLabel = row.task_label;
+                    var taskStartTime = row.task_startTime;
+                    var taskEndTime = row.task_endTime;
+
+                    var tagId = row.tag_id;
+                    var tagLabel = row.tag_label;
+                    var tagTime = row.tag_time;
+                    var tagWeek = row.tag_week;
+
+                    projects[projectId] = projects[projectId] || {
+                        id: projectId,
+                        label: projectLabel,
+                        sorp: projectSorp,
+                        creatorId: projectCreatorId,
+                        tasks: {}, 
+                        tags: {},
+                    }
+
+                    projects[projectId].tasks[taskId] = projects[projectId].tasks[taskId] || {
+                        id: taskId,
+                        label: taskLabel,
+                        startTime: taskStartTime,
+                        endTime: taskEndTime
+                    }   
+
+                    projects[projectId].tags[tagId] = projects[projectId].tags[tagId] || {
+                        id: tagId,
+                        label: tagLabel,
+                        time: tagTime,
+                        week: tagWeek
+                    }
+                })
+
+                var returnArr = Object.keys(projects).map(function(key){
+                    var project = projects[key];
+                    return {
+                        id: project.id,
+                        label: project.label,
+                        sorp: project.sorp,
+                        tasks: Object.keys(project.tasks).map(function(key){
+                            return (project.tasks[key])
+                        }),
+                        tags: Object.keys(project.tags).map(function(key){
+                            return project.tags[key];
+                        })
+                    }
+                })
+                returnArr.reverse();  //might have problem.
+                return returnArr;
+            }
+
+            return new Promise(function(resolve, reject){
+                conn.query(sql, function(err, rows) {
+                    if (err) {
+                        var errmsg = sql + '\n' + err.stack;
+                        reject(new Error(errmsg));
+                        return;
+                    }
+                    resolve({
+                        projects: wrap(rows),
+                        count: count
+                    });
+                });    
+            })
+        }
+
+        var transactionArr = [[queryCount, queryProjects], [queryOtherInfo]];
+
         return new Promise(function(resolve, reject){
-            dbpool.execute(sql, function(err, rows){
+            dbpool.transaction(transactionArr, function(err, result){
                 resolve({
                     err: err,
-                    projects: wrap(rows)
+                    projects: result[0].projects,
+                    count: result[0].count
                 });
-            });
-        })
+            });            
+        });
     }
 
     static deleteProjectById(projectId, restore){

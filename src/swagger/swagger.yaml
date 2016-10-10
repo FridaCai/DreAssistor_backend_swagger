@@ -10,12 +10,6 @@ schemes:
 produces:
 - "application/json"
 
-
-
-
-
-
-
 paths:
   /authTest:
     get:
@@ -163,6 +157,16 @@ paths:
         in: query
         description: "project ownerId"
         required: false
+        type: "integer"
+      - name: "offset"
+        in: query
+        description: "page offset"
+        required: true
+        type: "integer"
+      - name: "limit"
+        in: query
+        description: "page limit"
+        required: true
         type: "integer"
       
       responses:
