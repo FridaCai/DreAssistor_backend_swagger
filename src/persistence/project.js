@@ -358,6 +358,9 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
 
         var queryCount = function(result, conn){
             var sql = `select count(*) as count from project where flag = 0`;
+
+            var condition = (userId != undefined ? `and p.creator_id=${userId}` : '');
+            var sql = `select count(*) as count from project p where p.flag=0 ${condition}`;
             return new Promise(function(resolve, reject){
                 conn.query(sql, function(err, result) {
                     if (err) {
