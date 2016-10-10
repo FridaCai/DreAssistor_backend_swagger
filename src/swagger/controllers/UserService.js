@@ -7,6 +7,7 @@ var User = require('../../model/user.js');
 
 var EAction = require('../../exception.js').action;
 var CError = require('../../exception.js').CError;
+var logger = require('../../logger.js').logger('normal');
 
 
 exports.userOptions = function(args, res, next) {

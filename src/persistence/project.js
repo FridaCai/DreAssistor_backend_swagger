@@ -481,14 +481,18 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
         }
 
         var transactionArr = [[queryCount, queryProjects], [queryOtherInfo]];
-
         return new Promise(function(resolve, reject){
             dbpool.transaction(transactionArr, function(err, result){
-                resolve({
-                    err: err,
-                    projects: result[0].projects,
-                    count: result[0].count
-                });
+                if(err){
+                    resolve({
+                        err: err
+                    });    
+                }else{
+                    resolve({
+                        projects: result[0].projects,
+                        count: result[0].count
+                    });    
+                }                
             });            
         });
     }
