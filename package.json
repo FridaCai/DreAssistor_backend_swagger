@@ -24,6 +24,7 @@
     "log4js": "^0.6.37",
     "moment": "^2.13.0",
     "mysql": "^2.10.2",
+    "node-debug": "^0.1.0",
     "swagger-tools": "0.10.1"
   }
 }

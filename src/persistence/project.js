@@ -391,8 +391,18 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
 
         var queryOtherInfo = function(result, conn){
             var count = result[0][0].count;
-            var projectIds = result[1].map(function(row){return row.id}).join(',');
+            var projectIdArr = result[1].map(function(row){return row.id});
+            if(projectIdArr.length === 0){
+                return new Promise(function(resolve, reject){
+                    resolve({
+                        projects: [],
+                        count: 0
+                    })
+                })
+            }
 
+
+            var projectIds = projectIdArr.join(',');
             var startTime = Util.getOutTime('task.start_time');
             var endTime = Util.getOutTime('task.end_time');
             var tagTime = Util.getOutTime('tag.time');
