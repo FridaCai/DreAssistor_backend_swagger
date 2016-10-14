@@ -61,7 +61,7 @@ var PropertyPersistence = class PropertyPersistence {
             properties[propertyId].value = parseFloat(propertyValue);   
         }
         if(propertyRefkey != undefined){
-            properties[propertyId].ref_key = propertyRefkey;   
+            properties[propertyId].refKey = propertyRefkey;   
         }
         if(propertyStatus != undefined){
             properties[propertyId].status = propertyStatus ? true: false;   

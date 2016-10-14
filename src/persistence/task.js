@@ -26,7 +26,7 @@ var TaskPersistence = class TaskPersistence{
 				a.id as attachment_id, a.label as attachment_label, a.url as attachment_url,
 				
 				p.id as property_id, p.dropdown as property_dropdown, p.text as property_text,
-				p.value as property_value, p.ref_key as property_refKey, p.status as property_status,
+				p.value as property_value, p.ref_key as property_ref_key, p.status as property_status,
 				p.label as property_label, p.curve as property_curve, p.attachment as property_attachment, 
 				p.image as property_image, p.\`key\` as property_key, 
 
