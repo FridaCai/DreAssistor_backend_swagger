@@ -27,7 +27,7 @@ var PropertyPersistence = class PropertyPersistence {
 		//convert db curve to client;
 		var propertyCurve = (function(curve){
 			if(curve == undefined){
-				return curve;
+				return undefined;
 			}else if(curve === 0){
 				return {};
 			}else{
@@ -40,8 +40,23 @@ var PropertyPersistence = class PropertyPersistence {
 
 
 
-		var propertyAttachment = get('property_attachment');
-		var propertyImage = get('property_image');
+		var propertyAttachment = (function(at){
+			if(at == undefined){
+				return undefined;
+			}else if(at === 0){
+				return [];//query more info when user open expander.
+			}
+		})(get('property_attachment'));
+
+
+		var propertyImage = (function(img){
+			if(img == undefined){
+				return undefined;
+			}else if(img === 0){
+				return [];//query more info when user open expander.
+			}
+		})(get('property_image'));
+
 
 		properties = properties || {};
         properties[propertyId] = properties[propertyId] || {
