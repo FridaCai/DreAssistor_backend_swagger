@@ -6,6 +6,8 @@ var Util = require('../util.js');
 var PropertyPersistence = require('./property.js');
 var CurvePersistence = require('./curve.js');
 var Task = require('../model/task.js');
+var SubTaskPersistence = require('./subtask.js');
+var AttachmentPersistence = require('./attachment.js');
 
 var TaskPersistence = class TaskPersistence{
 	constructor(){
@@ -322,98 +324,14 @@ var TaskPersistence = class TaskPersistence{
             })
 		}
 
-		var deleteAllSubtask = function(result, conn){
-			var taskId = task.id;
-			var sql = `delete from subtask where task_id=${taskId}`;
-			return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
-                    }
-                    resolve(result);
-                })    
-            })
-
+		var updateSubTask = function(){
+			return SubTaskPersistence.assembleUpdateHandlers(task);
 		}
-		var insertSubtask = function(result, conn){
-			if(task.subtask.length ===0)
-				return Promise.resolve();
 
-			var sqls = [];
-			task.subtask.map(function(st){
-				//todo.
-				var id = (st.id == undefined ? 'NULL' : st.id);
-				var label = (st.label == undefined ? 'NULL' : `"${st.label}"`);
-				var status = st.status;
-				var taskId = task.id;
-
-				//why not insert directly? for create_time. otherwise, create_time will lose.
-				sqls.push(`INSERT INTO subtask (id, label, status, task_id) 
-					VALUES (${id}, ${label}, ${status}, ${taskId})
-					ON DUPLICATE KEY 
-					UPDATE label=values(label), 
-					status=values(status), 
-					task_id=values(task_id)`);
-			})
-			var sql = sqls.join(';');
-			return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
-                    }
-                    resolve(result);
-                })    
-            })
+		var updateAttachment = function(result, conn){
+			return AttachmentPersistence.assembleUpdateHandlers(task);
 		}
-		var deleteAllAttachment = function(result, conn){
-			var taskId = task.id;
-			var sql = `delete from attachment where task_id=${taskId}`;
-			return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
-                    }
-                    resolve(result);
-                })    
-            })
-		}
-		var insertAttachment = function(result, conn){
-			if(task.attachment.length ===0 )
-				return Promise.resolve();
 
-			var sqls = [];
-			task.attachment.map(function(at){
-				var id = (at.id == undefined ? 'NULL' : at.id);
-				var label = (at.label == undefined ? 'NULL' : `"${at.label}"`);
-				var url = (at.url == undefined ? 'NULL' : `"${at.url}"`);
-				var taskId = task.id;
-
-				//why not insert directly? for create_time. otherwise, create_time will lose.
-				sqls.push(`INSERT INTO attachment (id, label, url, task_id) 
-					VALUES (${id}, ${label}, ${url}, ${taskId})
-					ON DUPLICATE KEY 
-					UPDATE label=values(label), 
-					url=values(url), 
-					task_id=values(task_id)`);
-			})
-			var sql = sqls.join(';');
-			return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
-                    }
-                    resolve(result);
-                })    
-            })
-		}
 
 		var deleteCurve = function(result, conn){
 			var sheets = task.template.sheets;
@@ -432,7 +350,6 @@ var TaskPersistence = class TaskPersistence{
 		}
 
 		var insertCurve = function(result, conn){
-			debugger;
 			var sheets = task.template.sheets;
         	var curveParam = [];
 
@@ -456,11 +373,8 @@ var TaskPersistence = class TaskPersistence{
         	return CurvePersistence.insert(curveParam, conn);
 		}
 
+		
 		var updateProperty = function(result, conn){
-			//return for some reason.
-
-
-			debugger;
 			var insertCurveFirstId = result[0] ? result[0].insertId:undefined;
 			var conditions = [];
 			var params = [];
@@ -485,10 +399,6 @@ var TaskPersistence = class TaskPersistence{
 					}else{
 						property.curve = 'NULL';
 					}
-					
-
-
-
 					conditions.push({
 						key: 'id',
 						value: property.id
@@ -499,7 +409,7 @@ var TaskPersistence = class TaskPersistence{
 			return PropertyPersistence.update(conn, conditions, params);
 		}
 
-		var transactionArr = [[updateTask, deleteAllSubtask, insertSubtask, deleteAllAttachment, insertAttachment, deleteCurve], [insertCurve], [updateProperty]];
+		var transactionArr = [[updateTask, deleteCurve], updateSubTask(), updateAttachment(), [insertCurve], [updateProperty]];
         return new Promise(function(resolve, reject){
             dbpool.transaction(transactionArr, function(err, rows){
                 resolve({
