@@ -46,13 +46,16 @@ var EnginePersistence = class EnginePersistence {
         })
 	}
 
-
 	static insertProperties(result, conn, engines){
-		var affectedRows = result[0].affectedRows;
-        if(affectedRows.length === 0)
-            return Promise.resolve();
+		var affectedRows = result.affectedRows;
+        if(affectedRows.length === 0){
+        	return Promise.resolve({
+				affectedRows: []
+			});
+        }
+            
 
-        var insertId = result[0].insertId;
+        var insertId = result.insertId;
         var conditions = [];
         for(var i=0; i<affectedRows; i++){
             var engineId = insertId + i;
@@ -66,8 +69,24 @@ var EnginePersistence = class EnginePersistence {
                 }
             })
        }
-       return PropertyPersistence.insertProperty(conn, conditions);   
+       return PropertyPersistence.insertProperty(conditions, result, conn);   
 	}
+	static insertPropertiesCurve(result, conn, engines){
+		if(result.affectedRows.length === 0){
+			return Promise.resolve({
+				affectedRows: []
+			});
+		}
+
+		var properties = [];
+		engines.map(function(engine){
+			engine.properties.map(function(property){
+				properties.push(property);
+			})
+		})
+		return PropertyPersistence.insertCurve(properties, result, conn);
+	}
+
 
 
 	static assembleUpdateHandlers(engines, projectId){
@@ -150,8 +169,6 @@ var EnginePersistence = class EnginePersistence {
 
 			return PropertyPersistence.deleteByEngineIds(conn, params);
 		}
-
-
 		var update = function(result, conn){
 			var params = result[0].updateEngineParam;
 			if(params.length === 0)
@@ -173,34 +190,28 @@ var EnginePersistence = class EnginePersistence {
                 });    
     		})
 		}
-
+	
 		var updateProperties = function(result, conn){
 			var params = result[0].updateEngineParam;
-
-			if(params.length === 0)
-				return Promise.resolve();
-
-			var conditions = [];
 			var properties = [];
 			params.map(function(param){
 				param.properties.map(function(property){
-					conditions.push({
-						key: 'id',
-						value: property.id
-					});
 					properties.push(property);
 				})
 			})
-			return PropertyPersistence.update(conn, conditions, properties);
+			return PropertyPersistence.assembleUpdateHandlers(properties, result, conn);
 		}
+		
 		var insertEngine = function(result, conn){
 			var params = result[0].insertEngineParam;
 			return EnginePersistence.insertEngine(conn, projectId, params);
 		}
 		var insertEngineProperties = function(result, conn){
-			return EnginePersistence.insertProperties(result, conn, engines);
+			return EnginePersistence.insertProperties(result[0], conn, engines);
 		}
-
+		var insertEnginePropertiesCurve = function(result, conn){
+			return EnginePersistence.insertPropertiesCurve(result[0], conn, engines);
+		}
 
 		return [
 			[select], 
@@ -211,7 +222,8 @@ var EnginePersistence = class EnginePersistence {
 				update, 
 				updateProperties
 			],
-			[insertEngineProperties]
+			[insertEngineProperties],
+			[insertEnginePropertiesCurve]
 		];
 	}
 

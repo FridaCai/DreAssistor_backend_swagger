@@ -7,7 +7,7 @@ var CurvePersistence = class CurvePersistence {
 	}
 
 	static findById(id){
-		var sql = `select * from curve where id=${id}`;
+		var sql = `select * from curve where id=${id} and flag=0`;
 		var wrap = function(rows){
 			if(!rows || rows.length === 0){
 				return "";
@@ -30,9 +30,32 @@ var CurvePersistence = class CurvePersistence {
             });
         })
 	}
+	static findByPropertyId(id){
+		var sql = `select * from curve where property_id=${id} and flag=0`;
+		var wrap = function(rows){
+			if(!rows || rows.length === 0){
+				return null;
+			}
+			
+			var row = rows[0];
+			return {
+				id: id,
+				caption: row.caption,
+				data: JSON.parse(row.data),
+				series: JSON.parse(row.series)
+			}
+		}
+		return new Promise(function(resolve, reject){
+            dbpool.execute(sql, function(err, rows){
+                resolve({
+                    err: err,
+                    curve: wrap(rows)
+                });
+            });
+        })
+	}
 
-
-	//curve: 
+	//curve client: 
 	//undefined -- no need, 
 	//{} --to be defined,  
 	//{data:[], series:{}, chapter:''} --defined

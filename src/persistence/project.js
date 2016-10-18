@@ -5,6 +5,7 @@ var Util = require('../util.js');
 var PropertyPersistence = require('./property.js');
 var TaskPersistence = require('./task.js');
 var EnginePersistence = require('./engine.js');
+var CurvePersistence = require('./curve.js');
 
 var ProjectPersistence = class ProjectPersistence {
 	constructor(){
@@ -65,21 +66,16 @@ var ProjectPersistence = class ProjectPersistence {
         }
 
         var updateProperty = function(result, conn){
-            var properties = param.properties;
-            var conditions = properties.map(function(property){
-                return {
-                    key: 'id',
-                    value: property.id
-                }
-            })
-            var properties = param.properties;
-            return PropertyPersistence.update(conn, conditions, properties);
+            return PropertyPersistence.assembleUpdateHandlers(param.properties, result, conn);
         }
 
 
-        var transactionArr = [[updateProject, updateTag, updateTask, updateProperty]];
+        
+        var transactionArr = [[updateProject, updateTag, updateTask, 
+            updateProperty]];
         var engineArr = EnginePersistence.assembleUpdateHandlers(param.engines, projectId);
         transactionArr = transactionArr.concat(engineArr);
+
         return new Promise(function(resolve, reject){
             dbpool.transaction(transactionArr, function(err, rows){
                 resolve({
@@ -103,7 +99,6 @@ var ProjectPersistence = class ProjectPersistence {
                     resolve(result);
                 })    
             })
-			
 		}
 
 		var insertTags = function(result, conn){
@@ -170,30 +165,40 @@ var ProjectPersistence = class ProjectPersistence {
             })
 	    }
 
-        var insertProperties = function(result, conn){
+        var insertProperty = function(result, conn){
             var projectId = result[0].insertId;
-            return PropertyPersistence.insertProperty.call(this, conn, [{
+            var conditions = [{
                 properties: param.properties,
                 foreignObj: {
                     key: 'project_id',
                     value: projectId
                 }
-            }])
+            }]
+            return PropertyPersistence.insertProperty(conditions, result, conn);
+        }
+        var insertPropertyCurve = function(result, conn){
+            return PropertyPersistence.insertCurve(param.properties, result[0], conn);
         }
 
 	    var insertEngines = function(result, conn){
             var projectId = result[0].insertId;
             return EnginePersistence.insertEngine(conn, projectId, param.engines);
     	}
+
+
         var insertEngineProperties = function(result, conn){
-            return EnginePersistence.insertProperties(result, conn, param.engines);
+            return EnginePersistence.insertProperties(result[1], conn, param.engines);
+        }
+        var insertEnginePropertiesCurve = function(result, conn){
+            return EnginePersistence.insertPropertiesCurve(result[1], conn, param.engines);
         }
 
 		return new Promise(function(resolve, reject){
 			dbpool.transaction([
 	    		[insertProject], 
-	    		[insertEngines, insertTags, insertTasks, insertProperties],
-                [insertEngineProperties]
+	    		[insertProperty, insertEngines, insertTags, insertTasks],
+                [insertPropertyCurve, insertEngineProperties],
+                [insertEnginePropertiesCurve]
 			], function(err, rows){
 				resolve({
 					err: err,
@@ -391,8 +396,6 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
 
         var queryOtherInfo = function(result, conn){
             var count = result[0][0].count;
-
-debugger;
             if(count == 0){
                 return new Promise(function(resolve, reject){
                     resolve({
@@ -401,9 +404,8 @@ debugger;
                     })
                 })
             }
-
-
             var projectIds = result[1].map(function(row){return row.id}).join(',');
+
             var startTime = Util.getOutTime('task.start_time');
             var endTime = Util.getOutTime('task.end_time');
             var tagTime = Util.getOutTime('tag.time');

@@ -6,6 +6,8 @@ var Util = require('../util.js');
 var PropertyPersistence = require('./property.js');
 var CurvePersistence = require('./curve.js');
 var Task = require('../model/task.js');
+var SubTaskPersistence = require('./subtask.js');
+var AttachmentPersistence = require('./attachment.js');
 
 var TaskPersistence = class TaskPersistence{
 	constructor(){
@@ -26,7 +28,7 @@ var TaskPersistence = class TaskPersistence{
 				a.id as attachment_id, a.label as attachment_label, a.url as attachment_url,
 				
 				p.id as property_id, p.dropdown as property_dropdown, p.text as property_text,
-				p.value as property_value, p.ref_key as property_refKey, p.status as property_status,
+				p.value as property_value, p.ref_key as property_ref_key, p.status as property_status,
 				p.label as property_label, p.curve as property_curve, p.attachment as property_attachment, 
 				p.image as property_image, p.\`key\` as property_key, 
 
@@ -213,7 +215,7 @@ var TaskPersistence = class TaskPersistence{
 	                }
 	            })
             })
-            return PropertyPersistence.insertProperty(conn, propertyParam);
+            return PropertyPersistence.insertProperty(propertyParam, result, conn);
         }
 
       
@@ -225,7 +227,7 @@ var TaskPersistence = class TaskPersistence{
 		return new Promise(function(resolve, reject){
 			dbpool.transaction(transactionArr, function(err, rows){
 				resolve({
-					err: (err ? err.stack: null)
+					err: err
 				});
 			});
 		});
@@ -322,184 +324,28 @@ var TaskPersistence = class TaskPersistence{
             })
 		}
 
-		var deleteAllSubtask = function(result, conn){
-			var taskId = task.id;
-			var sql = `delete from subtask where task_id=${taskId}`;
-			return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
-                    }
-                    resolve(result);
-                })    
-            })
-
-		}
-		var insertSubtask = function(result, conn){
-			if(task.subtask.length ===0)
-				return Promise.resolve();
-
-			var sqls = [];
-			task.subtask.map(function(st){
-				//todo.
-				var id = (st.id == undefined ? 'NULL' : st.id);
-				var label = (st.label == undefined ? 'NULL' : `"${st.label}"`);
-				var status = st.status;
-				var taskId = task.id;
-
-				//why not insert directly? for create_time. otherwise, create_time will lose.
-				sqls.push(`INSERT INTO subtask (id, label, status, task_id) 
-					VALUES (${id}, ${label}, ${status}, ${taskId})
-					ON DUPLICATE KEY 
-					UPDATE label=values(label), 
-					status=values(status), 
-					task_id=values(task_id)`);
-			})
-			var sql = sqls.join(';');
-			return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
-                    }
-                    resolve(result);
-                })    
-            })
-		}
-		var deleteAllAttachment = function(result, conn){
-			var taskId = task.id;
-			var sql = `delete from attachment where task_id=${taskId}`;
-			return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
-                    }
-                    resolve(result);
-                })    
-            })
-		}
-		var insertAttachment = function(result, conn){
-			if(task.attachment.length ===0 )
-				return Promise.resolve();
-
-			var sqls = [];
-			task.attachment.map(function(at){
-				var id = (at.id == undefined ? 'NULL' : at.id);
-				var label = (at.label == undefined ? 'NULL' : `"${at.label}"`);
-				var url = (at.url == undefined ? 'NULL' : `"${at.url}"`);
-				var taskId = task.id;
-
-				//why not insert directly? for create_time. otherwise, create_time will lose.
-				sqls.push(`INSERT INTO attachment (id, label, url, task_id) 
-					VALUES (${id}, ${label}, ${url}, ${taskId})
-					ON DUPLICATE KEY 
-					UPDATE label=values(label), 
-					url=values(url), 
-					task_id=values(task_id)`);
-			})
-			var sql = sqls.join(';');
-			return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
-                    }
-                    resolve(result);
-                })    
-            })
+		var updateSubTask = function(){
+			return SubTaskPersistence.assembleUpdateHandlers(task);
 		}
 
-		var deleteCurve = function(result, conn){
-			var sheets = task.template.sheets;
-        	var propertyIds = [];
-        	sheets.map(function(sheet, index){
-        		sheet.map(function(property){
-        			if(CurvePersistence.isDefined(property.curve)){ /*todo: should in Curve data model.*/
-	        			propertyIds.push(property.id);
-	        		}
-        		})
-        	})
-        	if(propertyIds.length === 0)
-        		return Promise.resolve();
-
-        	return CurvePersistence.delete(propertyIds, conn);
+		var updateAttachment = function(result, conn){
+			return AttachmentPersistence.assembleUpdateHandlers(task);
 		}
 
-		var insertCurve = function(result, conn){
-			debugger;
-			var sheets = task.template.sheets;
-        	var curveParam = [];
 
-        	sheets.map(function(sheet, index){
-        		sheet.map(function(property){
-
-        			var propertyId = property.id;	
-        			if(CurvePersistence.isDefined(property.curve)){ /*todo: should in Curve data model.*/
-	        			curveParam.push({
-		        			curve: property.curve,
-		        			propertyId: propertyId
-		        		});
-	        		}
-        		})
-        	})
-
-        	if(curveParam.length === 0){
-        		return Promise.resolve();
-        	}
-
-        	return CurvePersistence.insert(curveParam, conn);
-		}
-
-		var updateProperty = function(result, conn){
-			//return for some reason.
-
-
-			debugger;
-			var insertCurveFirstId = result[0] ? result[0].insertId:undefined;
-			var conditions = [];
-			var params = [];
-			var index = 0;
-
-			var sheets = task.template.sheets;
-			sheets.map(function(sheet){
+		var updateProperty = function(){
+			var properties = [];
+			task.template.sheets.map(function(sheet){
 				sheet.map(function(property){
-					
-					if(insertCurveFirstId){
-						if(CurvePersistence.isDefined(property.curve)){ //todo: should in Curve data model.
-							var curveId = insertCurveFirstId + index;
-							property.curve = curveId;
-							index ++;
-						}else if(CurvePersistence.isNeed(property.curve)){
-							property.curve = 0;
-						}else if(CurvePersistence.notNeed(property.curve)){
-							property.curve = 'NULL';
-						}else{
-							console.error('error in taskPersistence.update.');
-						}	
-					}else{
-						property.curve = 'NULL';
-					}
-					
-
-
-
-					conditions.push({
-						key: 'id',
-						value: property.id
-					})
-					params.push(property)
+					properties.push(property);
 				})
 			})
-			return PropertyPersistence.update(conn, conditions, params);
+			return PropertyPersistence.assembleUpdateHandlers(properties);
 		}
 
-		var transactionArr = [[updateTask, deleteAllSubtask, insertSubtask, deleteAllAttachment, insertAttachment, deleteCurve], [insertCurve], [updateProperty]];
+		var transactionArr = [updateTask].concat(updateSubTask()).concat(updateAttachment());
+		transactionArr = [transactionArr].concat(updateProperty());
+
         return new Promise(function(resolve, reject){
             dbpool.transaction(transactionArr, function(err, rows){
                 resolve({

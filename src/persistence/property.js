@@ -2,6 +2,7 @@
 var dbpool = require('../db.js');
 var Project  = require('../model/project.js');
 var Util = require('../util.js');
+var CurvePersistence = require('./curve.js');
 
 var PropertyPersistence = class PropertyPersistence {
 	constructor(){
@@ -27,7 +28,7 @@ var PropertyPersistence = class PropertyPersistence {
 		//convert db curve to client;
 		var propertyCurve = (function(curve){
 			if(curve == undefined){
-				return curve;
+				return undefined;
 			}else if(curve === 0){
 				return {};
 			}else{
@@ -40,8 +41,23 @@ var PropertyPersistence = class PropertyPersistence {
 
 
 
-		var propertyAttachment = get('property_attachment');
-		var propertyImage = get('property_image');
+		var propertyAttachment = (function(at){
+			if(at == undefined){
+				return undefined;
+			}else if(at === 0){
+				return [];//query more info when user open expander.
+			}
+		})(get('property_attachment'));
+
+
+		var propertyImage = (function(img){
+			if(img == undefined){
+				return undefined;
+			}else if(img === 0){
+				return [];//query more info when user open expander.
+			}
+		})(get('property_image'));
+
 
 		properties = properties || {};
         properties[propertyId] = properties[propertyId] || {
@@ -61,7 +77,7 @@ var PropertyPersistence = class PropertyPersistence {
             properties[propertyId].value = parseFloat(propertyValue);   
         }
         if(propertyRefkey != undefined){
-            properties[propertyId].ref_key = propertyRefkey;   
+            properties[propertyId].refKey = propertyRefkey;   
         }
         if(propertyStatus != undefined){
             properties[propertyId].status = propertyStatus ? true: false;   
@@ -152,13 +168,12 @@ var PropertyPersistence = class PropertyPersistence {
         })
 	}
 
-	
-	static insertProperty(conn, param){
-		var propertyClauseArr = [];
 
-		param.map(function(p){
-			var properties = p.properties;
-			var foreignObj = p.foreignObj;
+	static insertProperty(conditions, result, conn){
+		var propertyClauseArr = [];
+		conditions.map(function(condition){
+			var properties = condition.properties;
+			var foreignObj = condition.foreignObj;
 			properties.map(function(property){
 	            //undefined; null; 0; ''
 	            var key = `"${property.key}"`;
@@ -198,93 +213,178 @@ var PropertyPersistence = class PropertyPersistence {
 			curve, attachment, image, 
 			status, engine_id, project_id, 
 			property_wrap_id
-        ) values ${propertyClause}`;
+	    ) values ${propertyClause}`;
+	    return new Promise(function(resolve, reject){
+	        conn.query(sql, function(err, result) {
+	            if (err) {
+	                var errmsg = sql + '\n' + err.stack;
+	                reject(new Error(errmsg));
+	                return;
+	            }
+	            resolve(result);
+	        });
+	    })
+	}
 
-        return new Promise(function(resolve, reject){
-            conn.query(sql, function(err, result) {
-                if (err) {
-                    var errmsg = sql + '\n' + err.stack;
-                    reject(new Error(errmsg));
-                    return;
-                }
-                resolve(result);
-            });
-        })
-    }
+	static insertCurve(properties, result, conn){
+		var insertPropertyFirstId = result.insertId;
+		var index = 0;
+		var curveParam = [];
 
-    static update(conn, conditions, params){
-    	var sqls = [];
-		var loop = conditions.length;
-		for(var i=0; i<loop; i++){
-			var param = params[i];
-			var label = (param.label == undefined ? 'NULL': `"${param.label}"`);
-			var text = (param.text == undefined ? 'NULL': `"${param.text}"`);
-			var value = (param.value == undefined ? 'NULL': param.value);
-			var dropdown = (param.dropdown == undefined ? 'NULL': `"${param.dropdown}"`);
-
-
-			var curve = (param.curve == undefined ? 'NULL': param.curve);
-			//tricky before demo
-			curve = (typeof curve==='object') ? 0:curve;
-
-
-			var image = (param.image == undefined ? 'NULL': 0);
-			var attachment = (param.attachment == undefined ? 'NULL': 0);
-			var status = (param.status == undefined ? 'NULL': param.status);
-
-
-			//if use SQL clause: replace or update on duplicate key, what about the id? it will be guid from client rather than auto-generated id.
 		
-			var condition = conditions[i];
-			var id = 'NULL';
-			var projectId = 'NULL';
-			var engineId = 'NULL';
-			var propertyWrapId = 'NULL';
-
-			switch(condition.key){
-				case 'id':
-					id = condition.value;
-					break;
-				case 'project_id':
-					projectId = condition.value;
-					break;
-				case 'engine_id':
-					engineId = condition.value;
-					break;
-				case 'property_wrap_id':
-					propertyWrapId = condition.value;
-					break;
+		properties.map(function(property){
+			if(CurvePersistence.isDefined(property.curve)){
+				curveParam.push({
+					curve: property.curve,
+					propertyId: insertPropertyFirstId + index
+				})
 			}
+			index ++;
+		})
 
-			sqls.push(`update property p
-		    	set 
-		    	label = ${label},
-		    	\`text\` = ${text}, 
-		    	\`value\` = ${value}, 
-		    	dropdown = ${dropdown}, 
-		    	curve = ${curve}, 
-		    	attachment = ${attachment},
-		    	image = ${image}, 
-		    	status = ${status} 
-		    	where p.id = ${id}
-					or p.project_id=${projectId}
-					or p.engine_id=${engineId}
-					or p.property_wrap_id=${propertyWrapId}`);
+		if(curveParam.length === 0){
+    		return Promise.resolve();
+    	}
+
+    	return CurvePersistence.insert(curveParam, conn);
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+	
+
+	static assembleUpdateHandlers(properties, result, conn){
+		var deleteCurve = function(){
+			var propertyIds = [];
+			properties.map(function(property){
+				if(CurvePersistence.isDefined(property.curve)){ //todo: should in Curve data model.
+	    			propertyIds.push(property.id);
+	    		}
+	    	})
+	    	if(propertyIds.length === 0)
+	    		return Promise.resolve();
+
+	    	return CurvePersistence.delete(propertyIds, conn);
 		}
 
-		var sql = sqls.join(';');
-       return new Promise(function(resolve, reject){
-            conn.query(sql, function(err, result) {
-                if (err) {
-                    var errmsg = sql + '\n' + err.stack;
-                    reject(new Error(errmsg));
-                    return;
-                }
-                resolve(result);
-            });
-        })
-       //todo: update curve , attachment, image, more component like time... refer to front end code.
-    }
+		var insertCurve = function(){
+			var curveParam = [];
+			properties.map(function(property){
+				var propertyId = property.id;	
+				if(CurvePersistence.isDefined(property.curve)){ //todo: should in Curve data model.
+	    			curveParam.push({
+	        			curve: property.curve,
+	        			propertyId: propertyId
+	        		});
+	    		}
+			})
+	    	if(curveParam.length === 0){
+	    		return Promise.resolve();
+	    	}
+	    	return CurvePersistence.insert(curveParam, conn);
+		}
+
+		var update = function(){
+			var conditions = [];
+			var params = [];
+			var update = function(conn, conditions, params){
+		    	var sqls = [];
+				var loop = conditions.length;
+				for(var i=0; i<loop; i++){
+					var param = params[i];
+					var label = (param.label == undefined ? 'NULL': `"${param.label}"`);
+					var text = (param.text == undefined ? 'NULL': `"${param.text}"`);
+					var value = (param.value == undefined ? 'NULL': param.value);
+					var dropdown = (param.dropdown == undefined ? 'NULL': `"${param.dropdown}"`);
+
+
+					var curve = (param.curve == undefined ? 'NULL': 0);
+					var image = (param.image == undefined ? 'NULL': 0);
+					var attachment = (param.attachment == undefined ? 'NULL': 0);
+					var status = (param.status == undefined ? 'NULL': param.status);
+
+
+					//if use SQL clause: replace or update on duplicate key, what about the id? it will be guid from client rather than auto-generated id.
+				
+					var condition = conditions[i];
+					var id = 'NULL';
+					var projectId = 'NULL';
+					var engineId = 'NULL';
+					var propertyWrapId = 'NULL';
+
+					switch(condition.key){
+						case 'id':
+							id = condition.value;
+							break;
+						case 'project_id':
+							projectId = condition.value;
+							break;
+						case 'engine_id':
+							engineId = condition.value;
+							break;
+						case 'property_wrap_id':
+							propertyWrapId = condition.value;
+							break;
+					}
+
+					sqls.push(`update property p
+				    	set 
+				    	label = ${label},
+				    	\`text\` = ${text}, 
+				    	\`value\` = ${value}, 
+				    	dropdown = ${dropdown}, 
+				    	curve = ${curve}, 
+				    	attachment = ${attachment},
+				    	image = ${image}, 
+				    	status = ${status} 
+				    	where p.id = ${id}
+							or p.project_id=${projectId}
+							or p.engine_id=${engineId}
+							or p.property_wrap_id=${propertyWrapId}`);
+				}
+
+				var sql = sqls.join(';');
+		       return new Promise(function(resolve, reject){
+		            conn.query(sql, function(err, result) {
+		                if (err) {
+		                    var errmsg = sql + '\n' + err.stack;
+		                    reject(new Error(errmsg));
+		                    return;
+		                }
+		                resolve(result);
+		            });
+		        })
+		       //todo: update curve , attachment, image, more component like time... refer to front end code.
+		    }
+
+			properties.map(function(property){
+				conditions.push({
+					key: 'id',
+					value: property.id
+				})
+				params.push(property)
+			})
+			return update(conn, conditions, params);
+		}
+
+		return Promise.all([
+			deleteCurve(), 
+			insertCurve(), 
+			update()
+		]);
+	}
 }
 
 module.exports = PropertyPersistence;
