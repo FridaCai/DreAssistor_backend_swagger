@@ -65,14 +65,17 @@ var ProjectPersistence = class ProjectPersistence {
             return Promise.resolve()
         }
 
-        var assembleUpdateHandlers = function(){
-            return PropertyPersistence.assembleUpdateHandlers(param.properties);
-
+        var updateProperty = function(result, conn){
+            return PropertyPersistence.assembleUpdateHandlers(param.properties, result, conn);
         }
 
-        var transactionArr = [[updateProject, updateTag, updateTask]].concat(assembleUpdateHandlers());
-        //var engineArr = EnginePersistence.assembleUpdateHandlers(param.engines, projectId);
-        //transactionArr = transactionArr.concat(engineArr);
+
+        
+        var transactionArr = [[updateProject, updateTag, updateTask, 
+            updateProperty]];
+        var engineArr = EnginePersistence.assembleUpdateHandlers(param.engines, projectId);
+        transactionArr = transactionArr.concat(engineArr);
+
         return new Promise(function(resolve, reject){
             dbpool.transaction(transactionArr, function(err, rows){
                 resolve({
@@ -178,24 +181,24 @@ var ProjectPersistence = class ProjectPersistence {
         }
 
 	    var insertEngines = function(result, conn){
-            return Promise.resolve();
-            /*
             var projectId = result[0].insertId;
             return EnginePersistence.insertEngine(conn, projectId, param.engines);
-            */
     	}
+
+
         var insertEngineProperties = function(result, conn){
-            return Promise.resolve();
-            /*
             return EnginePersistence.insertProperties(result[1], conn, param.engines);
-            */
+        }
+        var insertEnginePropertiesCurve = function(result, conn){
+            return EnginePersistence.insertPropertiesCurve(result[1], conn, param.engines);
         }
 
 		return new Promise(function(resolve, reject){
 			dbpool.transaction([
 	    		[insertProject], 
 	    		[insertProperty, insertEngines, insertTags, insertTasks],
-                [insertPropertyCurve, insertEngineProperties]
+                [insertPropertyCurve, insertEngineProperties],
+                [insertEnginePropertiesCurve]
 			], function(err, rows){
 				resolve({
 					err: err,
