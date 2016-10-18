@@ -411,7 +411,44 @@ paths:
       x-swagger-router-controller: "Task"
   
 
-
+  /curve/propertyId/{id}:
+    get:
+      tags:
+      - "Curve"
+      description: ""
+      operationId: "findCurveByPropertyId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get curve by property id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: object
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Curve"
+    
+    options:
+      tags:
+      - "Curve"
+      description: "preflight for cors \n"
+      operationId: "findCurveByPropertyIdOptions"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get curve by property id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Curve"
 
   /curve/{id}:
     get:

@@ -333,83 +333,19 @@ var TaskPersistence = class TaskPersistence{
 		}
 
 
-		var deleteCurve = function(result, conn){
-			var sheets = task.template.sheets;
-        	var propertyIds = [];
-        	sheets.map(function(sheet, index){
-        		sheet.map(function(property){
-        			if(CurvePersistence.isDefined(property.curve)){ /*todo: should in Curve data model.*/
-	        			propertyIds.push(property.id);
-	        		}
-        		})
-        	})
-        	if(propertyIds.length === 0)
-        		return Promise.resolve();
-
-        	return CurvePersistence.delete(propertyIds, conn);
-		}
-
-		var insertCurve = function(result, conn){
-			var sheets = task.template.sheets;
-        	var curveParam = [];
-
-        	sheets.map(function(sheet, index){
-        		sheet.map(function(property){
-
-        			var propertyId = property.id;	
-        			if(CurvePersistence.isDefined(property.curve)){ /*todo: should in Curve data model.*/
-	        			curveParam.push({
-		        			curve: property.curve,
-		        			propertyId: propertyId
-		        		});
-	        		}
-        		})
-        	})
-
-        	if(curveParam.length === 0){
-        		return Promise.resolve();
-        	}
-
-        	return CurvePersistence.insert(curveParam, conn);
-		}
-
-		
-		var updateProperty = function(result, conn){
-			var insertCurveFirstId = result[0] ? result[0].insertId:undefined;
-			var conditions = [];
-			var params = [];
-			var index = 0;
-
-			var sheets = task.template.sheets;
-			sheets.map(function(sheet){
+		var updateProperty = function(){
+			var properties = [];
+			task.template.sheets.map(function(sheet){
 				sheet.map(function(property){
-					
-					if(insertCurveFirstId){
-						if(CurvePersistence.isDefined(property.curve)){ //todo: should in Curve data model.
-							var curveId = insertCurveFirstId + index;
-							property.curve = curveId;
-							index ++;
-						}else if(CurvePersistence.isNeed(property.curve)){
-							property.curve = 0;
-						}else if(CurvePersistence.notNeed(property.curve)){
-							property.curve = 'NULL';
-						}else{
-							console.error('error in taskPersistence.update.');
-						}	
-					}else{
-						property.curve = 'NULL';
-					}
-					conditions.push({
-						key: 'id',
-						value: property.id
-					})
-					params.push(property)
+					properties.push(property);
 				})
 			})
-			return PropertyPersistence.update(conn, conditions, params);
+			return PropertyPersistence.assembleUpdateHandlers(properties);
 		}
 
-		var transactionArr = [[updateTask, deleteCurve], updateSubTask(), updateAttachment(), [insertCurve], [updateProperty]];
+		var transactionArr = [updateTask].concat(updateSubTask()).concat(updateAttachment());
+		transactionArr = [transactionArr].concat(updateProperty());
+
         return new Promise(function(resolve, reject){
             dbpool.transaction(transactionArr, function(err, rows){
                 resolve({
