@@ -5,6 +5,7 @@ var Util = require('../util.js');
 var PropertyPersistence = require('./property.js');
 var TaskPersistence = require('./task.js');
 var EnginePersistence = require('./engine.js');
+var CurvePersistence = require('./curve.js');
 
 var ProjectPersistence = class ProjectPersistence {
 	constructor(){
@@ -64,22 +65,14 @@ var ProjectPersistence = class ProjectPersistence {
             return Promise.resolve()
         }
 
-        var updateProperty = function(result, conn){
-            var properties = param.properties;
-            var conditions = properties.map(function(property){
-                return {
-                    key: 'id',
-                    value: property.id
-                }
-            })
-            var properties = param.properties;
-            return PropertyPersistence.update(conn, conditions, properties);
+        var assembleUpdateHandlers = function(){
+            return PropertyPersistence.assembleUpdateHandlers(param.properties);
+
         }
 
-
-        var transactionArr = [[updateProject, updateTag, updateTask, updateProperty]];
-        var engineArr = EnginePersistence.assembleUpdateHandlers(param.engines, projectId);
-        transactionArr = transactionArr.concat(engineArr);
+        var transactionArr = [[updateProject, updateTag, updateTask]].concat(assembleUpdateHandlers());
+        //var engineArr = EnginePersistence.assembleUpdateHandlers(param.engines, projectId);
+        //transactionArr = transactionArr.concat(engineArr);
         return new Promise(function(resolve, reject){
             dbpool.transaction(transactionArr, function(err, rows){
                 resolve({
@@ -103,7 +96,6 @@ var ProjectPersistence = class ProjectPersistence {
                     resolve(result);
                 })    
             })
-			
 		}
 
 		var insertTags = function(result, conn){
@@ -170,30 +162,40 @@ var ProjectPersistence = class ProjectPersistence {
             })
 	    }
 
-        var insertProperties = function(result, conn){
+        var insertProperty = function(result, conn){
             var projectId = result[0].insertId;
-            return PropertyPersistence.insertProperty.call(this, conn, [{
+            var conditions = [{
                 properties: param.properties,
                 foreignObj: {
                     key: 'project_id',
                     value: projectId
                 }
-            }])
+            }]
+            return PropertyPersistence.insertProperty(conditions, result, conn);
+        }
+        var insertPropertyCurve = function(result, conn){
+            return PropertyPersistence.insertCurve(param.properties, result[0], conn);
         }
 
 	    var insertEngines = function(result, conn){
+            return Promise.resolve();
+            /*
             var projectId = result[0].insertId;
             return EnginePersistence.insertEngine(conn, projectId, param.engines);
+            */
     	}
         var insertEngineProperties = function(result, conn){
-            return EnginePersistence.insertProperties(result, conn, param.engines);
+            return Promise.resolve();
+            /*
+            return EnginePersistence.insertProperties(result[1], conn, param.engines);
+            */
         }
 
 		return new Promise(function(resolve, reject){
 			dbpool.transaction([
 	    		[insertProject], 
-	    		[insertEngines, insertTags, insertTasks, insertProperties],
-                [insertEngineProperties]
+	    		[insertProperty, insertEngines, insertTags, insertTasks],
+                [insertPropertyCurve, insertEngineProperties]
 			], function(err, rows){
 				resolve({
 					err: err,
