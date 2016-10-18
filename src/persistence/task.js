@@ -215,7 +215,7 @@ var TaskPersistence = class TaskPersistence{
 	                }
 	            })
             })
-            return PropertyPersistence.insertProperty(conn, propertyParam);
+            return PropertyPersistence.insertProperty(propertyParam, result, conn);
         }
 
       
@@ -227,7 +227,7 @@ var TaskPersistence = class TaskPersistence{
 		return new Promise(function(resolve, reject){
 			dbpool.transaction(transactionArr, function(err, rows){
 				resolve({
-					err: (err ? err.stack: null)
+					err: err
 				});
 			});
 		});
