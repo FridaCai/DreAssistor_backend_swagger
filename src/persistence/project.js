@@ -490,7 +490,8 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
                     }
                     resolve({
                         projects: wrap(rows),
-                        count: count
+                        count: count,
+                        t:'test'
                     });
                 });    
             })
