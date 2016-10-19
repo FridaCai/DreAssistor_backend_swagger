@@ -333,18 +333,18 @@ var TaskPersistence = class TaskPersistence{
 		}
 
 
-		var updateProperty = function(){
+		var updateProperty = function(result, conn){
 			var properties = [];
 			task.template.sheets.map(function(sheet){
 				sheet.map(function(property){
 					properties.push(property);
 				})
 			})
-			return PropertyPersistence.assembleUpdateHandlers(properties);
+			return PropertyPersistence.assembleUpdateHandlers(properties, result, conn);
 		}
 
 		var transactionArr = [updateTask].concat(updateSubTask()).concat(updateAttachment());
-		transactionArr = [transactionArr].concat(updateProperty());
+		transactionArr = [transactionArr, [updateProperty]];
 
         return new Promise(function(resolve, reject){
             dbpool.transaction(transactionArr, function(err, rows){
