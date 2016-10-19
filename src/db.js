@@ -3,7 +3,7 @@ var logger = require('./logger.js').logger('normal');
 var Util = require('./util.js');
 
 var pool = mysql.createPool({
-    host: 'localhost',
+    host: '127.0.0.1',
     user: 'root',
     password: 'mapi1111111111!',
     database: 'dreassistor',
