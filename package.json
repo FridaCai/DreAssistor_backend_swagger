@@ -12,7 +12,8 @@
 	
 	"build-prod":"npm install",
 	"deploy-prod":"mysqld --console --log_syslog=0",
-  "deploy-lenovo": "cnpm install & node index.js"
+  "deploy-lenovo": "cnpm install & node index.js",
+  "deploy-patac-server": "npm install & node index.js"
   },
   "keywords": [
     "swagger"
