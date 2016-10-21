@@ -494,6 +494,66 @@ paths:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+  /uploadfile:
+    post:
+      tags:
+      - "UploadFile"
+      description: "upload file\n"
+      operationId: "uploadFile"
+      parameters:
+      - name: "file"
+        in: "formData"
+        description: "upload file"
+        required: true
+        type: "file"
+      responses:
+        200:
+          description: "Successful response"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "UploadFile"
+
+    options:
+      tags:
+      - "UploadFile"
+      description: "preflight for cors \n"
+      operationId: "uploadFileOptions"
+      
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "UploadFile"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   /statical:
     options:
       tags:
@@ -1037,4 +1097,7 @@ definitions:
       
 
   postTaskResponse:
+    type: "object"
+    
+  uploadfile:
     type: "object"
