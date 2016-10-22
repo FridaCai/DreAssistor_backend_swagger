@@ -3,6 +3,8 @@ var dbpool = require('../db.js');
 var Project  = require('../model/project.js');
 var Util = require('../util.js');
 var CurvePersistence = require('./curve.js');
+var AttachmentPersistence = require('./attachment.js');
+var ImagePersistence = require('./attachment.js');
 
 var PropertyPersistence = class PropertyPersistence {
 	constructor(){
@@ -226,6 +228,28 @@ var PropertyPersistence = class PropertyPersistence {
 	    })
 	}
 
+	static insertAttachment(properties, result, conn, key){
+		var insertPropertyFirstId = result.insertId;
+		var index = 0;
+		var attachmentParam = [];
+		
+		properties.map(function(property){
+			if(AttachmentPersistence.isDefined(property.attachment)){ //frida.here.
+				var obj = {
+					attachment: property.attachment,
+				}
+				obj[key] = insertPropertyFirstId + index;
+				attachmentParam.push(obj);
+			}
+			index ++;
+		})
+
+		if(attachmentParam.length === 0){
+    		return Promise.resolve();
+    	}
+    	return AttachmentPersistence.insert(attachmentParam, conn);
+	}
+
 	static insertCurve(properties, result, conn){
 		var insertPropertyFirstId = result.insertId;
 		var index = 0;
@@ -248,22 +272,6 @@ var PropertyPersistence = class PropertyPersistence {
 
     	return CurvePersistence.insert(curveParam, conn);
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
-	
-	
 
 	static assembleUpdateHandlers(properties, result, conn){
 		var deleteCurve = function(){

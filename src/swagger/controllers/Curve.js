@@ -1,5 +1,4 @@
 'use strict';
-var url = require('url');
 var Curve = require('./CurveService');
 var EAction = require('../../exception.js').action;
 

@@ -19,7 +19,7 @@ module.exports = class User {
 		return {
 			id: this.id,
 			name: this.label,
-			email: this.url,
+			email: this.email,
 		}
 	}
 }

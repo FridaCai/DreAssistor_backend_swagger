@@ -25,7 +25,7 @@ var TaskPersistence = class TaskPersistence{
 				
 				st.id as subtask_id, st.label as subtask_label, st.status as subtask_status, 
 				
-				a.id as attachment_id, a.label as attachment_label, a.url as attachment_url,
+				a.id as attachment_id, a.label as attachment_label, a.guid as attachment_guid,
 				
 				p.id as property_id, p.dropdown as property_dropdown, p.text as property_text,
 				p.value as property_value, p.ref_key as property_ref_key, p.status as property_status,
@@ -75,7 +75,7 @@ var TaskPersistence = class TaskPersistence{
 					tasks[id]['attachment'][row.attachment_id] = {
 						id: row.attachment_id,
 						label: row.attachment_label,
-						url: row.attachment_url
+						guid: row.attachment_guid
 					}	
 				}
 				

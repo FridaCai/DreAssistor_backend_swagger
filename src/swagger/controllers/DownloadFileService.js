@@ -17,7 +17,13 @@ exports.downloadFile = function(args, res, next) {
 	res.setHeader('Content-type', mimetype);
 
 	var filestream = fs.createReadStream(`./uploadfiles/${guid}`);
-	filestream.pipe(res);
+    filestream.on('open', function () {
+	    filestream.pipe(res);
+	});
+	filestream.on('error', function(err) {
+		logger.error(err.stack);
+		res.end();
+	});
 }
 
 exports.downloadFileOptions = function(args, res, next) {

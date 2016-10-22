@@ -87,7 +87,21 @@ var EnginePersistence = class EnginePersistence {
 		return PropertyPersistence.insertCurve(properties, result, conn);
 	}
 
+	static insertPropertiesAttachment(result, conn, engines){
+		if(result.affectedRows.length === 0){
+			return Promise.resolve({
+				affectedRows: []
+			});
+		}
 
+		var properties = [];
+		engines.map(function(engine){
+			engine.properties.map(function(property){
+				properties.push(property);
+			})
+		})
+		return PropertyPersistence.insertAttachment(properties, result, conn, "engineId");
+	}
 
 	static assembleUpdateHandlers(engines, projectId){
 		var select = function(result, conn){

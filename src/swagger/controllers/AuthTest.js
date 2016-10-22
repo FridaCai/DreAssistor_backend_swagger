@@ -1,7 +1,5 @@
 'use strict';
 
-var url = require('url');
-
 var AuthTest = require('./AuthTestService');
 var EAction = require('../../exception.js').action;
 

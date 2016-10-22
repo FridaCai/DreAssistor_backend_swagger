@@ -179,12 +179,14 @@ var ProjectPersistence = class ProjectPersistence {
         var insertPropertyCurve = function(result, conn){
             return PropertyPersistence.insertCurve(param.properties, result[0], conn);
         }
+        var insertPropertyAttachment = function(result, conn){ //frida here.
+            return PropertyPersistence.insertAttachment(param.properties, result[0], conn, 'propertyId');
+        }
 
 	    var insertEngines = function(result, conn){
             var projectId = result[0].insertId;
             return EnginePersistence.insertEngine(conn, projectId, param.engines);
     	}
-
 
         var insertEngineProperties = function(result, conn){
             return EnginePersistence.insertProperties(result[1], conn, param.engines);
@@ -192,13 +194,16 @@ var ProjectPersistence = class ProjectPersistence {
         var insertEnginePropertiesCurve = function(result, conn){
             return EnginePersistence.insertPropertiesCurve(result[1], conn, param.engines);
         }
+        var insertEnginePropertiesAttachment = function(result, conn){ //frida here.
+            return EnginePersistence.insertPropertiesAttachment(result[1], conn, param.engines);
+        }
 
 		return new Promise(function(resolve, reject){
 			dbpool.transaction([
 	    		[insertProject], 
 	    		[insertProperty, insertEngines, insertTags, insertTasks],
-                [insertPropertyCurve, insertEngineProperties],
-                [insertEnginePropertiesCurve]
+                [insertPropertyCurve, insertEngineProperties, insertPropertyAttachment],
+                [insertEnginePropertiesCurve, insertEnginePropertiesAttachment]
 			], function(err, rows){
 				resolve({
 					err: err,

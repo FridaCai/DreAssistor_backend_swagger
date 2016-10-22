@@ -8,14 +8,14 @@ module.exports = class Attachment {
 	init(param){
 		this.id = param.id;
 		this.label = param.label;
-		this.url = param.url;
+		this.guid = param.guid;
 	}
 
 	dump(){
 		return {
 			id: this.id,
 			label: this.label,
-			url: this.url
+			guid: this.guid
 		}
 	}
 
