@@ -8,7 +8,9 @@ var fs = require('fs-extra');
 
 exports.uploadFile = function(args, res, next) {
   var file = args.file.value;
+  var id = args.id.value;
   var filename = file.originalname;
+
 
   console.log(`file.encoding: ${file.encoding}`);
   console.log(`file.fieldname: ${file.fieldname}`);
@@ -20,8 +22,14 @@ exports.uploadFile = function(args, res, next) {
       if(err){
         throw(err);
       }
-      fs.writeFile('./uploadfiles/' + filename, file.buffer, function(err){
-        throw(err);
+      fs.writeFile('./uploadfiles/' + id, file.buffer, function(err){
+        if(err){
+          throw(err);  
+        }
+        res.end(JSON.stringify({
+          errCode: -1,
+          guid: id
+        }));
       })
   })
 }

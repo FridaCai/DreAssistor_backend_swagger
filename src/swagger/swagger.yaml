@@ -518,6 +518,11 @@ paths:
         description: "upload file"
         required: true
         type: "file"
+      - name: "id"
+        in: "formData"
+        description: "generate guid at client"
+        required: true
+        type: "string"
       responses:
         200:
           description: "Successful response"
@@ -539,6 +544,50 @@ paths:
       x-swagger-router-controller: "UploadFile"
 
 
+
+
+
+
+
+
+
+  /downloadfile:
+    get:
+      tags:
+      - "DownloadFile"
+      description: "down file\n"
+      operationId: "downloadFile"
+      parameters:
+      - name: "guid"
+        in: "query"
+        description: "attachment/image guid"
+        required: true
+        type: "string"
+      - name: "label"
+        in: "query"
+        description: "target name for the download file"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: "file"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "DownloadFile"
+
+    options:
+      tags:
+      - "DownloadFile"
+      description: "preflight for cors \n"
+      operationId: "downloadFileOptions"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "DownloadFile"
 
 
 
