@@ -5,68 +5,60 @@ var AttachmentPersistence = class AttachmentPersistence {
 	constructor(){
 		
 	}
-	
 
 	//todo: wrong. please correct it. attachment. taskId or proeprtyId.
-	static assembleUpdateHandlers(task){
-		var deleteByTaskId = function(result, conn){
-			var taskId = task.id;
-			var sql = `delete from attachment where task_id=${taskId}`;
-			return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
-                    }
-                    resolve(result);
-                })    
-            })
-		}
+	static update(result, conn, condition){
+		var deleteSql = (function(){
+			var taskIds = [-1];
+			var propertyIds = [-1];
+			condition.map(function(c){
+				if(c.taskId != undefined){
+					taskIds.push(c.taskId);
+				}
+				if(c.propertyId != undefined){
+					propertyIds.push(c.propertyId);
+				}
+			});
 
+			var taskIdsClause = taskIds.join(',');
+			var propertyIdClause = propertyIds.join(',');
+			return `delete from attachment where task_id in (${taskIdsClause}) or property_id in (${propertyIdClause})`;
+		})();
 
-
-
-
-		var insert = function(result, conn){
-			if(task.attachment.length ===0 )
-				return Promise.resolve();
-
+		var insertSql = (function(){
 			var sqls = [];
-			task.attachment.map(function(at){
-				var id = (at.id == undefined ? 'NULL' : at.id);
-				var label = (at.label == undefined ? 'NULL' : `"${at.label}"`);
-				var guid = (at.guid == undefined ? 'NULL' : `"${at.guid}"`);
-				var taskId = task.id;
+			condition.map(function(c){
+				var taskId = (c.taskId == undefined ? 'NULL': c.taskId);
+				var propertyId = (c.propertyId == undefined ? 'NULL': c.propertyId);
+				var at = c.attachment;
+				var id = (at.id == undefined ? 'NULL': at.id);
+				var label = at.label;
+				var guid = at.guid;
+				
 
 				//why not insert directly? for create_time. otherwise, create_time will lose.
-				sqls.push(`INSERT INTO attachment (id, label, guid, task_id) 
-					VALUES (${id}, ${label}, ${guid}, ${taskId})
+				sqls.push(`INSERT INTO attachment (id, label, guid, task_id, property_id) 
+					VALUES (${id}, "${label}", "${guid}", ${taskId}, ${propertyId})
 					ON DUPLICATE KEY 
 					UPDATE label=values(label), 
 					guid=values(guid), 
-					task_id=values(task_id)`);
+					task_id=values(task_id),
+					property_id=values(property_id)`);
 			})
-			var sql = sqls.join(';');
-			return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
-                    if (err) {
-                        var errmsg = sql + '\n' + err.stack;
-                        reject(new Error(errmsg));
-                        return;
-                    }
-                    resolve(result);
-                })    
-            })
-		}
+			return sqls.join(';');
+		})();
 
-
-
-
-
-
-
-		return [deleteByTaskId, insert]
+		var sql = `${deleteSql};${insertSql}`;
+        return new Promise(function(resolve, reject){
+            conn.query(sql, function(err, result) {
+                if (err) {
+                    var errmsg = sql + '\n' + err.stack;
+                    reject(new Error(errmsg));
+                    return;
+                }
+                resolve(result);
+            });
+        })
 	}
 
 	static needToSave(attachment){
@@ -96,7 +88,6 @@ var AttachmentPersistence = class AttachmentPersistence {
 			label, guid, task_id, property_id
         ) values ${clauses}`;
 
-        console.log(sql);
         return new Promise(function(resolve, reject){
             conn.query(sql, function(err, result) {
                 if (err) {

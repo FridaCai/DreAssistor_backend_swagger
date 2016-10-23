@@ -329,7 +329,19 @@ var TaskPersistence = class TaskPersistence{
 		}
 
 		var updateAttachment = function(result, conn){
-			return AttachmentPersistence.assembleUpdateHandlers(task);
+			var condition = [];
+			task.attachment.map(function(at){
+				condition.push({
+					attachment: at,
+					taskId: task.id
+				});
+			})
+
+			if(condition.length === 0){
+	     		return []; //work? not sure.
+	     	}
+
+			return AttachmentPersistence.update(result, conn, condition);
 		}
 
 
@@ -343,7 +355,7 @@ var TaskPersistence = class TaskPersistence{
 			return PropertyPersistence.assembleUpdateHandlers(properties, result, conn);
 		}
 
-		var transactionArr = [updateTask].concat(updateSubTask()).concat(updateAttachment());
+		var transactionArr = [updateTask, updateAttachment].concat(updateSubTask());
 		transactionArr = [transactionArr, [updateProperty]];
 
         return new Promise(function(resolve, reject){
