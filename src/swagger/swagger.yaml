@@ -489,8 +489,83 @@ paths:
       x-swagger-router-controller: "Curve"
 
 
+  /attachment/propertyId/{id}:
+    get:
+      tags:
+      - "Attachment"
+      description: ""
+      operationId: "findAttachmentByPropertyId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get attachment by property id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: object
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Attachment"
+    
+    options:
+      tags:
+      - "Attachment"
+      description: "preflight for cors \n"
+      operationId: "findAttachmentByPropertyIdOptions"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get attachment by property id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Attachment"
 
-
+  /attachment/taskId/{id}:
+    get:
+      tags:
+      - "Attachment"
+      description: ""
+      operationId: "findAttachmentByTaskId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get attachment by task id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: object
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Attachment"
+    
+    options:
+      tags:
+      - "Attachment"
+      description: "preflight for cors \n"
+      operationId: "findAttachmentByTaskIdOptions"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "get attachment by task id"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Successful response"
+      x-swagger-router-controller: "Attachment"
 
 
 

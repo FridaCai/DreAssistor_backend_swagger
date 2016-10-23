@@ -108,6 +108,56 @@ var AttachmentPersistence = class AttachmentPersistence {
             });
         })
 	}
+
+	static findByTaskId(id){
+		var sql = `select * from attachment where task_id = ${id}`;
+		var wrap = function(rows){
+			if(!rows || rows.length === 0){
+				return "";
+			}
+			
+			return rows.map(function(row){
+				return {
+					id: row.id,
+					label: row.label,
+					guid: row.guid
+				}
+			});
+		}
+		return new Promise(function(resolve, reject){
+            dbpool.execute(sql, function(err, rows){
+                resolve({
+                    err: err,
+                    attachment: wrap(rows)
+                });
+            });
+        })
+	}
+
+	static findByPropertyId(id){
+		var sql = `select * from attachment where property_id = ${id}`;
+		var wrap = function(rows){
+			if(!rows || rows.length === 0){
+				return "";
+			}
+			
+			return rows.map(function(row){
+				return {
+					id: row.id,
+					label: row.label,
+					guid: row.guid	
+				}
+			});
+		}
+		return new Promise(function(resolve, reject){
+            dbpool.execute(sql, function(err, rows){
+                resolve({
+                    err: err,
+                    attachment: wrap(rows)
+                });
+            });
+        })
+	}
 }
 
 module.exports = AttachmentPersistence;
