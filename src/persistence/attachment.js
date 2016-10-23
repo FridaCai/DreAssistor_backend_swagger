@@ -69,8 +69,8 @@ var AttachmentPersistence = class AttachmentPersistence {
 		return [deleteByTaskId, insert]
 	}
 
-	static isDefined(attachment){
-		if(attachment != undefined){
+	static needToSave(attachment){
+		if(attachment != undefined && attachment.length>0){
 			return true;
 		}
 		return false;

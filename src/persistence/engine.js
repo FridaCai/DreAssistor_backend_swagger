@@ -100,7 +100,7 @@ var EnginePersistence = class EnginePersistence {
 				properties.push(property);
 			})
 		})
-		return PropertyPersistence.insertAttachment(properties, result, conn, "engineId");
+		return PropertyPersistence.insertAttachment(properties, result, conn, "propertyId");
 	}
 
 	static assembleUpdateHandlers(engines, projectId){

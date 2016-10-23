@@ -234,7 +234,7 @@ var PropertyPersistence = class PropertyPersistence {
 		var attachmentParam = [];
 		
 		properties.map(function(property){
-			if(AttachmentPersistence.isDefined(property.attachment)){ //frida.here.
+			if(AttachmentPersistence.needToSave(property.attachment)){ 
 				var obj = {
 					attachment: property.attachment,
 				}
