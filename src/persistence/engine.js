@@ -35,7 +35,7 @@ var EnginePersistence = class EnginePersistence {
         var sql = `insert into engine(project_id) values ${engineClause}`;
 
         return new Promise(function(resolve, reject){
-            conn.query(sql, function(err, result) {
+            dbpool.singleExecute(conn, sql, function(err, result) {
                 if (err) {
                     var errmsg = sql + '\n' + err.stack;
                     reject(new Error(errmsg));
@@ -107,7 +107,7 @@ var EnginePersistence = class EnginePersistence {
 		var select = function(result, conn){
 			var sql = `select id from engine where project_id=${projectId} and flag=0` ;
 			return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
+                dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
@@ -166,7 +166,7 @@ var EnginePersistence = class EnginePersistence {
 				where engine.id in (${idClause})`;
 
 	        return new Promise(function(resolve, reject){
-	            conn.query(sql, function(err, result) {
+	            dbpool.singleExecute(conn, sql, function(err, result) {
 	                if (err) {
 	                    var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
@@ -194,7 +194,7 @@ var EnginePersistence = class EnginePersistence {
 				}).join(',');
 	            var sql = `update engine set update_time = now() where id in (${idClause})`;
 
-	            conn.query(sql, function(err, result) {
+	            dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));

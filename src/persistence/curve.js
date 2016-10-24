@@ -76,7 +76,7 @@ var CurvePersistence = class CurvePersistence {
 		var sql = `update curve set flag=1 where property_id in (${propertyIdClause})`;
 		console.log(sql);
         return new Promise(function(resolve, reject){
-            conn.query(sql, function(err, result) {
+        	dbpool.singleExecute(conn, sql, function(err, result) {
                 if (err) {
                     var errmsg = sql + '\n' + err.stack;
                     reject(new Error(errmsg));
@@ -104,7 +104,7 @@ var CurvePersistence = class CurvePersistence {
 
         console.log(sql);
         return new Promise(function(resolve, reject){
-            conn.query(sql, function(err, result) {
+			dbpool.singleExecute(conn, sql, function(err, result) {
                 if (err) {
                     var errmsg = sql + '\n' + err.stack;
                     reject(new Error(errmsg));

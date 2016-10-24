@@ -11,7 +11,7 @@ var SubTaskPersistence = class SubTaskPersistence {
 			var taskId = task.id;
 			var sql = `delete from subtask where task_id=${taskId}`;
 			return new Promise(function(resolve, reject){
-	            conn.query(sql, function(err, result) {
+				dbpool.singleExecute(conn, sql, function(err, result) {
 	                if (err) {
 	                    var errmsg = sql + '\n' + err.stack;
 	                    reject(new Error(errmsg));
@@ -44,7 +44,7 @@ var SubTaskPersistence = class SubTaskPersistence {
 			})
 			var sql = sqls.join(';');
 			return new Promise(function(resolve, reject){
-	            conn.query(sql, function(err, result) {
+				dbpool.singleExecute(conn, sql, function(err, result) {
 	                if (err) {
 	                    var errmsg = sql + '\n' + err.stack;
 	                    reject(new Error(errmsg));

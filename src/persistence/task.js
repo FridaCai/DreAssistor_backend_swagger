@@ -166,7 +166,7 @@ var TaskPersistence = class TaskPersistence{
 	            )`;
 
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
+				dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
@@ -189,7 +189,7 @@ var TaskPersistence = class TaskPersistence{
             var sql = `insert into property_wrap(label, task_id) values ${clause}`;
 
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
+				dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
@@ -275,7 +275,7 @@ var TaskPersistence = class TaskPersistence{
 			or t.project_id=${projectId}`;
 
         return new Promise(function(resolve, reject){
-            conn.query(sql, function(err, result) {
+			dbpool.singleExecute(conn, sql, function(err, result) {
                 if (err) {
                     var errmsg = sql + '\n' + err.stack;
                     reject(new Error(errmsg));
@@ -313,7 +313,7 @@ var TaskPersistence = class TaskPersistence{
 				where id=${taskId}`;
 
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
+				dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));

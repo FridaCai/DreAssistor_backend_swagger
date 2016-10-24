@@ -49,12 +49,12 @@ var StaticalPersistence = class StaticalPersistence {
             console.log(sql);
 
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, rows) {
+                dbpool.singleExecute(conn, sql, function(err, result) {
                     if(err){
                         var errmsg = `${sql} \n ${err.stack}`;
                         reject(new Error(errmsg));   
                     }else{
-                        resolve(wrapProperty(rows));    
+                        resolve(wrapProperty(result));    
                     }
                 });    
             })
@@ -197,11 +197,11 @@ var StaticalPersistence = class StaticalPersistence {
             }
 
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, rows) {
+                dbpool.singleExecute(conn, sql, function(err, result) {
                     if(err){
                         reject(err);   
                     }else{
-                        resolve(wrap(rows));    
+                        resolve(wrap(result));    
                     }
                 });    
             })
@@ -270,13 +270,13 @@ where 1=1
 
             console.log(sql);
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, rows) {
+                dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
                         return;
                     }
-                    resolve(wrapProperty(rows));
+                    resolve(wrapProperty(result));
                 });    
             })
         }

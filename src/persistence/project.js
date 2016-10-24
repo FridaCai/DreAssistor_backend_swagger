@@ -22,7 +22,7 @@ var ProjectPersistence = class ProjectPersistence {
                 where id = ${projectId}`;
 
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
+                dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
@@ -40,17 +40,22 @@ var ProjectPersistence = class ProjectPersistence {
             }
 
             var sql = tags.map(function(tag){
-                var time = tag.time;
-                var id = tag.id;
+                var id = tag.id ? tag.id : 'NULL';
                 var label = tag.label;
-                return `update tag 
-                    set time=${Util.getInTime(time)},
-                    label = "${label}"
-                    where id=${id}`;
-            }).join(';');
+                var time = tag.time ? Util.getInTime(tag.time) : 'NULL';
+                var week = tag.week;
 
+                return `insert into tag (id, label, time, week, project_id)
+                    values(${id}, "${label}", ${time}, ${week}, ${projectId} )
+                    on duplicate key
+                    update label=values(label), 
+                    time=values(time),
+                    week=values(week),
+                    project_id=values(project_id)`
+            }).join(';');
+            
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
+                dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
@@ -90,7 +95,7 @@ var ProjectPersistence = class ProjectPersistence {
                     values (${param.creatorId}, ${Util.getInTime(param.sorp)}, "${param.label}")`;
 
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
+                dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
@@ -107,14 +112,14 @@ var ProjectPersistence = class ProjectPersistence {
 
             var tagClause = tags.map(function(tag){
                 var label = tag.label;
-                var time = tag.time || 'NULL';
+                var time = tag.time ? Util.getInTime(tag.time) : 'NULL';
                 var week = tag.week;
-                return `("${label}", ${Util.getInTime(time)}, ${week}, ${projectId})`;
+                return `("${label}", ${time}, ${week}, ${projectId})`;
             }).join(',');
             var sql = `insert into tag(label, time, week, project_id) values ${tagClause}`;
             
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
+                dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
@@ -154,7 +159,7 @@ var ProjectPersistence = class ProjectPersistence {
             ) values ${taskClause}`;
 
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
+                dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
@@ -372,7 +377,7 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
             var condition = (userId != undefined ? `and p.creator_id=${userId}` : '');
             var sql = `select count(*) as count from project p where p.flag=0 ${condition}`;
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
+                dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
@@ -388,7 +393,7 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
             var condition = (userId != undefined ? `and p.creator_id=${userId}` : '');
             var sql = `select id from project p where p.flag=0 ${condition} order by id desc limit ${offset},${limit} `;
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, result) {
+                dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
@@ -487,16 +492,15 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
             }
 
             return new Promise(function(resolve, reject){
-                conn.query(sql, function(err, rows) {
+                dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {
                         var errmsg = sql + '\n' + err.stack;
                         reject(new Error(errmsg));
                         return;
                     }
                     resolve({
-                        projects: wrap(rows),
-                        count: count,
-                        t:'test'
+                        projects: wrap(result),
+                        count: count
                     });
                 });    
             })

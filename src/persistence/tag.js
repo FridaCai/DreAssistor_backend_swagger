@@ -15,7 +15,7 @@ var TagPersistence = class TagPersistence {
 			or tag.project_id=${projectId}`;
 
         return new Promise(function(resolve, reject){
-            conn.query(sql, function(err, result) {
+			dbpool.singleExecute(conn, sql, function(err, result) {
                 if (err) {
                     var errmsg = sql + '\n' + err.stack;
                     reject(new Error(errmsg));

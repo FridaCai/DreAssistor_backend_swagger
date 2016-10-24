@@ -50,7 +50,7 @@ var AttachmentPersistence = class AttachmentPersistence {
 
 		var sql = `${deleteSql};${insertSql}`;
         return new Promise(function(resolve, reject){
-            conn.query(sql, function(err, result) {
+        	dbpool.singleExecute(conn, sql, function(err, result) {
                 if (err) {
                     var errmsg = sql + '\n' + err.stack;
                     reject(new Error(errmsg));
@@ -89,7 +89,20 @@ var AttachmentPersistence = class AttachmentPersistence {
         ) values ${clauses}`;
 
         return new Promise(function(resolve, reject){
-            conn.query(sql, function(err, result) {
+
+        	dbpool.singleExecute(conn, sql, function(err, result) {
+                if (err) {
+                    var errmsg = sql + '\n' + err.stack;
+                    reject(new Error(errmsg));
+                    return;
+                }
+                resolve(result);
+            });
+
+
+
+
+            dbpool.singleExecute(conn, sql, function(err, result) {
                 if (err) {
                     var errmsg = sql + '\n' + err.stack;
                     reject(new Error(errmsg));

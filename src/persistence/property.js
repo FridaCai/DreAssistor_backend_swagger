@@ -159,7 +159,7 @@ var PropertyPersistence = class PropertyPersistence {
 			or p.property_wrap_id in (${propertyWrapIds.join(',')})`;
 
         return new Promise(function(resolve, reject){
-            conn.query(sql, function(err, result) {
+			dbpool.singleExecute(conn, sql, function(err, result) {
                 if (err) {
                     var errmsg = sql + '\n' + err.stack;
                     reject(new Error(errmsg));
@@ -217,7 +217,7 @@ var PropertyPersistence = class PropertyPersistence {
 			property_wrap_id
 	    ) values ${propertyClause}`;
 	    return new Promise(function(resolve, reject){
-	        conn.query(sql, function(err, result) {
+			dbpool.singleExecute(conn, sql, function(err, result) {
 	            if (err) {
 	                var errmsg = sql + '\n' + err.stack;
 	                reject(new Error(errmsg));
@@ -365,7 +365,7 @@ var PropertyPersistence = class PropertyPersistence {
 
 				var sql = sqls.join(';');
 		       return new Promise(function(resolve, reject){
-		            conn.query(sql, function(err, result) {
+					dbpool.singleExecute(conn, sql, function(err, result) {
 		                if (err) {
 		                    var errmsg = sql + '\n' + err.stack;
 		                    reject(new Error(errmsg));
