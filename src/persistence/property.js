@@ -387,10 +387,25 @@ var PropertyPersistence = class PropertyPersistence {
 			return update(conn, conditions, params);
 		}
 
+		var updateAttachment = function(){
+			var condition = [];
+			properties.map(function(property){
+				property.attachment && property.attachment.map(function(at){
+					condition.push({
+						propertyId: property.id,
+						attachment: at
+					});	
+				})
+				
+			})
+			return AttachmentPersistence.update(result, conn, condition);
+		}
+
 		return Promise.all([
+			update(),
 			deleteCurve(), 
 			insertCurve(), 
-			update()
+			updateAttachment()
 		]);
 	}
 }
