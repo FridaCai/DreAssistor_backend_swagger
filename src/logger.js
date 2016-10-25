@@ -22,7 +22,7 @@ module.exports={
 
 
 		return new Promise(function(resolve, reject){
-			app.use(log4js.connectLogger(logger, {level:log4js.levels.TRACE, format:' :method :url'}));
+			app.use(log4js.connectLogger(logger, {level:log4js.levels.ALL, format:' :method :url'}));
 			resolve();	
 		})
 		

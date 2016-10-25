@@ -21,7 +21,7 @@ var TaskPersistence = class TaskPersistence{
 		var sql =`select t.id as task_id, t.label as task_label, ${startTime} as task_startTime, 
 				${endTime} as task_endTime, t.\`desc\` as task_desc, t.priority as task_priority, 
 				t.exp as task_exp, t.start_week as task_startWeek, t.end_week as task_endWeek, 
-				t.template_type as task_templateType, t.project_id as task_projectId,
+				t.template_type as task_templateType, t.project_id as task_projectId, t.creator_id as task_creatorId,
 				
 				st.id as subtask_id, st.label as subtask_label, st.status as subtask_status, 
 				
@@ -43,10 +43,6 @@ var TaskPersistence = class TaskPersistence{
 
 				where t.id in (${idsClause})
 				and t.flag = 0`;
-
-				//query property_attachment, property_curve, property_image when expand cell_expander.
-		console.log(sql);
-
 		
 		var wrap = function(rows){
 			
@@ -109,6 +105,7 @@ var TaskPersistence = class TaskPersistence{
 					exp: task.task_exp,
 					startWeek: task.task_startWeek,
 					endWeek: task.task_endWeek,
+					creatorId: task.task_creatorId,
 					subtask: Object.keys(task.subtask).map(function(st){
 						return task.subtask[st]
 					}),

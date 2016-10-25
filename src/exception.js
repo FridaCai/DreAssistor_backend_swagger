@@ -102,6 +102,14 @@ var ENUM = {
 					msg: `no user found in db after decode token`,
 				}
 			}
+		},
+		10: function(){
+			return {
+				code: 10,
+				res: {
+					msg: `no authorization`
+				}
+			}
 		}
 }
 
