@@ -294,7 +294,10 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
         var wrap = function(rows){
             //todo: engine. order by id desc.            
             //todo: if property value/text... === null, do not return please.
-            
+            if(rows.length === 0){
+                return null;
+            }
+
             var row0 = rows[0];
 
             var project = {
@@ -351,7 +354,6 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
                     return engine;
 
                 })
-                //todo: engine.
             }
             return returnArr;
         }

@@ -77,7 +77,7 @@ exports.findTaskById = function(args, res, next) {
     });
 }
 
-exports._restoreTaskById = function(id, res){
+exports._restoreById = function(id, res){
   var startTime = Date.parse(new Date());
   var restore = true;
   TaskPersistence.deleteById(id, restore).then(function(result){
@@ -92,7 +92,7 @@ exports._restoreTaskById = function(id, res){
     }));
 
     var diff = Date.parse(new Date()) - startTime;
-    logger.trace('deleteTaskById: ' + diff);
+    logger.trace('_restoreTaskById: ' + diff);
   }, function(e){
     throw e;
   }).catch(function(e){
@@ -104,7 +104,7 @@ exports.deleteTaskById = function(args, res, next) {
   var id = args.id.value;
   var restore = args.restore.value;
   if(restore){
-    this._restoreTaskById(id, res);
+    this._restoreById(id, res);
     return;
   }
 
@@ -141,29 +141,6 @@ exports.deleteTaskById = function(args, res, next) {
   })
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 exports.updateTask = function(args, res, next) {
   var startTime = Date.parse(new Date());
 
@@ -174,10 +151,6 @@ exports.updateTask = function(args, res, next) {
 
 
   this._authCheck(args).then(function(){  
-
-
-
-
 
     TaskPersistence.update(task, projectId).then(function(result){
       var err = result.err;
@@ -201,39 +174,12 @@ exports.updateTask = function(args, res, next) {
       EAction(res, e);
     });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   }, function(e){
     throw e;
   }).catch(function(e){
     EAction(res, e);
   })
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 exports._authCheck = function(args){
     return Promise.all([
