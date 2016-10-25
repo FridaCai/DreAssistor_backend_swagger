@@ -142,7 +142,7 @@ var TaskPersistence = class TaskPersistence{
         })
 	}
 
-	static insert(task, projectId){
+	static insert(task, projectId, creatorId){
 		var insertTask = function(result, conn){
 	        var label = task.label;
 	        var startTime = Util.getInTime(task.startTime);
@@ -153,16 +153,17 @@ var TaskPersistence = class TaskPersistence{
 	        var startWeek = task.startWeek;
 	        var endWeek = task.endWeek;
 	        var templateType = task.template.type;
+	        
 
 	        var sql = `insert into task(label, start_time, end_time, 
 	            \`desc\`, priority, exp, 
 	            start_week, end_week, template_type, 
-	            project_id) 
+	            project_id, creator_id) 
 	            values (
 	                "${label}", ${startTime}, ${endTime},
 	                "${desc}", ${priority}, "${exp}",
 	                ${startWeek}, ${endWeek}, ${templateType},
-	                ${projectId}
+	                ${projectId}, ${creatorId}
 	            )`;
 
             return new Promise(function(resolve, reject){

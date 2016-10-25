@@ -10,6 +10,28 @@ var CError = require('../../exception.js').CError;
 exports.authTestGet = function(args, res, next) {
   var startTime = Date.parse(new Date());
 
+  this.getUserByToken(args).then(function(user){
+      var errstr = JSON.stringify({
+        errCode: -1,
+        user: user
+      });
+      res.setHeader('Content-Type', 'application/json');
+      res.end(errstr); 
+
+      var diff = Date.parse(new Date()) - startTime;
+      logger.trace('authTestGet: ' + diff);
+  }, function(e){
+    throw e;
+  }).catch(function(e){
+    throw e;
+  })
+}
+
+exports.authTestOptions = function(args, res, next) {
+  res.end();
+}
+
+exports.getUserByToken = function(args){
   var token = args['x-access-token'].value;
 
   if(!token){
@@ -21,29 +43,27 @@ exports.authTestGet = function(args, res, next) {
     throw new CError(8)
   }
 
-  UserPersistence.findUserById(decoded.iss).then(function(result) {
+  return UserPersistence.findUserById(decoded.iss).then(function(result){
     var err = result.err;
     var rows = result.rows;
     
+    if(err){
+      logger.error(err.stack);
+      return Promise.reject(new CError(3));
+    }
+
     if(!rows.length){
-      throw new CError(9); 
+      return Promise.reject(new CError(9)); 
     }
 
     if(rows.length === 1){
-      var user = rows[0]; //another choise is to new a user instance and init it with param. but too complex and no need.
-      var errstr = JSON.stringify({
-        errCode: -1,
-        user: user
-      });
-      res.setHeader('Content-Type', 'application/json');
-      res.end(errstr); 
-
-      var diff = Date.parse(new Date()) - startTime;
-      logger.trace('authTestGet: ' + diff);
+      var user = rows[0];
+      return Promise.resolve(user); 
     }
   });
-} 
-
-exports.authTestOptions = function(args, res, next) {
-  res.end();
 }
+
+
+
+
+

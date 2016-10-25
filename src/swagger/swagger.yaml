@@ -286,6 +286,7 @@ paths:
       description: "modify task"
       operationId: "updateTask"
       parameters:
+
       - name: "id"
         in: "path"
         description: "task id"
@@ -381,6 +382,11 @@ paths:
       description: ""
       operationId: "insertTask"
       parameters:
+      - name: "x-access-token"
+        in: "header"
+        description: "token saved in client localstorage"
+        required: false
+        type: "string"
       - name: "task"
         in: "body"
         description: "insert task"
