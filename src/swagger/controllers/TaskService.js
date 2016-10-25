@@ -110,64 +110,58 @@ exports.deleteTaskById = function(args, res, next) {
 
 
   var startTime = Date.parse(new Date());
-  
-  AuthTest.getUserByToken(args).then(function(user){
-    var loginUserId = user.id;
 
-    TaskPersistence.findByIds([id]).then(function(result){
-      if(result.err){
-        logger.error(result.err.stack);
-        throw result.err;
+  this._authCheck(args).then(function(){
+
+    TaskPersistence.deleteById(id).then(function(result){
+      var err = result.err;
+
+      if(err){
+        logger.error(err.stack);
+        throw new CError(3, ''); 
       }
 
-      var tasks = result.tasks;
-      if(tasks.length === 0){ /*already deleted by a but b triger delete again.*/
-        res.end(JSON.stringify({
-          errCode: -1,
-        }));
-        return; //will following code be executed?
-      }
+      res.setHeader('Content-Type', 'application/json;charset=UTF-8');
+      res.end(JSON.stringify({
+        errCode: -1,
+      }));
 
-
-      var creatorId = tasks[0].creatorId;
-      if(loginUserId != creatorId){
-        throw new CError(10);
-      }
-
-      TaskPersistence.deleteById(id).then(function(result){
-        var err = result.err;
-
-        if(err){
-          logger.error(err.stack);
-          throw new CError(3, ''); 
-        }
-
-        res.setHeader('Content-Type', 'application/json;charset=UTF-8');
-        res.end(JSON.stringify({
-          errCode: -1,
-        }));
-
-        var diff = Date.parse(new Date()) - startTime;
-        logger.trace('deleteTaskById: ' + diff);
-
-
-
-      }, function(e){
-        throw e;
-      }).catch(function(e){
-        EAction(res, e);
-      });
+      var diff = Date.parse(new Date()) - startTime;
+      logger.trace('deleteTaskById: ' + diff);
     }, function(e){
       throw e;
     }).catch(function(e){
       EAction(res, e);
     });
+
   }, function(e){
     throw e;
   }).catch(function(e){
     EAction(res, e);
   })
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 exports.updateTask = function(args, res, next) {
@@ -177,9 +171,15 @@ exports.updateTask = function(args, res, next) {
   var bodyParam = args.task.value;
   var task = bodyParam.task;
   var projectId = bodyParam.projectId;
-  
 
-  TaskPersistence.update(task, projectId).then(function(result){
+
+  this._authCheck(args).then(function(){  
+
+
+
+
+
+    TaskPersistence.update(task, projectId).then(function(result){
       var err = result.err;
 
       if(err){
@@ -195,11 +195,74 @@ exports.updateTask = function(args, res, next) {
       var diff = Date.parse(new Date()) - startTime;
       logger.trace('updateTask: ' + diff);
 
+    }, function(e){
+      throw e;
     }).catch(function(e){
       EAction(res, e);
     });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  }, function(e){
+    throw e;
+  }).catch(function(e){
+    EAction(res, e);
+  })
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports._authCheck = function(args){
+    return Promise.all([
+      AuthTest.getUserByToken(args),
+      TaskPersistence.findByIds([args.id.value])
+    ]) .then(function(param){
+      var loginUser = param[0];
+      var loginUserId = loginUser.id;
+
+      var tasks = param[1].tasks;
+      var err = param[1].err;
+      if(err){
+        logger.error(err.stack);
+        throw err;
+      }
+      if(tasks.length === 0){ /*already deleted by a but b triger delete again.*/
+        return Promise.resolve();
+      }
+       
+      var creatorId = tasks[0].creatorId;
+      if(loginUserId != creatorId){
+        throw new CError(10);
+      }
+    }, function(e){
+      throw e;
+    }).catch(function(e){
+      return Promise.reject(e);
+    });
+}
 
 
 
