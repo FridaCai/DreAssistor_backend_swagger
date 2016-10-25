@@ -89,10 +89,10 @@ var ProjectPersistence = class ProjectPersistence {
             });            
         });
     }
-	static insertProject(param){
+	static insertProject(param, creatorId){
 		var insertProject = function(result, conn){
             var sql = `insert into project(creator_id, sorp, label) 
-                    values (${param.creatorId}, ${Util.getInTime(param.sorp)}, "${param.label}")`;
+                    values (${creatorId}, ${Util.getInTime(param.sorp)}, "${param.label}")`;
 
             return new Promise(function(resolve, reject){
                 dbpool.singleExecute(conn, sql, function(err, result) {
@@ -148,14 +148,14 @@ var ProjectPersistence = class ProjectPersistence {
                 return `("${label}", ${Util.getInTime(startTime)},${Util.getInTime(endTime)}, 
                     "${desc}", "${exp}",  ${priority}, 
                     ${startWeek}, ${endWeek}, ${templateType}, 
-                    ${projectId})`;
+                    ${projectId}, ${creatorId})`;
             }).join(',');
             
             var sql = `insert into task(
                 label, start_time, end_time, 
                 \`desc\`, exp, priority, 
                 start_week, end_week, template_type, 
-                project_id
+                project_id, creator_id
             ) values ${taskClause}`;
 
             return new Promise(function(resolve, reject){

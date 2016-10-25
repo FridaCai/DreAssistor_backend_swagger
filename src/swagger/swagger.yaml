@@ -119,6 +119,11 @@ paths:
       description: ""
       operationId: "insertProject"
       parameters:
+      - name: "x-access-token"
+        in: "header"
+        description: "token saved in client localstorage"
+        required: false
+        type: "string"
       - name: "project"
         in: "body"
         description: "insert project"
@@ -213,6 +218,11 @@ paths:
         description: ""
         operationId: "deleteProjectById"
         parameters:
+        - name: "x-access-token"
+          in: "header"
+          description: "token saved in client localstorage"
+          required: false
+          type: "string"
         - name: id
           in: path
           description: "project id"
@@ -231,14 +241,17 @@ paths:
               $ref: "#/definitions/errorModel"
         x-swagger-router-controller: "Project"
 
-
-
     put:
       tags:
       - "Project"
       description: ""
       operationId: "updateProject"
       parameters:
+      - name: "x-access-token"
+        in: "header"
+        description: "token saved in client localstorage"
+        required: false
+        type: "string"
       - name: id
         in: path
         description: "project id"

@@ -4,6 +4,7 @@ var EAction = require('../../exception.js').action;
 var CError = require('../../exception.js').CError;
 var logger = require('../../logger').logger('normal');
 var ProjectPersistence = require('../../persistence/project.js');
+var AuthTest = require('./AuthTestService.js');
 
 exports.projectOptions = function(args, res, next) {
   res.end();
@@ -84,27 +85,44 @@ exports.insertProject = function(args, res, next) {
 
   var param = args.project.value;
   
-  ProjectPersistence.insertProject(param).then(function(result){
-    var err = result.err;
-    
-    if(err){
-      logger.error(err.stack);
-      throw new CError(3, ''); //currently, there is only db error. not set msg to client.
-    }
 
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({
-      errCode: -1,
-      //projectId: projectId,  //return project json.
-    }));
 
-    var diff = Date.parse(new Date()) - startTime;
-    logger.trace('insertProject: ' + diff);
+  AuthTest.getUserByToken(args).then(function(user){
+    var creatorId = user.id;
 
+    ProjectPersistence.insertProject(param, creatorId).then(function(result){
+      var err = result.err;
+      
+      if(err){
+        logger.error(err.stack);
+        throw new CError(3, ''); //currently, there is only db error. not set msg to client.
+      }
+
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({
+        errCode: -1,
+        //projectId: projectId,  //return project json.
+      }));
+
+      var diff = Date.parse(new Date()) - startTime;
+      logger.trace('insertProject: ' + diff);
+
+    }, function(e){
+      throw e;
+    }).catch(function(e){
+      EAction(res, e);
+    });
+
+
+
+
+  }, function(e){
+    throw e;
   }).catch(function(e){
     EAction(res, e);
-  });
+  })
 }
+
 
 exports.deleteProjectById = function(args, res, next) {
   var startTime = Date.parse(new Date());
