@@ -14,6 +14,8 @@ exports.taskOptions2 = function(args, res, next) {
 
 
 exports.insertTask = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var param = args.task.value;
   var task = param.task;
   var projectId = param.projectId;
@@ -30,6 +32,10 @@ exports.insertTask = function(args, res, next) {
     res.end(JSON.stringify({
       errCode: -1,
     }));
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('insertTask: ' + diff);
+
   }).catch(function(e){
     EAction(res, e);
   });
@@ -37,6 +43,8 @@ exports.insertTask = function(args, res, next) {
 
 
 exports.findTaskById = function(args, res, next) {
+    var startTime = Date.parse(new Date());
+
     var param = args.id.value;
   
     TaskPersistence.findByIds([param]).then(function(result){
@@ -53,12 +61,17 @@ exports.findTaskById = function(args, res, next) {
         errCode: -1,
         task: task
       }));
+
+      var diff = Date.parse(new Date()) - startTime;
+      logger.trace('findTaskById: ' + diff);
     }).catch(function(e){
       EAction(res, e);
     });
 }
 
 exports.deleteTaskById = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var id = args.id.value;
   var restore = args.restore.value;
 
@@ -74,6 +87,10 @@ exports.deleteTaskById = function(args, res, next) {
       res.end(JSON.stringify({
         errCode: -1,
       }));
+
+      var diff = Date.parse(new Date()) - startTime;
+      logger.trace('deleteTaskById: ' + diff);
+
     }).catch(function(e){
       EAction(res, e);
     });
@@ -82,6 +99,8 @@ exports.deleteTaskById = function(args, res, next) {
 
 
 exports.updateTask = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var taskId = args.id.value;
   var bodyParam = args.task.value;
   var task = bodyParam.task;
@@ -100,6 +119,10 @@ exports.updateTask = function(args, res, next) {
       res.end(JSON.stringify({
         errCode: -1,
       }));
+
+      var diff = Date.parse(new Date()) - startTime;
+      logger.trace('updateTask: ' + diff);
+
     }).catch(function(e){
       EAction(res, e);
     });

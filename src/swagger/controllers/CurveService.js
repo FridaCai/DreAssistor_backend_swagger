@@ -5,6 +5,8 @@ exports.curveOptions = function(args, res, next) {
 }
 
 exports.findCurveById = function(args, res, next){
+	var startTime = Date.parse(new Date());
+
 	var id = args.id.value;
 
 	CurvePersistence.findById(id).then(function(result){
@@ -20,11 +22,17 @@ exports.findCurveById = function(args, res, next){
 		  errCode: -1,
 		  curve: result.curve
 		}));
+		
+		var diff = Date.parse(new Date()) - startTime;
+		logger.trace('findCurveById: ' + diff);
+
 	}).catch(function(e){
 		EAction(res, e);
 	});
 }
 exports.findCurveByPropertyId = function(args, res, next){
+	var startTime = Date.parse(new Date());
+
 	var id = args.id.value;
 
 	CurvePersistence.findByPropertyId(id).then(function(result){
@@ -40,6 +48,10 @@ exports.findCurveByPropertyId = function(args, res, next){
 		  errCode: -1,
 		  curve: result.curve
 		}));
+		
+		var diff = Date.parse(new Date()) - startTime;
+		logger.trace('findCurveByPropertyId: ' + diff);
+
 	}).catch(function(e){
 		EAction(res, e);
 	});

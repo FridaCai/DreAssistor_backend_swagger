@@ -2,6 +2,7 @@
 
 var Attachment = require('./AttachmentService');
 var EAction = require('../../exception.js').action;
+var logger = require('../../logger.js').logger('normal');
 
 module.exports.findAttachmentByTaskId = function findAttachmentByTaskId (req, res, next) {
 	try{

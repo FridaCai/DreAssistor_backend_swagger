@@ -8,7 +8,8 @@ var mime = require('mime');
 
 
 exports.downloadFile = function(args, res, next) {
-	//handle unexist case.
+	var startTime = Date.parse(new Date());
+
 	var guid = args.guid.value;
 	var label = args.label.value;
 
@@ -19,6 +20,9 @@ exports.downloadFile = function(args, res, next) {
 	var filestream = fs.createReadStream(`./uploadfiles/${guid}`);
     filestream.on('open', function () {
 	    filestream.pipe(res);
+	    
+	    var diff = Date.parse(new Date()) - startTime;
+		logger.trace('downloadFile: ' + diff);
 	});
 	filestream.on('error', function(err) {
 		logger.error(err.stack);

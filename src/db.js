@@ -13,7 +13,7 @@ var pool = mysql.createPool({
 
 
 exports.execute = function(sql, callback){
-    logger.debug(`SQL: ${sql}`);
+    logger.info(`SQL: ${sql}`);
     pool.getConnection(function(err, conn) {
         if(err) {
             callback(err);
@@ -28,7 +28,7 @@ exports.execute = function(sql, callback){
 }
 
 exports.singleExecute = function(conn, sql, cb){
-    console.debug(`SQL: ${sql}`);
+    logger.info(`SQL: ${sql}`);
     conn.query(sql, cb);
 }
 /*

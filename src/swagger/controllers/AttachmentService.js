@@ -6,6 +6,8 @@ var EAction = require('../../exception.js').action;
 var CError = require('../../exception.js').CError;
 
 exports.findAttachmentByTaskId = function(args, res, next) {
+	var startTime = Date.parse(new Date());
+
 	var taskId = args.id.value;
 	AttachmentPersistence.findByTaskId(taskId).then(function(result){
 		var err = result.err;
@@ -20,12 +22,18 @@ exports.findAttachmentByTaskId = function(args, res, next) {
 		  errCode: -1,
 		  attachment: result.attachment
 		}));
+
+		var diff = Date.parse(new Date()) - startTime;
+		logger.trace('findAttachmentByTaskId: ' + diff);
+
 	}).catch(function(e){
 		EAction(res, e);
 	});
 } 
 
 exports.findAttachmentByPropertyId = function(args, res, next) {
+	var startTime = Date.parse(new Date());
+
 	var propertyId = args.id.value;
 	AttachmentPersistence.findByPropertyId(propertyId).then(function(result){
 		var err = result.err;
@@ -40,6 +48,10 @@ exports.findAttachmentByPropertyId = function(args, res, next) {
 		  errCode: -1,
 		  attachment: result.attachment
 		}));
+
+		var diff = Date.parse(new Date()) - startTime;
+		logger.trace('findAttachmentByTaskId: ' + diff);
+		
 	}).catch(function(e){
 		EAction(res, e);
 	});

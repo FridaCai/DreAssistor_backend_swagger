@@ -7,6 +7,8 @@ var fs = require('fs-extra');
 
 
 exports.uploadFile = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var file = args.file.value;
   var id = args.id.value;
   var filename = file.originalname;
@@ -30,6 +32,9 @@ exports.uploadFile = function(args, res, next) {
           errCode: -1,
           guid: id
         }));
+
+        var diff = Date.parse(new Date()) - startTime;
+        logger.trace('findProjects: ' + diff);
       })
   })
 }

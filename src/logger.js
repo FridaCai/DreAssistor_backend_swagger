@@ -3,25 +3,26 @@ var log4js = require('log4js');
 module.exports={
 	init: function(app){
 		log4js.configure({
-		  appenders: [
-		    { type: 'console' },{
+		  appenders: [{
+		  	  type: 'console' 
+	  		},{
 		      type: 'file', 
-		      filename: 'logs/access.log', 
+		      filename: 'logs/all.log', 
 		      maxLogSize: 4096000, //3m
 		      backups:4,
-		      category: 'normal' 
+		      category: 'normal'
 		    }
 		  ],
 		  replaceConsole: true
 		});
 
 		var logger = log4js.getLogger('normal');
-		logger.setLevel('INFO');
+		logger.setLevel('ALL');
 
 
 
 		return new Promise(function(resolve, reject){
-			app.use(log4js.connectLogger(logger, {level:log4js.levels.INFO, format:':method :url'}));
+			app.use(log4js.connectLogger(logger, {level:log4js.levels.TRACE, format:' :method :url'}));
 			resolve();	
 		})
 		

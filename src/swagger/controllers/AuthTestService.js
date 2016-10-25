@@ -8,6 +8,8 @@ var EAction = require('../../exception.js').action;
 var CError = require('../../exception.js').CError;
 
 exports.authTestGet = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var token = args['x-access-token'].value;
 
   if(!token){
@@ -35,10 +37,13 @@ exports.authTestGet = function(args, res, next) {
       });
       res.setHeader('Content-Type', 'application/json');
       res.end(errstr); 
-      return;
+
+      var diff = Date.parse(new Date()) - startTime;
+      logger.trace('authTestGet: ' + diff);
     }
   });
 } 
+
 exports.authTestOptions = function(args, res, next) {
   res.end();
 }

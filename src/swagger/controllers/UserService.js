@@ -15,6 +15,8 @@ exports.userOptions = function(args, res, next) {
 }
 
 exports.userGET = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var email = args.email.value;
   var password = args.password.value;
   var param = {
@@ -60,6 +62,11 @@ exports.userGET = function(args, res, next) {
       token: token,
       expires: expires,
     }));
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('userGET: ' + diff);
+
+
   }).catch(function(e){
     EAction(res, e);
   });
@@ -69,6 +76,8 @@ exports.userGET = function(args, res, next) {
 
 
 exports.userPOST = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var param = args.user.value;
   var name = param.name;
   var email = param.email;
@@ -104,6 +113,10 @@ exports.userPOST = function(args, res, next) {
       token: token,
       expires: expires,
     }));
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('userPOST: ' + diff);
+
   }).catch(function(e){
     EAction(res, e);
   });

@@ -23,6 +23,9 @@ exports.findProjects = function(args, res, next) {
     limit: limit
   }
 
+
+
+  var startTime = Date.parse(new Date());
   ProjectPersistence.findProjects(param).then(function(result){
     var err = result.err;
     var projects = result.projects;
@@ -39,12 +42,18 @@ exports.findProjects = function(args, res, next) {
       projects: projects,
       count: count,
     }));
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('findProjects: ' + diff);
+
   }).catch(function(e){
     EAction(res, e);
   });
 }
 
 exports.findProjectById = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var id = args.id.value;
   ProjectPersistence.findProjectById(id).then(function(result){
     var err = result.err;
@@ -62,12 +71,17 @@ exports.findProjectById = function(args, res, next) {
         project: project
       })
     );
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('findProjectById: ' + diff);
   }).catch(function(e){
     EAction(res, e);
   });
 }
 
 exports.insertProject = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var param = args.project.value;
   
   ProjectPersistence.insertProject(param).then(function(result){
@@ -83,12 +97,18 @@ exports.insertProject = function(args, res, next) {
       errCode: -1,
       //projectId: projectId,  //return project json.
     }));
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('insertProject: ' + diff);
+
   }).catch(function(e){
     EAction(res, e);
   });
 }
 
 exports.deleteProjectById = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var id = args.id.value;
   var restore = args.restore.value;
   ProjectPersistence.deleteProjectById(id, restore).then(function(result){
@@ -104,11 +124,17 @@ exports.deleteProjectById = function(args, res, next) {
       errCode: -1,
       //projectId: projectId,  //return project json.
     }));
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('deleteProjectById: ' + diff);
+
   }).catch(function(e){
     EAction(res, e);
   });
 }
 exports.updateProject = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var projectId = args.id.value;
   var project = args.project.value;
 
@@ -125,6 +151,10 @@ exports.updateProject = function(args, res, next) {
       errCode: -1,
       //projectId: projectId,  //return project json.
     }));
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('updateProject: ' + diff);
+    
   }).catch(function(e){
     EAction(res, e);
   });

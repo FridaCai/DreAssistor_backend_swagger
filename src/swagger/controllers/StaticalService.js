@@ -7,6 +7,8 @@ var StaticalPersistence = require('../../persistence/statical.js');
 
 
 exports.getStaticalData = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   //how to get user?
   var projectCreator = args.projectCreator.value;
   var taskType = args.taskType.value;
@@ -26,12 +28,18 @@ exports.getStaticalData = function(args, res, next) {
       errCode: -1,
       projects: projects
     }));
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('getStaticalData: ' + diff);
+
   }).catch(function(e){
     EAction(res, e);
   });
 }
 
 exports.findStaticalProjectById = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   //how to get user?
   var id = args.id.value;
 
@@ -53,6 +61,10 @@ exports.findStaticalProjectById = function(args, res, next) {
       errCode: -1,
       entity: project
     }));
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('findStaticalProjectById: ' + diff);
+
   }).catch(function(e){
     EAction(res, e);
   });
@@ -60,6 +72,8 @@ exports.findStaticalProjectById = function(args, res, next) {
 
 
 exports.findStaticalTasksByIds = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var ids = args.ids.value.split(',');
   StaticalPersistence.findStaticalTasksByIds(ids).then(function(result){
     var err = result.err;
@@ -75,6 +89,10 @@ exports.findStaticalTasksByIds = function(args, res, next) {
       errCode: -1,
       entity: tasks
     }));
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('findStaticalTasksByIds: ' + diff);
+
   }).catch(function(e){
     EAction(res, e);
   });
@@ -82,6 +100,8 @@ exports.findStaticalTasksByIds = function(args, res, next) {
 
 
 exports.findStaticalTaskById = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var id = args.id.value;
   StaticalPersistence.findStaticalTaskById(id).then(function(result){
     var err = result.err;
@@ -97,11 +117,17 @@ exports.findStaticalTaskById = function(args, res, next) {
       errCode: -1,
       entity: task
     }));
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('findStaticalTaskById: ' + diff);
+
   }).catch(function(e){
     EAction(res, e);
   });
 }
 exports.findStaticalEngineById = function(args, res, next) {
+  var startTime = Date.parse(new Date());
+
   var id = args.id.value;
   StaticalPersistence.findStaticalEngineById(id).then(function(result){
     var err = result.err;
@@ -116,6 +142,11 @@ exports.findStaticalEngineById = function(args, res, next) {
       errCode: -1,
       entity: engine
     }));
+
+    var diff = Date.parse(new Date()) - startTime;
+    logger.trace('findStaticalEngineById: ' + diff);
+  
+
   }).catch(function(e){
     EAction(res, e);
   });
