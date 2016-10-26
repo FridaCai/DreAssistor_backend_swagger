@@ -11,19 +11,19 @@ exports.authTestGet = function(args, res, next) {
   var startTime = Date.parse(new Date());
 
   this.getUserByToken(args).then(function(user){
-      var errstr = JSON.stringify({
+      var returnStr = JSON.stringify({
         errCode: -1,
         user: user
       });
       res.setHeader('Content-Type', 'application/json');
-      res.end(errstr); 
+      res.end(returnStr); 
 
       var diff = Date.parse(new Date()) - startTime;
       logger.trace('authTestGet: ' + diff);
   }, function(e){
     throw e;
   }).catch(function(e){
-    throw e;
+    EAction(res, e);
   })
 }
 
@@ -35,12 +35,12 @@ exports.getUserByToken = function(args){
   var token = args['x-access-token'].value;
 
   if(!token){
-    throw new CError(7);
+    return Promise.reject(new CError(7));
   }
 
   var decoded = jwt.decode(token, jwtTokenSecret); 
   if(decoded.exp <= Date.now()){
-    throw new CError(8)
+    return Promise.reject(new CError(8));
   }
 
   return UserPersistence.findUserById(decoded.iss).then(function(result){

@@ -110,6 +110,10 @@ var ProjectPersistence = class ProjectPersistence {
             var projectId = result[0].insertId;
             var tags = param.tags;
 
+            if(tags.length === 0){
+                return Promise.resolve();
+            }
+
             var tagClause = tags.map(function(tag){
                 var label = tag.label;
                 var time = tag.time ? Util.getInTime(tag.time) : 'NULL';
@@ -133,6 +137,10 @@ var ProjectPersistence = class ProjectPersistence {
 		var insertTasks = function(result, conn){
             var projectId = result[0].insertId;
             var tasks = param.tasks;
+
+            if(tasks.length === 0){
+                return Promise.resolve();
+            }
 
             var taskClause = tasks.map(function(task){
                 var label = task.label;
@@ -311,19 +319,25 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
                 engines: {}
             };
             rows.map(function(row){
-                project.tags[row.tag_id] = project.tags[row.tag_id] || {
-                    id: row.tag_id,
-                    label: row.tag_label,
-                    time: row.tag_time,
-                    week: row.tag_week
+                if(row.tag_id != null){
+                    project.tags[row.tag_id] = project.tags[row.tag_id] || {
+                        id: row.tag_id,
+                        label: row.tag_label,
+                        time: row.tag_time,
+                        week: row.tag_week
+                    }    
                 }
 
-                project.tasks[row.task_id] = project.tasks[row.task_id] || {
-                    id: row.task_id,
-                    label: row.task_label,
-                    startTime: row.task_starttime,
-                    endTime: row.task_endtime
-                }   
+                if(row.task_id != null){
+                    project.tasks[row.task_id] = project.tasks[row.task_id] || {
+                        id: row.task_id,
+                        label: row.task_label,
+                        startTime: row.task_starttime,
+                        endTime: row.task_endtime
+                    }    
+                }
+
+                   
                 PropertyPersistence.wrapProperty(project.properties, row);
                 EnginePersistence.wrapEngine(project.engines, row);
             })

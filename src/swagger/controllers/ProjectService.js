@@ -210,8 +210,6 @@ exports.updateProject = function(args, res, next) {
       }).catch(function(e){
         EAction(res, e);
       });
-    
-
   }, function(e){
     throw e;
   }).catch(function(e){
