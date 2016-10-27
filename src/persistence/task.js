@@ -22,7 +22,8 @@ var TaskPersistence = class TaskPersistence{
 				${endTime} as task_endTime, t.\`desc\` as task_desc, t.priority as task_priority, 
 				t.exp as task_exp, t.start_week as task_startWeek, t.end_week as task_endWeek, 
 				t.template_type as task_templateType, t.project_id as task_projectId, t.creator_id as task_creatorId,
-				
+				t.privacy as task_privacy, t.mark_color as task_markColor,
+
 				st.id as subtask_id, st.label as subtask_label, st.status as subtask_status, 
 				
 				a.id as attachment_id, a.label as attachment_label, a.guid as attachment_guid,
@@ -106,6 +107,8 @@ var TaskPersistence = class TaskPersistence{
 					startWeek: task.task_startWeek,
 					endWeek: task.task_endWeek,
 					creatorId: task.task_creatorId,
+					privacy: task.task_privacy,
+					markColor: task.task_markColor,
 					subtask: Object.keys(task.subtask).map(function(st){
 						return task.subtask[st]
 					}),
@@ -150,17 +153,19 @@ var TaskPersistence = class TaskPersistence{
 	        var startWeek = task.startWeek;
 	        var endWeek = task.endWeek;
 	        var templateType = task.template.type;
+	        var privacy = task.privacy;
+	        var markColor = task.markColor;
 	        
 
 	        var sql = `insert into task(label, start_time, end_time, 
 	            \`desc\`, priority, exp, 
 	            start_week, end_week, template_type, 
-	            project_id, creator_id) 
+	            project_id, creator_id, privacy, mark_color) 
 	            values (
 	                "${label}", ${startTime}, ${endTime},
 	                "${desc}", ${priority}, "${exp}",
 	                ${startWeek}, ${endWeek}, ${templateType},
-	                ${projectId}, ${creatorId}
+	                ${projectId}, ${creatorId}, ${privacy}, ${markColor} 
 	            )`;
 
             return new Promise(function(resolve, reject){
@@ -296,6 +301,8 @@ var TaskPersistence = class TaskPersistence{
 			var startWeek = task.startWeek;
 	        var endWeek = task.endWeek;
 	        var templateType = task.template.type;
+	        var privacy = task.privacy;
+	        var markColor = task.markColor
 	        
 	        var sql = `update task set
 	        	label = "${label}",
@@ -307,7 +314,9 @@ var TaskPersistence = class TaskPersistence{
 				start_week = ${startWeek},
 				end_week = ${endWeek},
 				template_type = ${templateType},
-				project_id = ${projectId} 
+				project_id = ${projectId},
+				mark_color = ${markColor},
+				privacy = ${privacy} 
 				where id=${taskId}`;
 
             return new Promise(function(resolve, reject){

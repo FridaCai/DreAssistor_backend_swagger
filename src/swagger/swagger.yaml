@@ -1230,6 +1230,8 @@ definitions:
         type: integer
       endWeek:
         type: integer
+      markColor: 
+        type: integer
       template:
         $ref: "#/definitions/template"
 
