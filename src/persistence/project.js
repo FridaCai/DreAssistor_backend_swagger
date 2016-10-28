@@ -438,9 +438,14 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
             var sorp = Util.getOutTime('p.sorp ');
 
             var sql = `select p.id as project_id, p.label as project_label, ${sorp} as project_sorp, 
-                p.creator_id as project_creator_id, task.id as task_id,
+                p.creator_id as project_creator_id, 
+
+                task.id as task_id,
                 task.label as task_label, ${startTime} as task_startTime, ${endTime} as task_endTime,
+                task.creator_id as task_creator_id,
+                
                 tag.id as tag_id, tag.label as tag_label, ${tagTime} as tag_time, tag.week as tag_week
+                
                 from project p
                 left join task on (p.id = task.project_id and task.flag=0)
                 left join tag on (p.id = tag.project_id and tag.flag=0)
@@ -460,6 +465,8 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
                     var taskStartTime = row.task_startTime;
                     var taskEndTime = row.task_endTime;
 
+                    var tastCreatorId = row.task_creator_id;
+
                     var tagId = row.tag_id;
                     var tagLabel = row.tag_label;
                     var tagTime = row.tag_time;
@@ -478,7 +485,8 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
                         id: taskId,
                         label: taskLabel,
                         startTime: taskStartTime,
-                        endTime: taskEndTime
+                        endTime: taskEndTime,
+                        creatorId: tastCreatorId
                     }   
 
                     projects[projectId].tags[tagId] = projects[projectId].tags[tagId] || {
@@ -495,6 +503,7 @@ select p.id as project_id, p.label as project_label, p.creator_id as project_cre
                         id: project.id,
                         label: project.label,
                         sorp: project.sorp,
+                        creatorId: project.creatorId,
                         tasks: Object.keys(project.tasks).map(function(key){
                             return (project.tasks[key])
                         }),
