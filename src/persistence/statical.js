@@ -46,7 +46,6 @@ var StaticalPersistence = class StaticalPersistence {
                  or dropdown like '%${searchExpress}%'`
             ];   
             var sql = sqls.join(' '); 
-            console.log(sql);
 
             return new Promise(function(resolve, reject){
                 dbpool.singleExecute(conn, sql, function(err, result) {
@@ -110,7 +109,6 @@ var StaticalPersistence = class StaticalPersistence {
 
 
             var sql = sqls.join(' ');
-            console.log(sql);
 
             var wrap = function(rows){
                 if(!rows)
@@ -268,7 +266,6 @@ where 1=1
                 .concat(whereClauses)
                 .join(' ');
 
-            console.log(sql);
             return new Promise(function(resolve, reject){
                 dbpool.singleExecute(conn, sql, function(err, result) {
                     if (err) {

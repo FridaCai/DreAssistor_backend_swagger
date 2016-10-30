@@ -13,10 +13,12 @@ exports.downloadFile = function(args, res, next) {
 	var guid = args.guid.value;
 	var label = args.label.value;
 
-	var mimetype = mime.lookup(label); //if not file extend, can mime work?
-	res.setHeader('Content-disposition', `attachment; filename=${label}`);
+	var mimetype = mime.lookup(label); 
 	res.setHeader('Content-type', mimetype);
 
+	var filename=encodeURI(label);
+	res.setHeader('Content-disposition', `attachment; filename=${filename}`);
+	 
 	var filestream = fs.createReadStream(`./uploadfiles/${guid}`);
     filestream.on('open', function () {
 	    filestream.pipe(res);
