@@ -6,8 +6,11 @@
   "scripts": {
     "build": "cnpm install",
     "deploy": "node index.js",
-    "exportdb": "mysqldump  -u root -p --databases dreassistor >~/WorkStation/DRE/DreAssistor_backend_swagger/db/dreassistor.dump",
-    "exportdb-schema": "mysqldump  -u root -p --databases --no-data dreassistor >~/WorkStation/DRE/DreAssistor_backend_swagger/db/dreassistor.dump",
+
+    "exportdb":        "mysqldump -u root -p --databases                   dreassistor                                   > db/dreassistor.dump",
+    "exportdb-schema": "mysqldump -u root -p --databases --no-data         dreassistor | sed 's/AUTO_INCREMENT=[0-9]*//' > db/dreassistor.dump",
+    "exportdb-data":   "mysqldump -u root -p --databases --no-create-info  dreassistor                                   > db/dreassistor.dump",
+
     "importdb": "mysql -u root -p dreassistor < ~/WorkStation/DRE/DreAssistor_backend_swagger/db/dreassistor.dump",
     "build-prod": "npm install",
     "deploy-prod": "mysqld --console --log_syslog=0",

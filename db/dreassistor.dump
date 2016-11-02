@@ -32,7 +32,7 @@ DROP TABLE IF EXISTS `attachment`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `attachment` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `label` varchar(45) DEFAULT NULL,
+  `label` varchar(200) DEFAULT NULL,
   `guid` varchar(500) DEFAULT NULL COMMENT 'uuid to point to the file saved at server',
   `task_id` int(10) unsigned DEFAULT NULL,
   `property_id` int(10) unsigned DEFAULT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE `attachment` (
   KEY `property_attachment_idx` (`property_id`),
   CONSTRAINT `property_attachment` FOREIGN KEY (`property_id`) REFERENCES `property` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `task_attachment` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=78 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -69,7 +69,7 @@ CREATE TABLE `curve` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `property_curve_idx` (`property_id`),
   CONSTRAINT `property_curve` FOREIGN KEY (`property_id`) REFERENCES `property` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -89,7 +89,7 @@ CREATE TABLE `engine` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `project_engine_idx` (`project_id`),
   CONSTRAINT `project_engine` FOREIGN KEY (`project_id`) REFERENCES `project` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=469 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -101,7 +101,7 @@ DROP TABLE IF EXISTS `image`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `image` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `label` varchar(45) DEFAULT NULL,
+  `label` varchar(200) DEFAULT NULL,
   `url` varchar(500) DEFAULT NULL,
   `property_id` int(10) unsigned DEFAULT NULL,
   `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -111,7 +111,7 @@ CREATE TABLE `image` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `property_image_idx` (`property_id`),
   CONSTRAINT `property_image` FOREIGN KEY (`property_id`) REFERENCES `property` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -133,7 +133,7 @@ CREATE TABLE `project` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `user_project_idx` (`creator_id`),
   CONSTRAINT `user_project` FOREIGN KEY (`creator_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=292 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -146,7 +146,7 @@ DROP TABLE IF EXISTS `property`;
 CREATE TABLE `property` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `key` varchar(500) DEFAULT NULL,
-  `label` varchar(100) DEFAULT NULL,
+  `label` varchar(200) DEFAULT NULL,
   `text` varchar(500) DEFAULT NULL,
   `value` float DEFAULT NULL,
   `dropdown` varchar(100) DEFAULT NULL,
@@ -169,7 +169,7 @@ CREATE TABLE `property` (
   CONSTRAINT `engine_property` FOREIGN KEY (`engine_id`) REFERENCES `engine` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `project_property` FOREIGN KEY (`project_id`) REFERENCES `project` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `property_wrap_property` FOREIGN KEY (`property_wrap_id`) REFERENCES `property_wrap` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=108926 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -190,7 +190,7 @@ CREATE TABLE `property_wrap` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `task_property_wrap_idx` (`task_id`),
   CONSTRAINT `task_property_wrap` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=764 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -202,7 +202,7 @@ DROP TABLE IF EXISTS `subtask`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `subtask` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `label` varchar(45) DEFAULT NULL,
+  `label` varchar(200) DEFAULT NULL,
   `status` tinyint(4) DEFAULT NULL COMMENT 'has finished or not.',
   `task_id` int(10) unsigned DEFAULT NULL,
   `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -212,7 +212,7 @@ CREATE TABLE `subtask` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `task_subtask_idx` (`task_id`),
   CONSTRAINT `task_subtask` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -223,7 +223,7 @@ DROP TABLE IF EXISTS `tag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tag` (
-  `label` varchar(50) NOT NULL DEFAULT '""',
+  `label` varchar(200) DEFAULT NULL,
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `time` timestamp NULL DEFAULT NULL,
   `week` int(11) DEFAULT NULL,
@@ -235,7 +235,7 @@ CREATE TABLE `tag` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `project_tag_idx` (`project_id`),
   CONSTRAINT `project_tag` FOREIGN KEY (`project_id`) REFERENCES `project` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=710 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -247,7 +247,7 @@ DROP TABLE IF EXISTS `task`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `task` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `label` varchar(100) DEFAULT NULL,
+  `label` varchar(200) DEFAULT NULL,
   `start_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `end_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `desc` varchar(500) DEFAULT NULL,
@@ -267,7 +267,7 @@ CREATE TABLE `task` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `projectId_idx` (`project_id`),
   CONSTRAINT `project_task` FOREIGN KEY (`project_id`) REFERENCES `project` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=508 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -279,7 +279,7 @@ DROP TABLE IF EXISTS `user`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) DEFAULT NULL,
+  `name` varchar(200) DEFAULT NULL,
   `password` varchar(100) DEFAULT NULL,
   `email` varchar(300) NOT NULL,
   `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -289,7 +289,7 @@ CREATE TABLE `user` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=115 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -301,4 +301,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-10-27 13:54:12
+-- Dump completed on 2016-11-02 10:41:13
