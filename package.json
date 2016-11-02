@@ -11,8 +11,8 @@
     "exportdb-schema": "mysqldump -u root -p --databases --no-data         dreassistor | sed 's/AUTO_INCREMENT=[0-9]*//' > db/dreassistor_schema.dump",
     "exportdb-data":   "mysqldump -u root -p --databases --no-create-info  dreassistor                                   > db/dreassistor_data.dump",
 
-    "importdb_schema": "mysql -u root -p dreassistor < db/dreassistor_schema.dump",
-    "importdb_data": "mysql -u root -p dreassistor < db/dreassistor_data.dump",
+    "importdb-schema": "mysql -u root -p dreassistor < db/dreassistor_schema.dump",
+    "importdb-data": "mysql -u root -p dreassistor < db/dreassistor_data.dump",
 
 
     "build-prod": "npm install",
