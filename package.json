@@ -7,11 +7,14 @@
     "build": "cnpm install",
     "deploy": "node index.js",
 
-    "exportdb":        "mysqldump -u root -p --databases                   dreassistor                                   > db/dreassistor.dump",
-    "exportdb-schema": "mysqldump -u root -p --databases --no-data         dreassistor | sed 's/AUTO_INCREMENT=[0-9]*//' > db/dreassistor.dump",
-    "exportdb-data":   "mysqldump -u root -p --databases --no-create-info  dreassistor                                   > db/dreassistor.dump",
+    "exportdb":        "mysqldump -u root -p --databases                   dreassistor                                   > db/dreassistor_db.dump",
+    "exportdb-schema": "mysqldump -u root -p --databases --no-data         dreassistor | sed 's/AUTO_INCREMENT=[0-9]*//' > db/dreassistor_schema.dump",
+    "exportdb-data":   "mysqldump -u root -p --databases --no-create-info  dreassistor                                   > db/dreassistor_data.dump",
 
-    "importdb": "mysql -u root -p dreassistor < db/dreassistor.dump",
+    "importdb_schema": "mysql -u root -p dreassistor < db/dreassistor_schema.dump",
+    "importdb_data": "mysql -u root -p dreassistor < db/dreassistor_data.dump",
+
+
     "build-prod": "npm install",
     "deploy-prod": "mysqld --console --log_syslog=0",
     "deploy-lenovo": "cnpm install & node index.js",
