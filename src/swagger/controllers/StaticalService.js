@@ -10,11 +10,10 @@ exports.getStaticalData = function(args, res, next) {
   var startTime = Date.parse(new Date());
 
   //how to get user?
-  var projectCreator = args.projectCreator.value;
   var taskType = args.taskType.value;
   var searchClause = args.searchClause.value;
 
-  StaticalPersistence.getStaticalData(projectCreator, taskType, searchClause).then(function(result){
+  StaticalPersistence.getStaticalData(taskType, searchClause).then(function(result){
     var err = result.err;
     var projects = result.rows;
 

@@ -722,11 +722,7 @@ paths:
       description: ""
       operationId: "getStaticalData"
       parameters:
-      - name: "projectCreator"
-        in: query
-        description: "filter statical data by project creator"
-        required: false
-        type: "integer"
+
       - name: "taskType"
         in: query
         description: "filter statical data by task type"
