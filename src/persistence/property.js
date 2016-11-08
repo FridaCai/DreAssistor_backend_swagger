@@ -274,6 +274,9 @@ var PropertyPersistence = class PropertyPersistence {
 	}
 
 	static assembleUpdateHandlers(properties, result, conn){
+		if(properties.length === 0)
+			return Promise.resolve();
+		
 		var deleteCurve = function(){
 			var propertyIds = [];
 			properties.map(function(property){
