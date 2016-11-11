@@ -23,3 +23,8 @@ Promise.all(preBootActions).then(function(){
 		logger.logger('normal').info('Start server. Listening on port %d (http://localhost:%d)', serverPort, serverPort);
   });
 });
+
+
+process.on('uncaughtException', (err) => {
+  logger.logger('normal').error(err.stack);
+});
