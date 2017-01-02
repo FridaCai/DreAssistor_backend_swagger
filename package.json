@@ -6,19 +6,16 @@
   "scripts": {
     "build": "cnpm install",
     "deploy": "node index.js",
-
-    "exportdb":        "mysqldump -u root -p --databases                   dreassistor > db/dreassistor_db.dump",
+    "exportdb": "mysqldump -u root -p --databases                   dreassistor > db/dreassistor_db.dump",
     "exportdb-schema": "mysqldump -u root -p --databases --no-data         dreassistor > db/dreassistor_schema.dump && node tool/replace.js",
-    "exportdb-data":   "mysqldump -u root -p --databases --no-create-info  dreassistor > db/dreassistor_data.dump",
-
+    "exportdb-data": "mysqldump -u root -p --databases --no-create-info  dreassistor > db/dreassistor_data.dump",
     "importdb-schema": "mysql -u root -p dreassistor < db/dreassistor_schema.dump",
     "importdb-data": "mysql -u root -p dreassistor < db/dreassistor_data.dump",
-
-
     "build-prod": "npm install",
     "deploy-prod": "mysqld --console --log_syslog=0",
     "deploy-lenovo": "cnpm install & node index.js",
-    "deploy-patac-server": "npm install & node index.js"
+    "deploy-patac-server": "npm install & node index.js",
+    "test": "mocha"
   },
   "keywords": [
     "swagger"
@@ -37,5 +34,10 @@
     "mysql": "^2.10.2",
     "node-debug": "^0.1.0",
     "swagger-tools": "0.10.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "should": "^11.1.2"
   }
 }
